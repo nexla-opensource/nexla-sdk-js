@@ -11,6 +11,12 @@ import type { OperationData, OperationId, OperationInit } from "./operation-type
 import { createGeneratedResources, type GeneratedResourceClients } from "../resources/generated/index.js";
 import { WebhooksClient } from "../webhooks/index.js";
 import { base64Encode, readEnv } from "../runtime.js";
+import { DEFAULT_PER_PAGE, hasNextPage, numberHeader, type Page } from "./pagination.js";
+
+const withQuery = (init: RequestOptions | undefined, query: Record<string, unknown>): RequestOptions => ({
+  ...init,
+  params: { ...init?.params, query: { ...init?.params?.query, ...query } }
+});
 
 export interface NexlaClientOptions {
   /** Service key, sent as `Basic <serviceKey>` on POST /token. Env: NEXLA_SERVICE_KEY. */
@@ -115,7 +121,17 @@ export class NexlaClient {
     path: Path,
     init?: RequestOptions
   ): Promise<unknown> {
-    const execute = async (): Promise<unknown> => {
+    const { data } = await this.requestWithResponse(method, path, init);
+    return data;
+  }
+
+  /** Like request(), and also returns the response headers (for example X-Total-Count). */
+  async requestWithResponse<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>>(
+    method: Method,
+    path: Path,
+    init?: RequestOptions
+  ): Promise<{ data: unknown; headers: Headers }> {
+    const execute = async (): Promise<{ data: unknown; headers: Headers }> => {
       const result = await this.invoke(method, path, init);
       const { data, error, response } = result as { data?: unknown; error?: unknown; response?: Response };
       // openapi-fetch returns an empty string as `error` for an empty error body,
@@ -124,7 +140,7 @@ export class NexlaClient {
       if (!res.ok) {
         throw this.mapError(error, res, method, path as string);
       }
-      return data;
+      return { data, headers: res.headers };
     };
 
     try {
@@ -136,6 +152,42 @@ export class NexlaClient {
         return await execute();
       }
       throw error;
+    }
+  }
+
+  /**
+   * Yields one page at a time for a list endpoint. Sends page and per_page (default 100).
+   * Stops at the last page, at an empty page, or when the server says there is no next page.
+   */
+  async *paginate<T = unknown>(method: HttpMethod, path: string, init?: RequestOptions): AsyncGenerator<Page<T>, void, undefined> {
+    const perPage = Number(init?.params?.query?.["per_page"] ?? DEFAULT_PER_PAGE);
+    let page = 1;
+    while (true) {
+      const { data, headers } = await this.requestWithResponse(
+        method,
+        path as PathsWithMethod<paths, HttpMethod>,
+        withQuery(init, { page, per_page: perPage })
+      );
+      const items = Array.isArray(data) ? (data as T[]) : [];
+      if (items.length === 0) return;
+
+      yield {
+        items,
+        page,
+        perPage,
+        totalCount: numberHeader(headers, "x-total-count"),
+        totalPages: numberHeader(headers, "x-total-page-count")
+      };
+
+      if (!hasNextPage(items.length, perPage, headers)) return;
+      page += 1;
+    }
+  }
+
+  /** Yields each item from every page of a list endpoint. */
+  async *paginateItems<T = unknown>(method: HttpMethod, path: string, init?: RequestOptions): AsyncGenerator<T, void, undefined> {
+    for await (const page of this.paginate<T>(method, path, init)) {
+      yield* page.items;
     }
   }
 

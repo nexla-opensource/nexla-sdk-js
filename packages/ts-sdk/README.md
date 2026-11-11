@@ -48,6 +48,22 @@ Supported env vars:
 - `NEXLA_ACCESS_TOKEN`
 - `NEXLA_API_URL`
 
+### Pagination
+
+```ts
+// One page at a time (page and per_page are sent; per_page defaults to 100)
+for await (const page of client.paginate("get", "/data_sources", { params: { query: { status: "ACTIVE" } } })) {
+  console.log(page.page, page.items.length, page.totalCount);
+}
+
+// Every item, across all pages
+for await (const source of client.paginateItems("get", "/data_sources")) {
+  console.log(source);
+}
+```
+
+The iterator stops at the last page (`X-Total-Page-Count`), then when there is no `Link` with `rel="Next"`, then when a page is shorter than `per_page`. It never follows the `Link` URL itself.
+
 ### Timeouts, retries, and cancellation
 
 - `timeoutMs` (default `60000`) bounds each HTTP attempt. A timeout throws `NexlaTimeoutError`. A connection failure throws `NexlaConnectionError`.

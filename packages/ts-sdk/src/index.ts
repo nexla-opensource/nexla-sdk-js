@@ -2,6 +2,7 @@ export { NexlaClient } from "./client/nexla-client.js";
 export type { NexlaClientOptions } from "./client/nexla-client.js";
 export type { RetryOptions } from "./client/http.js";
 export type { RequestOptions } from "./client/types.js";
+export type { Page } from "./client/pagination.js";
 export type { OperationData, OperationId, OperationInit } from "./client/operation-types.js";
 
 export * from "./errors.js";
