@@ -1,7 +1,7 @@
 import createClient, { type Client } from "openapi-fetch";
 import type { HttpMethod, PathsWithMethod } from "openapi-typescript-helpers";
 import type { paths } from "../generated/schema.js";
-import { AuthenticationError, AuthorizationError, NexlaError, NotFoundError, RateLimitError, ResourceConflictError, ServerError, ValidationError, isRecord } from "../errors.js";
+import { AuthenticationError, NexlaError, errorFromResponse } from "../errors.js";
 import { AccessTokenAuthProvider } from "../auth/access-token.js";
 import { ServiceKeyAuthProvider } from "../auth/service-key.js";
 import type { AuthProvider } from "../auth/types.js";
@@ -106,17 +106,21 @@ export class NexlaClient {
   ): Promise<unknown> {
     const execute = async (): Promise<unknown> => {
       const result = await this.invoke(method, path, init);
-      const response = result as { data?: unknown; error?: unknown; response?: Response };
-      if (response.error) {
-        throw this.mapError(response.error, response.response ?? new Response(null, { status: 500 }), method, path as string);
+      const { data, error, response } = result as { data?: unknown; error?: unknown; response?: Response };
+      // openapi-fetch returns an empty string as `error` for an empty error body,
+      // so decide on the HTTP status, not on the error value.
+      const res = response ?? new Response(null, { status: 500 });
+      if (!res.ok) {
+        throw this.mapError(error, res, method, path as string);
       }
-      return response.data as unknown;
+      return data;
     };
 
     try {
       return await execute();
     } catch (error) {
-      if (error instanceof AuthenticationError && this.authProvider.isRefreshable) {
+      // Only a 401 means the token is stale. A 423 (locked account) is not refreshed.
+      if (error instanceof AuthenticationError && error.statusCode === 401 && this.authProvider.isRefreshable) {
         await this.authProvider.refreshAccessToken();
         return await execute();
       }
@@ -166,57 +170,8 @@ export class NexlaClient {
   }
 
   private mapError(errorBody: unknown, response: Response, method?: string, path?: string): NexlaError {
-    const message = extractErrorMessage(errorBody, response) ?? `Request failed with status ${response.status}`;
-    const context: Record<string, unknown> = {
-      method: method?.toUpperCase(),
-      path,
-      url: response.url,
-      status_code: response.status,
-    };
-    const options = { statusCode: response.status, response: errorBody, context };
-
-    if (response.status === 401) {
-      return new AuthenticationError(message, options);
-    }
-    if (response.status === 403) {
-      return new AuthorizationError(message, options);
-    }
-    if (response.status === 404) {
-      return new NotFoundError(message, options);
-    }
-    if (response.status === 409) {
-      return new ResourceConflictError(message, options);
-    }
-    if (response.status === 422 || response.status === 400) {
-      return new ValidationError(message, options);
-    }
-    if (response.status === 429) {
-      const retryAfter = parseRetryAfter(response.headers.get("retry-after"));
-      return new RateLimitError(message, retryAfter === undefined ? options : { ...options, retryAfter });
-    }
-    if (response.status >= 500) {
-      return new ServerError(message, options);
-    }
-
-    return new NexlaError(message, options);
+    return errorFromResponse(response, errorBody, { method, path, url: response.url || undefined });
   }
 }
-
-const extractErrorMessage = (body: unknown, response: Response): string | undefined => {
-  if (isRecord(body)) {
-    const message = body["message"];
-    if (typeof message === "string") return message;
-    const error = body["error"];
-    if (typeof error === "string") return error;
-  }
-  if (response.statusText) return response.statusText;
-  return undefined;
-};
-
-const parseRetryAfter = (value: string | null): number | undefined => {
-  if (!value) return undefined;
-  const parsed = Number(value);
-  return Number.isNaN(parsed) ? undefined : parsed;
-};
 
 export interface NexlaClient extends GeneratedResourceClients {}

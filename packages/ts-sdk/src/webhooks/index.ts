@@ -1,4 +1,4 @@
-import { NexlaError, isRecord } from "../errors.js";
+import { errorFromResponse, readErrorBody } from "../errors.js";
 
 export interface WebhookSendOptions {
   includeHeaders?: boolean;
@@ -64,9 +64,8 @@ export class WebhooksClient {
     });
 
     if (!response.ok) {
-      const errorBody = await safeParseJson(response);
-      const message = extractErrorMessage(errorBody) ?? response.statusText ?? "Webhook request failed";
-      throw new NexlaError(message, { statusCode: response.status, response: errorBody });
+      // No url: the request URL carries the API key as a query parameter.
+      throw errorFromResponse(response, await readErrorBody(response), { method: "POST" });
     }
 
     return safeParseJson(response);
@@ -83,14 +82,4 @@ const safeParseJson = async (response: Response): Promise<unknown> => {
   } catch {
     return undefined;
   }
-};
-
-const extractErrorMessage = (body: unknown): string | undefined => {
-  if (isRecord(body)) {
-    const message = body["message"];
-    if (typeof message === "string") return message;
-    const error = body["error"];
-    if (typeof error === "string") return error;
-  }
-  return undefined;
 };

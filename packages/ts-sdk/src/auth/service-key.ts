@@ -1,4 +1,4 @@
-import { AuthenticationError, NexlaError, isRecord } from "../errors.js";
+import { AuthenticationError, NexlaError, errorFromResponse, isRecord, readErrorBody } from "../errors.js";
 import type { AuthProvider } from "./types.js";
 
 export interface ServiceKeyAuthOptions {
@@ -92,14 +92,8 @@ export class ServiceKeyAuthProvider implements AuthProvider {
     });
 
     if (!response.ok) {
-      const errorBody = await safeParseJson(response);
-      const message = extractErrorMessage(errorBody, response) ?? "Authentication failed";
-
-      if (response.status === 401) {
-        throw new AuthenticationError(message, { statusCode: response.status, response: errorBody });
-      }
-
-      throw new NexlaError(message, { statusCode: response.status, response: errorBody });
+      const errorBody = await readErrorBody(response);
+      throw errorFromResponse(response, errorBody, { method: "POST", path: "/token", url: `${this.baseUrl}/token` });
     }
 
     const data = await safeParseJson(response);
@@ -130,15 +124,4 @@ const safeParseJson = async (response: Response): Promise<unknown> => {
   } catch {
     return undefined;
   }
-};
-
-const extractErrorMessage = (body: unknown, response: Response): string | undefined => {
-  if (isRecord(body)) {
-    const message = body["message"];
-    if (typeof message === "string") return message;
-    const error = body["error"];
-    if (typeof error === "string") return error;
-  }
-  if (response.statusText) return response.statusText;
-  return undefined;
 };
