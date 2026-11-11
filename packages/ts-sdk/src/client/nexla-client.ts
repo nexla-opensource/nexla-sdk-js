@@ -5,7 +5,7 @@ import { AuthenticationError, NexlaError, errorFromResponse } from "../errors.js
 import { AccessTokenAuthProvider } from "../auth/access-token.js";
 import { ServiceKeyAuthProvider } from "../auth/service-key.js";
 import type { AuthProvider } from "../auth/types.js";
-import { createFetchWithRetry, type RetryOptions } from "./http.js";
+import { createFetchWithRetry, type HttpOptions, type RetryOptions } from "./http.js";
 import type { RequestOptions } from "./types.js";
 import type { OperationData, OperationId, OperationInit } from "./operation-types.js";
 import { createGeneratedResources, type GeneratedResourceClients } from "../resources/generated/index.js";
@@ -18,6 +18,8 @@ export interface NexlaClientOptions {
   apiVersion?: string;
   tokenRefreshMargin?: number;
   retry?: RetryOptions;
+  /** Timeout for each HTTP attempt, in ms. Default 60000. */
+  timeoutMs?: number;
   fetch?: typeof fetch;
   userAgent?: string;
   webhookApiKey?: string;
@@ -50,7 +52,14 @@ export class NexlaClient {
     this.acceptHeader = `application/vnd.nexla.api.${this.apiVersion}+json`;
 
     const fetchImpl = options.fetch ?? globalThis.fetch;
-    const fetchWithRetry = createFetchWithRetry(fetchImpl, options.retry);
+    const httpOptions: HttpOptions = {
+      ...(options.retry ?? {}),
+      ...(options.timeoutMs !== undefined ? { timeoutMs: options.timeoutMs } : {})
+    };
+    const fetchWithRetry = createFetchWithRetry(fetchImpl, httpOptions);
+    // Token calls use the same retry and timeout policy as API calls.
+    const authFetch: typeof fetch = (input, init) =>
+      fetchWithRetry(input instanceof Request ? input : new Request(input, init));
 
     if (serviceKey) {
       const authOptions = {
@@ -58,7 +67,7 @@ export class NexlaClient {
         baseUrl: this.baseUrl,
         apiVersion: this.apiVersion,
         tokenRefreshMargin: options.tokenRefreshMargin ?? 3600,
-        fetchFn: fetchImpl
+        fetchFn: authFetch
       } as const;
       const provider = new ServiceKeyAuthProvider(
         options.userAgent ? { ...authOptions, userAgent: options.userAgent } : authOptions
