@@ -1,5 +1,5 @@
 ---
-"@nexla/sdk": major
+"@nexla/sdk": minor
 ---
 
-Promote the TypeScript SDK to production-ready GA with OpenAPI coverage gates and spec metadata validation.
+Ship the TypeScript SDK with OpenAPI coverage gates and spec metadata validation.
