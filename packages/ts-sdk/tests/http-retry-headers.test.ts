@@ -6,8 +6,8 @@ const createResponse = (status: number, retryAfter?: string) =>
     status,
     headers: {
       "content-type": "application/json",
-      ...(retryAfter ? { "retry-after": retryAfter } : {})
-    }
+      ...(retryAfter ? { "retry-after": retryAfter } : {}),
+    },
   });
 
 describe("createFetchWithRetry", () => {

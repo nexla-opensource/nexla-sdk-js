@@ -8,10 +8,12 @@ const createMockFetch = () => {
     calls.push(request);
 
     const body = JSON.stringify([{ id: 1, name: "flow-1" }]);
-    return Promise.resolve(new Response(body, {
-      status: 200,
-      headers: { "content-type": "application/json" }
-    }));
+    return Promise.resolve(
+      new Response(body, {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
   };
   return { fetchFn, calls };
 };
@@ -24,7 +26,7 @@ describe("NexlaClient", () => {
       accessToken: "access-token",
       baseUrl: "https://example.com",
       fetch: fetchFn,
-      userAgent: "nexla-sdk-test"
+      userAgent: "nexla-sdk-test",
     });
 
     await client.request("get", "/flows");

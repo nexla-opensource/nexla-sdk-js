@@ -8,10 +8,12 @@ const createMockFetch = () => {
     calls.push(request);
 
     if (request.url.endsWith("/token")) {
-      return Promise.resolve(new Response(JSON.stringify({ access_token: "token-1", expires_in: 1 }), {
-        status: 200,
-        headers: { "content-type": "application/json" }
-      }));
+      return Promise.resolve(
+        new Response(JSON.stringify({ access_token: "token-1", expires_in: 1 }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      );
     }
 
     return Promise.resolve(new Response("", { status: 204 }));
@@ -28,7 +30,7 @@ describe("ServiceKeyAuthProvider logout", () => {
       baseUrl: "https://example.com",
       apiVersion: "v1",
       tokenRefreshMargin: 1,
-      fetchFn
+      fetchFn,
     });
 
     await provider.getAccessToken();

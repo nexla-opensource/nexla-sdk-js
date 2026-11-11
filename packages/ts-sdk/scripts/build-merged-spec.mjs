@@ -89,8 +89,8 @@ const mapSecurity = (security) =>
         // The backend names the session bearer HTTPBearer. The SDK names it NexlaSessionToken.
         scheme === "HTTPBearer" ? "NexlaSessionToken" : scheme,
         scopes,
-      ])
-    )
+      ]),
+    ),
   );
 
 const operationEntries = (spec) => {
@@ -119,12 +119,19 @@ export const buildMergedSpec = (redoc, pub) => {
   merged.components.schemas = merged.components.schemas ?? {};
 
   const redocKeys = new Set(
-    operationEntries(redoc).map(({ method, apiPath }) => `${method} ${normalizePath(apiPath)}`)
+    operationEntries(redoc).map(({ method, apiPath }) => `${method} ${normalizePath(apiPath)}`),
   );
   const addedKeys = new Set();
   const usedOperationIds = new Set(operationEntries(redoc).map(({ operation }) => operation.operationId));
   const referencedSchemas = new Set();
-  const stats = { redocKeys: redocKeys.size, backendOperations: 0, skippedOverlap: 0, skippedDuplicate: 0, added: 0, renamedOperationIds: 0 };
+  const stats = {
+    redocKeys: redocKeys.size,
+    backendOperations: 0,
+    skippedOverlap: 0,
+    skippedDuplicate: 0,
+    added: 0,
+    renamedOperationIds: 0,
+  };
 
   for (const { method, apiPath, operation } of operationEntries(pub)) {
     stats.backendOperations += 1;

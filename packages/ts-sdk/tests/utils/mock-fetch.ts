@@ -37,10 +37,12 @@ export function createMockFetch(responses: MockResponse[]): MockFetchResult {
       ...(next.headers ?? {}),
     };
 
-    return Promise.resolve(new Response(body, {
-      status: next.status,
-      headers,
-    }));
+    return Promise.resolve(
+      new Response(body, {
+        status: next.status,
+        headers,
+      }),
+    );
   };
 
   return {
@@ -72,7 +74,7 @@ export function createMockFetch(responses: MockResponse[]): MockFetchResult {
  * Create a mock fetch that uses a handler function for dynamic responses.
  */
 export function createDynamicMockFetch(
-  handler: (request: Request) => MockResponse | Promise<MockResponse>
+  handler: (request: Request) => MockResponse | Promise<MockResponse>,
 ): MockFetchResult {
   const calls: Request[] = [];
 

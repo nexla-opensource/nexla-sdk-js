@@ -35,7 +35,7 @@ describe("branch coverage extras", () => {
       baseUrl: "https://example.com",
       apiVersion: "v1",
       tokenRefreshMargin: 1,
-      fetchFn
+      fetchFn,
     });
 
     await expect(provider.getAccessToken()).rejects.toThrow();
@@ -49,7 +49,7 @@ describe("branch coverage extras", () => {
     const client = new NexlaClient({
       accessToken: "access-token",
       baseUrl: "https://example.com",
-      fetch: fetchFn
+      fetch: fetchFn,
     });
 
     await expect(client.request("get", "/flows")).rejects.toThrow();

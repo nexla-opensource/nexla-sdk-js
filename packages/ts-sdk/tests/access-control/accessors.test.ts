@@ -211,7 +211,7 @@ describe("AccessorManagement", () => {
       await expect(
         client.access_control.get_data_source_accessors({
           params: { path: { data_source_id: 99999 } },
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -231,7 +231,7 @@ describe("AccessorManagement", () => {
         client.access_control.add_data_source_accessors({
           params: { path: { data_source_id: 123 } },
           body: { accessors: [{ id: 456, type: "user", access_role: "admin" }] },
-        })
+        }),
       ).rejects.toThrow();
     });
   });

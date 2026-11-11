@@ -103,9 +103,7 @@ describe("TeamsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.teams.get({ params: { path: { team_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.teams.get({ params: { path: { team_id: 99999 } } })).rejects.toThrow();
     });
   });
 
@@ -243,9 +241,7 @@ describe("TeamsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.teams.delete({ params: { path: { team_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.teams.delete({ params: { path: { team_id: 99999 } } })).rejects.toThrow();
     });
   });
 });

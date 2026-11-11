@@ -22,14 +22,24 @@ const scriptedFetch = (options: { token?: string; data?: unknown; tokenDelayMs?:
     if (path.endsWith("/token") || path.endsWith("/token/refresh")) {
       if (options.tokenDelayMs) await new Promise((resolve) => setTimeout(resolve, options.tokenDelayMs));
       const issued = path.endsWith("/token/refresh") ? "tok-org-7" : token;
-      return new Response(JSON.stringify({ access_token: issued, token_type: "Bearer", expires_in: 86400, extra: "kept" }), {
-        status: 200,
-        headers: { "content-type": "application/json" }
-      });
+      return new Response(
+        JSON.stringify({ access_token: issued, token_type: "Bearer", expires_in: 86400, extra: "kept" }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      );
     }
-    return new Response(JSON.stringify(options.data ?? []), { status: 200, headers: { "content-type": "application/json" } });
+    return new Response(JSON.stringify(options.data ?? []), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
   };
-  return { fetchFn, calls, tokenCalls: () => calls.filter((call) => call.url.match(/\/token(\/refresh)?(\?|$)/)).length };
+  return {
+    fetchFn,
+    calls,
+    tokenCalls: () => calls.filter((call) => call.url.match(/\/token(\/refresh)?(\?|$)/)).length,
+  };
 };
 
 const BASE = "https://test.nexla.io";
@@ -70,7 +80,7 @@ describe("credential modes", () => {
       password: "pw",
       orgId: 3,
       baseUrl: BASE,
-      fetch: mock.fetchFn
+      fetch: mock.fetchFn,
     });
 
     await client.request("get", "/data_sources/1");
@@ -84,15 +94,21 @@ describe("credential modes", () => {
 
     await client.request("get", "/flows");
 
-    expect(mock.calls[0]?.headers.get("authorization")).toBe(`Basic ${Buffer.from("dev@example.com:pw").toString("base64")}`);
+    expect(mock.calls[0]?.headers.get("authorization")).toBe(
+      `Basic ${Buffer.from("dev@example.com:pw").toString("base64")}`,
+    );
   });
 
   it("requires both email and password for password login", () => {
-    expect(() => new NexlaClient({ email: "dev@example.com", baseUrl: BASE, fetch: scriptedFetch().fetchFn })).toThrow(NexlaError);
+    expect(() => new NexlaClient({ email: "dev@example.com", baseUrl: BASE, fetch: scriptedFetch().fetchFn })).toThrow(
+      NexlaError,
+    );
   });
 
   it("rejects more than one explicit credential", () => {
-    expect(() => new NexlaClient({ serviceKey: "a", apiKey: "b", baseUrl: BASE, fetch: scriptedFetch().fetchFn })).toThrow(NexlaError);
+    expect(
+      () => new NexlaClient({ serviceKey: "a", apiKey: "b", baseUrl: BASE, fetch: scriptedFetch().fetchFn }),
+    ).toThrow(NexlaError);
   });
 
   it("prefers an explicit option over an environment variable", async () => {

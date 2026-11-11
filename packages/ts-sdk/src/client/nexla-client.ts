@@ -15,7 +15,7 @@ import { DEFAULT_PER_PAGE, hasNextPage, numberHeader, type Page } from "./pagina
 
 const withQuery = (init: RequestOptions | undefined, query: Record<string, unknown>): RequestOptions => ({
   ...init,
-  params: { ...init?.params, query: { ...init?.params?.query, ...query } }
+  params: { ...init?.params, query: { ...init?.params?.query, ...query } },
 });
 
 /** The backend reads tags as one comma-separated value, not as repeated parameters. */
@@ -60,18 +60,20 @@ class NexlaClientBase {
   readonly authProvider: AuthProvider;
   readonly webhooks?: WebhooksClient;
 
-
   constructor(options: NexlaClientOptions = {}) {
     const credentials = resolveCredentials(options);
 
-    this.baseUrl = (options.baseUrl ?? readEnv("NEXLA_API_URL") ?? "https://dataops.nexla.io/nexla-api").replace(/\/$/, "");
+    this.baseUrl = (options.baseUrl ?? readEnv("NEXLA_API_URL") ?? "https://dataops.nexla.io/nexla-api").replace(
+      /\/$/,
+      "",
+    );
     this.apiVersion = options.apiVersion ?? "v1";
     this.acceptHeader = "application/json";
 
     const fetchImpl = options.fetch ?? globalThis.fetch;
     const httpOptions: HttpOptions = {
       ...(options.retry ?? {}),
-      ...(options.timeoutMs !== undefined ? { timeoutMs: options.timeoutMs } : {})
+      ...(options.timeoutMs !== undefined ? { timeoutMs: options.timeoutMs } : {}),
     };
     const fetchWithRetry = createFetchWithRetry(fetchImpl, httpOptions);
     // Token calls use the same retry and timeout policy as API calls.
@@ -85,7 +87,7 @@ class NexlaClientBase {
         tokenRefreshMargin: options.tokenRefreshMargin ?? 3600,
         fetchFn: authFetch,
         ...(options.userAgent ? { userAgent: options.userAgent } : {}),
-        ...(options.dataplane ? { dataplane: options.dataplane } : {})
+        ...(options.dataplane ? { dataplane: options.dataplane } : {}),
       };
       this.authProvider = new ServiceKeyAuthProvider(authOptions);
     } else {
@@ -113,7 +115,7 @@ class NexlaClientBase {
         }
 
         return new Request(request, { headers });
-      }
+      },
     });
 
     if (options.webhookApiKey) {
@@ -127,7 +129,7 @@ class NexlaClientBase {
   async request<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>>(
     method: Method,
     path: Path,
-    init?: RequestOptions
+    init?: RequestOptions,
   ): Promise<unknown> {
     const { data } = await this.requestWithResponse(method, path, init);
     return data;
@@ -137,7 +139,7 @@ class NexlaClientBase {
   async requestWithResponse<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>>(
     method: Method,
     path: Path,
-    init?: RequestOptions
+    init?: RequestOptions,
   ): Promise<{ data: unknown; headers: Headers }> {
     const prepared = joinTagsQuery(init);
     const execute = async (): Promise<{ data: unknown; headers: Headers }> => {
@@ -168,14 +170,18 @@ class NexlaClientBase {
    * Yields one page at a time for a list endpoint. Sends page and per_page (default 100).
    * Stops at the last page, at an empty page, or when the server says there is no next page.
    */
-  async *paginate<T = unknown>(method: HttpMethod, path: string, init?: RequestOptions): AsyncGenerator<Page<T>, void, undefined> {
+  async *paginate<T = unknown>(
+    method: HttpMethod,
+    path: string,
+    init?: RequestOptions,
+  ): AsyncGenerator<Page<T>, void, undefined> {
     const perPage = Number(init?.params?.query?.["per_page"] ?? DEFAULT_PER_PAGE);
     let page = 1;
     while (true) {
       const { data, headers } = await this.requestWithResponse(
         method,
         path as PathsWithMethod<paths, HttpMethod>,
-        withQuery(init, { page, per_page: perPage })
+        withQuery(init, { page, per_page: perPage }),
       );
       const items = Array.isArray(data) ? (data as T[]) : [];
       if (items.length === 0) return;
@@ -185,7 +191,7 @@ class NexlaClientBase {
         page,
         perPage,
         totalCount: numberHeader(headers, "x-total-count"),
-        totalPages: numberHeader(headers, "x-total-page-count")
+        totalPages: numberHeader(headers, "x-total-page-count"),
       };
 
       if (!hasNextPage(items.length, perPage, headers)) return;
@@ -194,7 +200,11 @@ class NexlaClientBase {
   }
 
   /** Yields each item from every page of a list endpoint. */
-  async *paginateItems<T = unknown>(method: HttpMethod, path: string, init?: RequestOptions): AsyncGenerator<T, void, undefined> {
+  async *paginateItems<T = unknown>(
+    method: HttpMethod,
+    path: string,
+    init?: RequestOptions,
+  ): AsyncGenerator<T, void, undefined> {
     for await (const page of this.paginate<T>(method, path, init)) {
       yield* page.items;
     }
@@ -204,7 +214,7 @@ class NexlaClientBase {
     _operationId: OpId,
     method: HttpMethod,
     path: string,
-    init?: OperationInit<OpId>
+    init?: OperationInit<OpId>,
   ): Promise<OperationData<OpId>> {
     const data = await this.request(method, path as PathsWithMethod<paths, HttpMethod>, init as RequestOptions);
     return data as OperationData<OpId>;
@@ -222,7 +232,7 @@ class NexlaClientBase {
   private invoke<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>>(
     method: Method,
     path: Path,
-    init?: RequestOptions
+    init?: RequestOptions,
   ) {
     switch (method) {
       case "get":
@@ -257,7 +267,7 @@ type Credentials = { kind: "basic"; value: string } | { kind: "accessToken"; val
 const ENV_VARS = {
   serviceKey: "NEXLA_SERVICE_KEY",
   apiKey: "NEXLA_API_KEY",
-  accessToken: "NEXLA_ACCESS_TOKEN"
+  accessToken: "NEXLA_ACCESS_TOKEN",
 } as const;
 
 /**
@@ -276,7 +286,9 @@ const resolveCredentials = (options: NexlaClientOptions): Credentials => {
 
   const fromEnv = (["serviceKey", "apiKey", "accessToken"] as const).filter((mode) => readEnv(ENV_VARS[mode]));
   if (explicit.length === 0 && fromEnv.length > 1) {
-    throw new NexlaError(`Set one credential environment variable, not ${fromEnv.map((mode) => ENV_VARS[mode]).join(" and ")}.`);
+    throw new NexlaError(
+      `Set one credential environment variable, not ${fromEnv.map((mode) => ENV_VARS[mode]).join(" and ")}.`,
+    );
   }
 
   const mode = explicit[0] ?? fromEnv[0];
@@ -296,7 +308,7 @@ const resolveCredentials = (options: NexlaClientOptions): Credentials => {
       return { kind: "accessToken", value: options.accessToken ?? readEnv(ENV_VARS.accessToken) ?? "" };
     default:
       throw new NexlaError(
-        "Either serviceKey, apiKey, email and password, or accessToken must be provided (or set NEXLA_SERVICE_KEY, NEXLA_API_KEY, or NEXLA_ACCESS_TOKEN)."
+        "Either serviceKey, apiKey, email and password, or accessToken must be provided (or set NEXLA_SERVICE_KEY, NEXLA_API_KEY, or NEXLA_ACCESS_TOKEN).",
       );
   }
 };

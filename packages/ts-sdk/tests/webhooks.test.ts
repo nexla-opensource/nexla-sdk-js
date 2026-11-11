@@ -7,10 +7,12 @@ const createMockFetch = (status: number, body?: unknown) => {
     const request = input instanceof Request ? input : new Request(input, init);
     calls.push(request);
 
-    return Promise.resolve(new Response(JSON.stringify(body ?? {}), {
-      status,
-      headers: { "content-type": "application/json" }
-    }));
+    return Promise.resolve(
+      new Response(JSON.stringify(body ?? {}), {
+        status,
+        headers: { "content-type": "application/json" },
+      }),
+    );
   };
   return { fetchFn, calls };
 };

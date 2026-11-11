@@ -54,7 +54,8 @@ describe("createFetchWithRetry", () => {
     const baseFetch: typeof fetch = async (input: RequestInfo | URL) => {
       calls += 1;
       bodies.push(await (input as Request).text());
-      if (calls === 1) return createResponse(429, { error: { detail: "slow down", retry_after: 1, type: "RateLimitExceeded" } });
+      if (calls === 1)
+        return createResponse(429, { error: { detail: "slow down", retry_after: 1, type: "RateLimitExceeded" } });
       return createResponse(201, { id: 9 });
     };
 

@@ -103,9 +103,7 @@ describe("UsersResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.users.get({ params: { path: { user_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.users.get({ params: { path: { user_id: 99999 } } })).rejects.toThrow();
     });
 
     it("fetches user with expand parameter", async () => {

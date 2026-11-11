@@ -79,7 +79,7 @@ const client = new NexlaClient({ serviceKey: process.env.NEXLA_SERVICE_KEY });
 
 const flows = await client.flows.list();
 const activated = await client.flows.flow_activate_with_flow_id({
-  params: { path: { flow_id: 123 } }
+  params: { path: { flow_id: 123 } },
 });
 ```
 
@@ -89,7 +89,7 @@ Use the raw client when you need direct path-level access:
 
 ```ts
 const { data } = await client.raw.GET("/flows", {
-  params: { query: { page: 1 } }
+  params: { query: { page: 1 } },
 });
 ```
 
@@ -110,7 +110,7 @@ const client = new NexlaClient({
   baseUrl: "https://dataops.nexla.io/nexla-api",
   apiVersion: "v1",
   retry: { maxRetries: 3 },
-  userAgent: "my-app/1.2.3"
+  userAgent: "my-app/1.2.3",
 });
 ```
 

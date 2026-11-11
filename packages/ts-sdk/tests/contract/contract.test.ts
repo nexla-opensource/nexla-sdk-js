@@ -63,20 +63,23 @@ const loadFixtures = (): Array<{ file: string; fixture: Fixture }> =>
     .map((file) => ({ file, fixture: JSON.parse(readFileSync(join(FIXTURE_DIR, file), "utf8")) as Fixture }));
 
 /** Runs one fixture's call through the SDK. Returns the result, or the error it threw. */
-const runCall = async (
-  fixture: Fixture,
-  client: NexlaClient
-): Promise<{ result?: unknown; error?: unknown }> => {
+const runCall = async (fixture: Fixture, client: NexlaClient): Promise<{ result?: unknown; error?: unknown }> => {
   const { op, args } = fixture.call;
   try {
     switch (op) {
       case "get_source":
-        return { result: await client.request("get", "/data_sources/{source_id}", { params: { path: { source_id: args["id"] } } }) };
+        return {
+          result: await client.request("get", "/data_sources/{source_id}", {
+            params: { path: { source_id: args["id"] } },
+          }),
+        };
       case "create_source":
         return { result: await client.request("post", "/data_sources", { body: args["body"] }) };
       case "list_sources_all": {
         const items: unknown[] = [];
-        for await (const item of client.paginateItems("get", "/data_sources", { params: { query: { per_page: args["per_page"] } } })) {
+        for await (const item of client.paginateItems("get", "/data_sources", {
+          params: { query: { per_page: args["per_page"] } },
+        })) {
           items.push(item);
         }
         return { result: items };
@@ -85,26 +88,28 @@ const runCall = async (
         return {
           result: await client.organizations.add_org_custodians({
             params: { path: { org_id: args["org_id"] as number } },
-            body: { custodians: args["custodians"] as Array<{ id: number }> }
-          })
+            body: { custodians: args["custodians"] as Array<{ id: number }> },
+          }),
         };
       case "reset_custodians":
         return {
           result: await client.organizations.reset_org_custodians({
             params: { path: { org_id: args["org_id"] as number } },
-            body: { custodians: args["custodians"] as Array<{ id: number }> }
-          })
+            body: { custodians: args["custodians"] as Array<{ id: number }> },
+          }),
         };
       case "reject_approval":
         return {
           result: await client.approval_requests.reject_approval_request({
-            params: { path: { request_id: args["request_id"] as number } }
-          })
+            params: { path: { request_id: args["request_id"] as number } },
+          }),
         };
       case "login":
         // Force a token fetch, then read source 1 with the new token.
         await client.authProvider.getAccessToken();
-        return { result: await client.request("get", "/data_sources/{source_id}", { params: { path: { source_id: 1 } } }) };
+        return {
+          result: await client.request("get", "/data_sources/{source_id}", { params: { path: { source_id: 1 } } }),
+        };
       default:
         throw new Error(`Unknown fixture op: ${op}`);
     }
@@ -113,7 +118,10 @@ const runCall = async (
   }
 };
 
-const clientFor = (fixture: Fixture, seen: Array<{ method: string; pathname: string; query: URLSearchParams; headers: Headers; body: unknown }>) => {
+const clientFor = (
+  fixture: Fixture,
+  seen: Array<{ method: string; pathname: string; query: URLSearchParams; headers: Headers; body: unknown }>,
+) => {
   let next = 0;
   const fetchFn: typeof fetch = async (input, init) => {
     const request = input instanceof Request ? input : new Request(input, init);
@@ -123,7 +131,7 @@ const clientFor = (fixture: Fixture, seen: Array<{ method: string; pathname: str
       pathname: new URL(request.url).pathname,
       query: new URL(request.url).searchParams,
       headers: request.headers,
-      body: text === "" ? undefined : JSON.parse(text)
+      body: text === "" ? undefined : JSON.parse(text),
     });
 
     const exchange = fixture.exchanges[next];
@@ -150,8 +158,8 @@ const clientFor = (fixture: Fixture, seen: Array<{ method: string; pathname: str
     fetch: fetchFn,
     retry: {
       ...(fixture.client.max_retries !== undefined ? { maxRetries: fixture.client.max_retries } : {}),
-      sleep: noSleep
-    }
+      sleep: noSleep,
+    },
   });
   return { client, exchangesUsed: () => next };
 };
@@ -170,15 +178,21 @@ describe("contract fixtures", () => {
       expect(sha256(readFileSync(join(FIXTURE_DIR, file))), file).toBe(hash);
     }
 
-    const onDisk = readdirSync(FIXTURE_DIR).filter((file) => file.endsWith(".json")).sort();
-    const listed = manifest.map((entry) => entry.file).filter((file) => file.endsWith(".json")).sort();
+    const onDisk = readdirSync(FIXTURE_DIR)
+      .filter((file) => file.endsWith(".json"))
+      .sort();
+    const listed = manifest
+      .map((entry) => entry.file)
+      .filter((file) => file.endsWith(".json"))
+      .sort();
     expect(onDisk).toEqual(listed);
     expect(onDisk).toHaveLength(21);
   });
 
   for (const { file, fixture } of loadFixtures()) {
     it(`${fixture.name} (${file})`, async () => {
-      const seen: Array<{ method: string; pathname: string; query: URLSearchParams; headers: Headers; body: unknown }> = [];
+      const seen: Array<{ method: string; pathname: string; query: URLSearchParams; headers: Headers; body: unknown }> =
+        [];
       const { client, exchangesUsed } = clientFor(fixture, seen);
 
       const outcome = await runCall(fixture, client);

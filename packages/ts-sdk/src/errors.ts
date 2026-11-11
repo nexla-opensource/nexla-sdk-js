@@ -68,7 +68,7 @@ export class NexlaError extends Error {
       context: this.context,
       status_code: this.statusCode,
       response: this.response,
-      original_error: this.originalError?.message
+      original_error: this.originalError?.message,
     };
   }
 }
@@ -171,7 +171,10 @@ export const readErrorBody = async (response: Response): Promise<unknown> => {
  * Parse a Retry-After value. Accepts seconds or an HTTP date.
  * Returns seconds from `now`, or `undefined` when the value is not usable.
  */
-export const parseRetryAfterSeconds = (value: string | null | undefined, now: number = Date.now()): number | undefined => {
+export const parseRetryAfterSeconds = (
+  value: string | null | undefined,
+  now: number = Date.now(),
+): number | undefined => {
   if (!value || value.trim() === "") return undefined;
   const seconds = Number(value);
   if (Number.isFinite(seconds)) return Math.max(0, seconds);
@@ -219,7 +222,7 @@ const retryAfterOf = (body: unknown, response: Response): number | undefined => 
 export const errorFromResponse = (
   response: Response,
   body: unknown,
-  request: { method?: string | undefined; path?: string | undefined; url?: string | undefined } = {}
+  request: { method?: string | undefined; path?: string | undefined; url?: string | undefined } = {},
 ): NexlaError => {
   const errorBody = typeof body === "string" && body.trim() === "" ? undefined : body;
   const message = messageOf(errorBody, response);
@@ -232,7 +235,7 @@ export const errorFromResponse = (
     requestId: response.headers.get("x-request-id") ?? undefined,
     method,
     url: request.url,
-    context: { method, path: request.path, url: request.url, status_code: response.status }
+    context: { method, path: request.path, url: request.url, status_code: response.status },
   };
 
   switch (response.status) {

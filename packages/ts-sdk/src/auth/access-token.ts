@@ -22,7 +22,9 @@ export class AccessTokenAuthProvider implements AuthProvider {
 
   switchOrg(): Promise<void> {
     return Promise.reject(
-      new NexlaError("switchOrg needs a credential that exchanges for tokens (apiKey, serviceKey, or email and password).")
+      new NexlaError(
+        "switchOrg needs a credential that exchanges for tokens (apiKey, serviceKey, or email and password).",
+      ),
     );
   }
 

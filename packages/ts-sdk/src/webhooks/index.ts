@@ -25,7 +25,7 @@ export class WebhooksClient {
   async sendOneRecord(
     webhookUrl: string,
     record: Record<string, unknown>,
-    options?: WebhookSendOptions
+    options?: WebhookSendOptions,
   ): Promise<unknown> {
     return this.makeRequest(webhookUrl, record, options);
   }
@@ -33,7 +33,7 @@ export class WebhooksClient {
   async sendManyRecords(
     webhookUrl: string,
     records: Record<string, unknown>[],
-    options?: WebhookSendOptions
+    options?: WebhookSendOptions,
   ): Promise<unknown> {
     return this.makeRequest(webhookUrl, records, options);
   }
@@ -41,7 +41,7 @@ export class WebhooksClient {
   private async makeRequest(
     webhookUrl: string,
     body: Record<string, unknown> | Record<string, unknown>[],
-    options?: WebhookSendOptions
+    options?: WebhookSendOptions,
   ): Promise<unknown> {
     const authMethod = options?.authMethod ?? "query";
     const url = new URL(webhookUrl);
@@ -61,7 +61,7 @@ export class WebhooksClient {
     const response = await this.fetchFn(url.toString(), {
       method: "POST",
       headers,
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {

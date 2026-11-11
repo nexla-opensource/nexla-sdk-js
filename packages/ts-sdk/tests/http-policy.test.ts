@@ -20,18 +20,18 @@ const recordingSleep = () => {
   const sleep = (ms: number) => {
     delays.push(ms);
     return Promise.resolve();
-};
+  };
   return { delays, sleep };
 };
 
 const connectError = () =>
   Object.assign(new TypeError("fetch failed"), {
-    cause: Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" })
+    cause: Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" }),
   });
 
 const resetAfterSend = () =>
   Object.assign(new TypeError("fetch failed"), {
-    cause: Object.assign(new Error("socket hang up"), { code: "ECONNRESET" })
+    cause: Object.assign(new Error("socket hang up"), { code: "ECONNRESET" }),
   });
 
 /** A fetch that never answers and rejects when the request signal aborts. */
@@ -124,7 +124,11 @@ describe("retry method rules", () => {
     const responses = [json(503), json(200)];
     const baseFetch: typeof fetch = () => Promise.resolve(responses.shift() ?? json(200));
 
-    const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, retryMethods: ["GET", "POST"], sleep: async () => {} });
+    const fetchWithRetry = createFetchWithRetry(baseFetch, {
+      maxRetries: 2,
+      retryMethods: ["GET", "POST"],
+      sleep: async () => {},
+    });
     const response = await fetchWithRetry(new Request("https://example.com/x", { method: "POST", body: "{}" }));
 
     expect(response.status).toBe(200);
@@ -234,7 +238,7 @@ describe("timeouts and cancellation", () => {
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 3, timeoutMs: 20, sleep: async () => {} });
 
     await expect(
-      fetchWithRetry(new Request("https://example.com/x", { method: "POST", body: "{}" }))
+      fetchWithRetry(new Request("https://example.com/x", { method: "POST", body: "{}" })),
     ).rejects.toBeInstanceOf(NexlaTimeoutError);
     expect(calls).toBe(1);
   });
@@ -266,7 +270,7 @@ describe("NexlaClient wiring", () => {
       baseUrl: "https://example.com",
       fetch: hangUntilAborted,
       timeoutMs: 20,
-      retry: { maxRetries: 0 }
+      retry: { maxRetries: 0 },
     });
 
     await expect(client.request("get", "/flows")).rejects.toBeInstanceOf(NexlaTimeoutError);
@@ -287,7 +291,12 @@ describe("NexlaClient wiring", () => {
       }
       return Promise.resolve(json(200, []));
     };
-    const client = new NexlaClient({ serviceKey: "svc", baseUrl: "https://example.com", fetch: fetchFn, retry: { sleep: async () => {} } });
+    const client = new NexlaClient({
+      serviceKey: "svc",
+      baseUrl: "https://example.com",
+      fetch: fetchFn,
+      retry: { sleep: async () => {} },
+    });
 
     await expect(client.request("get", "/flows")).resolves.toEqual([]);
     expect(tokenCalls).toBe(2);
@@ -301,7 +310,12 @@ describe("NexlaClient wiring", () => {
       }
       return Promise.resolve(json(200, []));
     };
-    const client503 = new NexlaClient({ serviceKey: "svc", baseUrl: "https://example.com", fetch: failingFetch, retry: { sleep: async () => {} } });
+    const client503 = new NexlaClient({
+      serviceKey: "svc",
+      baseUrl: "https://example.com",
+      fetch: failingFetch,
+      retry: { sleep: async () => {} },
+    });
 
     await expect(client503.request("get", "/flows")).rejects.toBeInstanceOf(ServerError);
     expect(tokenCalls).toBe(1);
@@ -312,7 +326,7 @@ describe("NexlaClient wiring", () => {
       accessToken: "tok",
       baseUrl: "https://example.com",
       fetch: () => Promise.resolve(rateLimited(120)),
-      retry: { sleep: async () => {} }
+      retry: { sleep: async () => {} },
     });
 
     const error = await client.request("get", "/flows").catch((caught: unknown) => caught);
@@ -327,12 +341,14 @@ describe("per-call signal", () => {
       accessToken: "tok",
       baseUrl: "https://example.com",
       fetch: hangUntilAborted,
-      retry: { maxRetries: 3, sleep: async () => {} }
+      retry: { maxRetries: 3, sleep: async () => {} },
     });
     const controller = new AbortController();
     setTimeout(() => controller.abort(new Error("stop")), 5);
 
-    const error = await client.request("get", "/flows", { signal: controller.signal }).catch((caught: unknown) => caught);
+    const error = await client
+      .request("get", "/flows", { signal: controller.signal })
+      .catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(Error);
     expect((error as Error).message).toBe("stop");
     expect(error).not.toBeInstanceOf(NexlaTimeoutError);

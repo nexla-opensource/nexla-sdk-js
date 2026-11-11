@@ -12,8 +12,9 @@ export type OperationResponse<OpId extends OperationId> = FetchResponse<
   MediaType
 >;
 
-export type OperationData<OpId extends OperationId> = OperationResponse<OpId> extends {
-  data: infer D;
-}
-  ? D
-  : never;
+export type OperationData<OpId extends OperationId> =
+  OperationResponse<OpId> extends {
+    data: infer D;
+  }
+    ? D
+    : never;

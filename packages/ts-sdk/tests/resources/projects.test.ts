@@ -103,9 +103,7 @@ describe("ProjectsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.projects.get({ params: { path: { project_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.projects.get({ params: { path: { project_id: 99999 } } })).rejects.toThrow();
     });
   });
 
@@ -135,7 +133,7 @@ describe("ProjectsResource", () => {
     it("creates a project with description", async () => {
       const newProject = createProject({
         name: "Project with Description",
-        description: "A detailed project description"
+        description: "A detailed project description",
       });
       const { fetchFn, calls } = createMockFetch([
         { status: 200, body: { access_token: "token", expires_in: 7200 } },
@@ -184,7 +182,7 @@ describe("ProjectsResource", () => {
     it("updates project description", async () => {
       const updatedProject = createProject({
         id: 123,
-        description: "New description"
+        description: "New description",
       });
       const { fetchFn, calls } = createMockFetch([
         { status: 200, body: { access_token: "token", expires_in: 7200 } },
@@ -238,15 +236,16 @@ describe("ProjectsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.projects.delete({ params: { path: { project_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.projects.delete({ params: { path: { project_id: 99999 } } })).rejects.toThrow();
     });
   });
 
   describe("flow operations", () => {
     it("gets project flows", async () => {
-      const flows = [{ id: 1, name: "Flow 1" }, { id: 2, name: "Flow 2" }];
+      const flows = [
+        { id: 1, name: "Flow 1" },
+        { id: 2, name: "Flow 2" },
+      ];
       const { fetchFn, calls } = createMockFetch([
         { status: 200, body: { access_token: "token", expires_in: 7200 } },
         { status: 200, body: flows },

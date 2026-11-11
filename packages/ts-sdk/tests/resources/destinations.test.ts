@@ -103,9 +103,7 @@ describe("DestinationsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.destinations.get({ params: { path: { sink_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.destinations.get({ params: { path: { sink_id: 99999 } } })).rejects.toThrow();
     });
   });
 

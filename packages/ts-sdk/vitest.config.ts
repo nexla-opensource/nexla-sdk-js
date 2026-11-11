@@ -11,7 +11,7 @@ export default defineConfig({
         lines: 80,
         functions: 80,
         statements: 80,
-        branches: 70
+        branches: 70,
       },
       exclude: [
         "dist/**",
@@ -24,8 +24,8 @@ export default defineConfig({
         "**/*.config.*",
         "src/auth/types.ts",
         "src/client/types.ts",
-        "src/resources/index.ts"
-      ]
-    }
-  }
+        "src/resources/index.ts",
+      ],
+    },
+  },
 });
