@@ -58,6 +58,13 @@ jobs:
       - name: Validate generated coverage and spec metadata
         run: pnpm -C packages/ts-sdk check:generated
 
+      # NEXLA_BACKEND_OPENAPI is a repository variable: the path to a fresh public backend spec on the runner.
+      # Public CI does not set it, so the step prints a skip notice and passes.
+      - name: Backend drift check
+        env:
+          NEXLA_BACKEND_OPENAPI: ${{ vars.NEXLA_BACKEND_OPENAPI }}
+        run: pnpm -C packages/ts-sdk check:backend-drift
+
       - name: Generate SDK artifacts
         run: |
           pnpm -C packages/ts-sdk gen

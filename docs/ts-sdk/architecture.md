@@ -70,6 +70,29 @@ How to rebuild:
 
 CI does not rebuild this file. The builder needs the private backend source.
 
+## Backend Drift Check
+
+`packages/ts-sdk/scripts/check-backend-drift.mjs` compares the committed `openapi/nexla-api.public.json` with a fresh public backend spec. It compares (method, normalized path) pairs, so a renamed placeholder is not drift. Operations that share a normalized key count once. A change to only one of them is not reported.
+
+- Input: `NEXLA_BACKEND_OPENAPI`, the path to the fresh spec JSON.
+- Unset or empty: the check prints a skip notice and exits 0.
+- Drift: the check prints the added (`+`) and removed (`-`) operations and exits 1.
+
+Run it locally:
+
+```bash
+NEXLA_BACKEND_OPENAPI=/path/to/nexla-api.public.json pnpm -C packages/ts-sdk check:backend-drift
+```
+
+Produce the fresh spec with these steps. The builders are maintained with the backend tooling, not in this repository.
+
+1. In `admin-api-python`, export the FastAPI document with `app.openapi()`. Also export the route list (route name, method, path) and the admin-dependency metadata of each route.
+2. Clean the document. Strip the `/api/v1` prefix, merge duplicate paths, and give each operation a readable, unique `operationId`.
+3. Filter to the public API. Remove admin-only routes, `GET /`, `GET /health`, `POST /mock_catalog_add`, routes under `/internal`, and `*_dead_route` operations.
+4. Save the result as the public spec, then set `NEXLA_BACKEND_OPENAPI` to its path.
+
+CI runs the check in the `Backend drift check` step of `ci.yml`. The step passes the repository variable `vars.NEXLA_BACKEND_OPENAPI`. Public CI does not set the variable, so the step skips. To enforce the check, set the variable to a path that exists on the runner, for example on a self-hosted runner, or in a job that first creates the file.
+
 ## OpenAPI Generation Pipeline
 
 The inputs are `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json`. The codegen reads one merged document, `packages/ts-sdk/src/generated/merged-spec.json`, which `gen` builds from both inputs.
@@ -115,6 +138,7 @@ Blocking TypeScript checks are in `.github/workflows/ci.yml`:
 - build
 - package checks: publint, attw, and size-limit (budgets in `packages/ts-sdk/package.json`)
 - consumer smoke test on Node 18 and 20 (`scripts/consumer-smoke.mjs`, a separate job)
+- backend drift check (skips unless `vars.NEXLA_BACKEND_OPENAPI` is set; see below)
 
 The package floor is Node.js 18, from `engines` in `packages/ts-sdk/package.json`. The main job runs on Node 20.
 

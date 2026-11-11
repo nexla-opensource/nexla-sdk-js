@@ -59,6 +59,7 @@
     "gen:spec-metadata": "node ./scripts/generate-spec-metadata.mjs",
     "gen": "pnpm run gen:merged-spec && pnpm run gen:types && pnpm run gen:resources && pnpm run gen:spec-metadata",
     "check:generated": "node ./scripts/check-generated-coverage.mjs",
+    "check:backend-drift": "node ./scripts/check-backend-drift.mjs",
     "publint": "publint --strict",
     "attw": "attw --pack .",
     "size": "size-limit",

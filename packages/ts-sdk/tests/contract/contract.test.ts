@@ -1,5 +1,5 @@
 /**
- * Replays the shared contract fixtures (_work/contract-fixtures, copied here) through the
+ * Replays the shared contract fixtures (tests/contract/fixtures, checked against MANIFEST.sha256) through the
  * real NexlaClient with a scripted fetch. Each fixture lists the requests the SDK must send,
  * in order, and the result or error it must return.
  */
