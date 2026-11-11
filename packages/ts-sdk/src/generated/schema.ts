@@ -1795,7 +1795,7 @@ export interface paths {
      * Get auth configs.
      * @description Get the authentication configurations by it's ID.
      */
-    get: operations["get_api_auth_configs"];
+    get: operations["get_api_auth_config"];
     /**
      * Update auth config.
      * @description Update an authentication configuration for the API.
@@ -1878,7 +1878,7 @@ export interface paths {
      * Update auth config (enable/disable).
      * @description Update an authentication configuration for the API.
      */
-    put: operations["update_api_auth_config"];
+    put: operations["update_org_auth_setting"];
   };
   "/async_tasks": {
     /**
@@ -24840,17 +24840,19 @@ export interface operations {
    */
   flow_activate_with_flow_id: {
     parameters: {
+      query?: {
+        /**
+         * @description Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to activate the full flow chain.
+         * Not necessary if the flow node is an origin flow node.
+         */
+        all?: 1;
+      };
       header?: {
         Accept?: components["parameters"]["accept"];
       };
       path: {
         /** @description The unique ID of the flow that needs to be activated. */
         flow_id: number;
-        /**
-         * @description Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to activate the full flow chain.
-         * Not necessary if the flow node is an origin flow node.
-         */
-        all: 1;
       };
     };
     responses: {
@@ -24877,6 +24879,11 @@ export interface operations {
   flow_pause_with_flow_id: {
     parameters: {
       query?: {
+        /**
+         * @description Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to pause the full flow chain.
+         * Not necessary if the flow node is an origin flow node.
+         */
+        all?: 1;
         /** @description If set to 'true', request will be executed in a deferred way, and results will be provided later. Notice: only works with all=1 or full_tree=1. */
         async?: boolean;
         /** @description The unique ID of the asynchronous request. In case it's provided, returns info about the deferred request. */
@@ -24888,11 +24895,6 @@ export interface operations {
       path: {
         /** @description The unique ID of the flow that needs to be paused. */
         flow_id: number;
-        /**
-         * @description Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to pause the full flow chain.
-         * Not necessary if the flow node is an origin flow node.
-         */
-        all: 1;
       };
     };
     responses: {
@@ -25060,6 +25062,13 @@ export interface operations {
    */
   flow_activate_with_resource_id: {
     parameters: {
+      query?: {
+        /**
+         * @description Set this query parameter if the resource ID you are making a call with is not an origin flow node but you want to activate the full flow chain.
+         * Not necessary if the flow node is an origin flow node.
+         */
+        all?: 1;
+      };
       header?: {
         Accept?: components["parameters"]["accept"];
       };
@@ -25068,11 +25077,6 @@ export interface operations {
         resource_type: "data_sources" | "data_sinks" | "data_sets";
         /** @description The unique id of the resource whose flow you want to reference.  For ex, set this to id of the `data_source` if you want to refer to the flow originating in a specific `data_source`. */
         resource_id: number;
-        /**
-         * @description Set this query parameter if the resource ID you are making a call with is not an origin flow node but you want to activate the full flow chain.
-         * Not necessary if the flow node is an origin flow node.
-         */
-        all: 1;
       };
     };
     responses: {
@@ -25098,6 +25102,13 @@ export interface operations {
    */
   flow_pause_with_resource_id: {
     parameters: {
+      query?: {
+        /**
+         * @description Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to pause the full flow chain.
+         * Not necessary if the flow node is an origin flow node.
+         */
+        all?: 1;
+      };
       header?: {
         Accept?: components["parameters"]["accept"];
       };
@@ -25106,11 +25117,6 @@ export interface operations {
         resource_type: "data_sources" | "data_sinks" | "data_sets";
         /** @description The unique id of the resource whose flow you want to reference.  For ex, set this to id of the `data_source` if you want to refer to the flow originating in a specific `data_source`. */
         resource_id: number;
-        /**
-         * @description Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to pause the full flow chain.
-         * Not necessary if the flow node is an origin flow node.
-         */
-        all: 1;
       };
     };
     responses: {
@@ -25682,7 +25688,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the Nexset that needs to be activated. */
-        set_id: number;
+        data_set_id: number;
       };
     };
     responses: {
@@ -28205,16 +28211,14 @@ export interface operations {
   get_notifications: {
     parameters: {
       query?: {
+        /** @description Set the read query parameter to 0 to fetch only notifications that have not yet been read, or set it to 1 to fetch only those that have been read. */
+        read?: number;
         /** @description Filter by level of notifications. Values are: 'DEBUG', 'INFO', 'WARN', 'ERROR', 'RECOVERED', 'RESOLVED'." */
         level?: "DEBUG" | "INFO" | "WARN" | "ERROR" | "RECOVERED";
         /** @description Filter notifications starting from timestamp. Format is unix timestamp. */
         from?: number;
         /** @description Filter notifications ending at timestamp. Format is unix timestamp. */
         to?: number;
-      };
-      path: {
-        /** @description Set the read query parameter to 0 to fetch only notifications that have not yet been read, or set it to 1 to fetch only those that have been read. */
-        read: number;
       };
     };
     responses: {
@@ -28394,9 +28398,9 @@ export interface operations {
    */
   get_notification_count: {
     parameters: {
-      path: {
+      query?: {
         /** @description Set the read query parameter to 0 to fetch only notifications that have not yet been read, or set it to 1 to fetch only those that have been read. If you don't send a read query parameter, all notifications (both read and unread) will be fetched. */
-        read: number;
+        read?: number;
       };
     };
     responses: {
@@ -29016,6 +29020,14 @@ export interface operations {
   get_resource_metrics_by_run: {
     parameters: {
       query?: {
+        /**
+         * @description Specify the rule based on which metrics should be grouped for aggregation.
+         *
+         * Default API behavior is to group by `runId`. This choice is only applicable for data sinks where the run summary could be reported by `runId` ( for reporting number of records written out per ingestion cycle) or `lastWritten` (for reporting number of records written out in each destination write batch).
+         */
+        groupby?: "runId" | "lastWritten";
+        /** @description Specify the order in which paginated results should be sorted. Default API behavior is to order by `runId`. This choice is only applicable for data sinks where the run summary could be reported by `runId` ( for reporting number of records written out per ingestion cycle) or `lastWritten` (for reporting number of records written out in each destination write batch). */
+        orderby?: "runId" | "lastWritten";
         page?: components["parameters"]["page"];
         size?: components["parameters"]["size"];
       };
@@ -29024,14 +29036,6 @@ export interface operations {
         resource_type: "data_sources" | "data_sinks" | "data_sets";
         /** @description The unique id of the resource you wish to fetch metrics for.  For ex, set this to id of the `data_source` if you want to fetch metrics of a specific `data_source`. */
         resource_id: number;
-        /**
-         * @description Specify the rule based on which metrics should be grouped for aggregation.
-         *
-         * Default API behavior is to group by `runId`. This choice is only applicable for data sinks where the run summary could be reported by `runId` ( for reporting number of records written out per ingestion cycle) or `lastWritten` (for reporting number of records written out in each destination write batch).
-         */
-        groupby: "runId" | "lastWritten";
-        /** @description Specify the order in which paginated results should be sorted. Default API behavior is to order by `runId`. This choice is only applicable for data sinks where the run summary could be reported by `runId` ( for reporting number of records written out per ingestion cycle) or `lastWritten` (for reporting number of records written out in each destination write batch). */
-        orderby: "runId" | "lastWritten";
       };
     };
     responses: {
@@ -29060,6 +29064,14 @@ export interface operations {
         from: string;
         /** @description The date that should be considered as the end of the metrics aggregation period. In the absence of this parameter, the API returns metrics aggregated up to the current date. */
         to?: string;
+        /**
+         * @description Specify the rule based on which metrics should be grouped for aggregation. This is an optional property.
+         *
+         * If present and set to `runId` the response will contain one entry per run id, with each entry containing metrics for all resources that processed data during that run.
+         */
+        groupby?: "runId";
+        /** @description Specify the order in which paginated results should be sorted. */
+        orderby?: "runId" | "created_at";
         page?: components["parameters"]["page"];
         per_page?: components["parameters"]["per_page"];
       };
@@ -29068,14 +29080,6 @@ export interface operations {
         resource_type: "data_sources" | "data_sinks" | "data_sets";
         /** @description The unique id of the resource whose flow you want to reference.  For ex, set this to id of the `data_source` if you want to refer to the flow originating in a specific `data_source`. */
         resource_id: number;
-        /**
-         * @description Specify the rule based on which metrics should be grouped for aggregation. This is an optional property.
-         *
-         * If present and set to `runId` the response will contain one entry per run id, with each entry containing metrics for all resources that processed data during that run.
-         */
-        groupby: "runId";
-        /** @description Specify the order in which paginated results should be sorted. */
-        orderby: "runId" | "created_at";
       };
     };
     responses: {
@@ -29145,7 +29149,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the resource being queried. */
-        data_source_id: number;
+        source_id: number;
       };
     };
     responses: {
@@ -29180,7 +29184,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the resource being queried. */
-        data_sink_id: number;
+        sink_id: number;
       };
     };
     responses: {
@@ -29215,7 +29219,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the resource being queried. */
-        data_set_id: number;
+        set_id: number;
       };
     };
     responses: {
@@ -29250,7 +29254,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the resource being queried. */
-        data_credential_id: number;
+        credential_id: number;
       };
     };
     responses: {
@@ -29320,7 +29324,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the resource being queried. */
-        data_schema_id: number;
+        schema_id: number;
       };
     };
     responses: {
@@ -30566,7 +30570,7 @@ export interface operations {
     parameters: {
       path: {
         /** @description The unique ID of the flow. */
-        data_flow_id: string;
+        flow_id: string;
       };
     };
     responses: {
@@ -30657,7 +30661,7 @@ export interface operations {
     parameters: {
       path: {
         /** @description The unique ID of the data flow. */
-        data_flow_id: string;
+        flow_id: string;
       };
     };
     /** @description Optional list of accessors. */
@@ -31943,20 +31947,16 @@ export interface operations {
   };
   /**
    * Get auth configs.
-   * @description Get the authentication configurations by it's ID.
+   * @description Get the authentication configurations for the API. This will return auth configs owned by current user.
    */
   get_api_auth_configs: {
     parameters: {
       header?: {
         Accept?: components["parameters"]["accept"];
       };
-      path: {
-        /** @description ID of the authentication configuration. */
-        auth_config_id: number;
-      };
     };
     responses: {
-      200: components["responses"]["auth_config_one"];
+      200: components["responses"]["auth_configs_many"];
       /** @description Forbidden */
       403: {
         content: never;
@@ -32005,38 +32005,51 @@ export interface operations {
     };
   };
   /**
-   * Update auth config (enable/disable).
-   * @description Update an authentication configuration for the API.
+   * Get auth configs.
+   * @description Get the authentication configurations by it's ID.
    */
-  update_api_auth_config: {
+  get_api_auth_config: {
     parameters: {
       header?: {
         Accept?: components["parameters"]["accept"];
       };
       path: {
-        /** @description The unique ID of the organization for which settings will be returned. */
-        org_id: number;
-        /** @description The unique ID of the authentication setting that needs to be updated. */
-        auth_setting_id: number;
+        /** @description ID of the authentication configuration. */
+        auth_config_id: number;
+      };
+    };
+    responses: {
+      200: components["responses"]["auth_config_one"];
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+    };
+  };
+  /**
+   * Update auth config.
+   * @description Update an authentication configuration for the API.
+   */
+  update_api_auth_config: {
+    parameters: {
+      path: {
+        /** @description The unique ID of the organization that needs to be updated. */
+        auth_config_id: number;
       };
     };
     requestBody?: {
       content: {
-        "application/json": components["schemas"]["AuthSettingPayload"];
+        "application/json": components["schemas"]["AuthConfigPayload"];
       };
     };
     responses: {
-      200: components["responses"]["auth_setting_one"];
+      200: components["responses"]["auth_config_one"];
       /** @description Bad Request */
       400: {
         content: never;
       };
       /** @description Forbidden */
       403: {
-        content: never;
-      };
-      /** @description Not Found */
-      404: {
         content: never;
       };
     };
@@ -32277,6 +32290,43 @@ export interface operations {
       200: components["responses"]["auth_settings_many"];
       /** @description Forbidden */
       403: {
+        content: never;
+      };
+    };
+  };
+  /**
+   * Update auth config (enable/disable).
+   * @description Update an authentication configuration for the API.
+   */
+  update_org_auth_setting: {
+    parameters: {
+      header?: {
+        Accept?: components["parameters"]["accept"];
+      };
+      path: {
+        /** @description The unique ID of the organization for which settings will be returned. */
+        org_id: number;
+        /** @description The unique ID of the authentication setting that needs to be updated. */
+        auth_setting_id: number;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["AuthSettingPayload"];
+      };
+    };
+    responses: {
+      200: components["responses"]["auth_setting_one"];
+      /** @description Bad Request */
+      400: {
+        content: never;
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+      /** @description Not Found */
+      404: {
         content: never;
       };
     };
@@ -32845,7 +32895,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the GenAI config. */
-        set_id: number;
+        gen_ai_config_id: number;
       };
     };
     responses: {
@@ -32875,7 +32925,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the GenAI config. */
-        set_id: number;
+        gen_ai_config_id: number;
       };
     };
     requestBody?: {
@@ -32914,7 +32964,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the GenAI config. */
-        set_id: number;
+        gen_ai_config_id: number;
       };
     };
     responses: {
@@ -33054,7 +33104,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the GenAI config. */
-        org_gen_ai_config_id: number;
+        gen_ai_org_setting_id: number;
       };
     };
     responses: {
@@ -33084,7 +33134,7 @@ export interface operations {
       };
       path: {
         /** @description The unique ID of the GenAI config. */
-        org_gen_ai_config_id: number;
+        gen_ai_org_setting_id: number;
       };
     };
     responses: {

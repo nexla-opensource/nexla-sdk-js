@@ -770,7 +770,7 @@ paths:
           schema:
             type: integer
         - name: all
-          in: path
+          in: query
           description: >
             Set this query parameter if the flow node ID you are making a call
             with is not an origin flow node but you want to activate the full
@@ -820,7 +820,7 @@ paths:
           schema:
             type: integer
         - name: all
-          in: path
+          in: query
           description: >
             Set this query parameter if the flow node ID you are making a call
             with is not an origin flow node but you want to pause the full flow
@@ -1101,7 +1101,7 @@ paths:
           schema:
             type: integer
         - name: all
-          in: path
+          in: query
           description: >
             Set this query parameter if the resource ID you are making a call
             with is not an origin flow node but you want to activate the full
@@ -1166,7 +1166,7 @@ paths:
           schema:
             type: integer
         - name: all
-          in: path
+          in: query
           description: >
             Set this query parameter if the flow node ID you are making a call
             with is not an origin flow node but you want to pause the full flow
@@ -1744,7 +1744,7 @@ paths:
         configured properly for this request, or else you get a message with an
         error.
       parameters:
-        - name: set_id
+        - name: data_set_id
           in: path
           description: The unique ID of the Nexset that needs to be activated.
           required: true
@@ -3725,7 +3725,7 @@ paths:
         - Notifications
       parameters:
         - name: read
-          in: path
+          in: query
           description: >
             Set the read query parameter to 0 to fetch only notifications that
             have not yet been read, or set it to 1 to fetch only those that have
@@ -3853,7 +3853,7 @@ paths:
         - Notifications
       parameters:
         - name: read
-          in: path
+          in: query
           description: >-
             Set the read query parameter to 0 to fetch only notifications that
             have not yet been read, or set it to 1 to fetch only those that have
@@ -4672,7 +4672,7 @@ paths:
           schema:
             type: integer
         - name: groupby
-          in: path
+          in: query
           schema:
             type: string
             enum:
@@ -4689,7 +4689,7 @@ paths:
             cycle) or `lastWritten` (for reporting number of records written out
             in each destination write batch).
         - name: orderby
-          in: path
+          in: query
           schema:
             type: string
             enum:
@@ -4773,7 +4773,7 @@ paths:
             format: date-time
             example: '2023-01-17'
         - name: groupby
-          in: path
+          in: query
           schema:
             type: string
             enum:
@@ -4787,7 +4787,7 @@ paths:
             per run id, with each entry containing metrics for all resources
             that processed data during that run.
         - name: orderby
-          in: path
+          in: query
           schema:
             type: string
             enum:
@@ -4891,7 +4891,7 @@ paths:
         source.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: data_source_id
+        - name: source_id
           in: path
           description: The unique ID of the resource being queried.
           required: true
@@ -4936,7 +4936,7 @@ paths:
         Retrieves the history of changes made to the properties of a data sink.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: data_sink_id
+        - name: sink_id
           in: path
           description: The unique ID of the resource being queried.
           required: true
@@ -4965,7 +4965,7 @@ paths:
         Retrieves the history of changes made to the properties of a Nexset.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: data_set_id
+        - name: set_id
           in: path
           description: The unique ID of the resource being queried.
           required: true
@@ -4995,7 +4995,7 @@ paths:
         credential.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: data_credential_id
+        - name: credential_id
           in: path
           description: The unique ID of the resource being queried.
           required: true
@@ -5054,7 +5054,7 @@ paths:
         schema.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: data_schema_id
+        - name: schema_id
           in: path
           description: The unique ID of the resource being queried.
           required: true
@@ -6246,7 +6246,7 @@ paths:
       description: |
         Returns a list of the access-control rules set for this flow.
       parameters:
-        - name: data_flow_id
+        - name: flow_id
           in: path
           description: The unique ID of the flow.
           required: true
@@ -6328,7 +6328,7 @@ paths:
         Removes access-control rules from a data flow. If no request body is
         provided, all rules associated with the data flow will be removed.
       parameters:
-        - name: data_flow_id
+        - name: flow_id
           in: path
           description: The unique ID of the data flow.
           required: true
@@ -7550,7 +7550,7 @@ paths:
     get:
       tags:
         - Org authentication configs
-      operationId: get_api_auth_configs
+      operationId: get_api_auth_config
       summary: Get auth configs.
       description: |
         Get the authentication configurations by it's ID.
@@ -7826,7 +7826,7 @@ paths:
     put:
       tags:
         - Org authentication configs
-      operationId: update_api_auth_config
+      operationId: update_org_auth_setting
       summary: Update auth config (enable/disable).
       description: |
         Update an authentication configuration for the API.
@@ -8343,7 +8343,7 @@ paths:
         Retrieves a GenAI integration configuration by ID.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: set_id
+        - name: gen_ai_config_id
           in: path
           description: The unique ID of the GenAI config.
           required: true
@@ -8367,7 +8367,7 @@ paths:
         Updates a GenAI integration configuration by ID.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: set_id
+        - name: gen_ai_config_id
           in: path
           description: The unique ID of the GenAI config.
           required: true
@@ -8398,7 +8398,7 @@ paths:
         Deletes a GenAI integration configuration by ID.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: set_id
+        - name: gen_ai_config_id
           in: path
           description: The unique ID of the GenAI config.
           required: true
@@ -8478,7 +8478,7 @@ paths:
       description: Retrieves a GenAI configuration binding by ID.
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: org_gen_ai_config_id
+        - name: gen_ai_org_setting_id
           in: path
           description: The unique ID of the GenAI config.
           required: true
@@ -8503,7 +8503,7 @@ paths:
         usage).
       parameters:
         - $ref: '#/components/parameters/accept'
-        - name: org_gen_ai_config_id
+        - name: gen_ai_org_setting_id
           in: path
           description: The unique ID of the GenAI config.
           required: true

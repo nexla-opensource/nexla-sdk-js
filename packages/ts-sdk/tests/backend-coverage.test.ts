@@ -23,11 +23,6 @@ const BASE_URL = "https://test.nexla.io/nexla-api";
 const ACCESS_TOKEN = "test-access-token";
 const METHODS = ["get", "post", "put", "patch", "delete", "options", "head", "trace"] as const;
 
-// Known defect in plugin-redoc-0.yaml. The operationId get_api_auth_configs is used for two routes.
-// The generator emits the first one (the list), so this get-by-id route has no working method.
-// Rename the operation in plugin-redoc-0.yaml, then remove the entry here.
-const KNOWN_UNREACHABLE_ROUTES = new Set(["GET /api_auth_configs/{}"]);
-
 type SpecDocument = { paths: Record<string, Record<string, { operationId?: string } | undefined>> };
 type OperationCall = (init?: Record<string, unknown>) => Promise<unknown>;
 
@@ -66,7 +61,6 @@ describe("backend spec coverage", () => {
 
     const failures: string[] = [];
     let checked = 0;
-    let skippedKnown = 0;
 
     for (const [apiPath, item] of Object.entries(publicSpec.paths)) {
       for (const method of METHODS) {
@@ -74,10 +68,6 @@ describe("backend spec coverage", () => {
         checked += 1;
 
         const key = keyOf(method, apiPath);
-        if (KNOWN_UNREACHABLE_ROUTES.has(key)) {
-          skippedKnown += 1;
-          continue;
-        }
         const merged = mergedOperations.get(key);
         if (!merged) {
           failures.push(`${key}: no operation in the merged spec`);
@@ -115,7 +105,6 @@ describe("backend spec coverage", () => {
     }
 
     expect(checked).toBeGreaterThan(1000);
-    expect(skippedKnown).toBe(KNOWN_UNREACHABLE_ROUTES.size);
     expect(failures).toEqual([]);
   });
 

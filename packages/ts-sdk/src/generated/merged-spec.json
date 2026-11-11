@@ -956,7 +956,7 @@
           },
           {
             "name": "all",
-            "in": "path",
+            "in": "query",
             "description": "Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to activate the full flow chain.\nNot necessary if the flow node is an origin flow node.\n",
             "schema": {
               "type": "integer",
@@ -1002,7 +1002,7 @@
           },
           {
             "name": "all",
-            "in": "path",
+            "in": "query",
             "description": "Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to pause the full flow chain.\nNot necessary if the flow node is an origin flow node.\n",
             "schema": {
               "type": "integer",
@@ -1309,7 +1309,7 @@
           },
           {
             "name": "all",
-            "in": "path",
+            "in": "query",
             "description": "Set this query parameter if the resource ID you are making a call with is not an origin flow node but you want to activate the full flow chain.\nNot necessary if the flow node is an origin flow node.\n",
             "schema": {
               "type": "integer",
@@ -1369,7 +1369,7 @@
           },
           {
             "name": "all",
-            "in": "path",
+            "in": "query",
             "description": "Set this query parameter if the flow node ID you are making a call with is not an origin flow node but you want to pause the full flow chain.\nNot necessary if the flow node is an origin flow node.\n",
             "schema": {
               "type": "integer",
@@ -2146,7 +2146,7 @@
         "description": "Request a suggestion for Nexset documentation. GenAI has to be configured properly for this request, or else you get a message with an error.\n",
         "parameters": [
           {
-            "name": "set_id",
+            "name": "data_set_id",
             "in": "path",
             "description": "The unique ID of the Nexset that needs to be activated.",
             "required": true,
@@ -5550,7 +5550,7 @@
         "parameters": [
           {
             "name": "read",
-            "in": "path",
+            "in": "query",
             "description": "Set the read query parameter to 0 to fetch only notifications that have not yet been read, or set it to 1 to fetch only those that have been read.\n",
             "schema": {
               "type": "integer"
@@ -5875,7 +5875,7 @@
         "parameters": [
           {
             "name": "read",
-            "in": "path",
+            "in": "query",
             "description": "Set the read query parameter to 0 to fetch only notifications that have not yet been read, or set it to 1 to fetch only those that have been read. If you don't send a read query parameter, all notifications (both read and unread) will be fetched.",
             "schema": {
               "type": "integer"
@@ -6880,7 +6880,7 @@
           },
           {
             "name": "groupby",
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string",
               "enum": [
@@ -6892,7 +6892,7 @@
           },
           {
             "name": "orderby",
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string",
               "enum": [
@@ -6979,7 +6979,7 @@
           },
           {
             "name": "groupby",
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string",
               "enum": [
@@ -6990,7 +6990,7 @@
           },
           {
             "name": "orderby",
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string",
               "enum": [
@@ -7118,7 +7118,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "data_source_id",
+            "name": "source_id",
             "in": "path",
             "description": "The unique ID of the resource being queried.",
             "required": true,
@@ -7181,7 +7181,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "data_sink_id",
+            "name": "sink_id",
             "in": "path",
             "description": "The unique ID of the resource being queried.",
             "required": true,
@@ -7226,7 +7226,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "data_set_id",
+            "name": "set_id",
             "in": "path",
             "description": "The unique ID of the resource being queried.",
             "required": true,
@@ -7271,7 +7271,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "data_credential_id",
+            "name": "credential_id",
             "in": "path",
             "description": "The unique ID of the resource being queried.",
             "required": true,
@@ -7361,7 +7361,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "data_schema_id",
+            "name": "schema_id",
             "in": "path",
             "description": "The unique ID of the resource being queried.",
             "required": true,
@@ -9044,7 +9044,7 @@
         "description": "Returns a list of the access-control rules set for this flow.\n",
         "parameters": [
           {
-            "name": "data_flow_id",
+            "name": "flow_id",
             "in": "path",
             "description": "The unique ID of the flow.",
             "required": true,
@@ -9161,7 +9161,7 @@
         "description": "Removes access-control rules from a data flow. If no request body is provided, all rules associated with the data flow will be removed.\n",
         "parameters": [
           {
-            "name": "data_flow_id",
+            "name": "flow_id",
             "in": "path",
             "description": "The unique ID of the data flow.",
             "required": true,
@@ -10964,7 +10964,7 @@
         "tags": [
           "Org authentication configs"
         ],
-        "operationId": "get_api_auth_configs",
+        "operationId": "get_api_auth_config",
         "summary": "Get auth configs.",
         "description": "Get the authentication configurations by it's ID.\n",
         "parameters": [
@@ -11333,7 +11333,7 @@
         "tags": [
           "Org authentication configs"
         ],
-        "operationId": "update_api_auth_config",
+        "operationId": "update_org_auth_setting",
         "summary": "Update auth config (enable/disable).",
         "description": "Update an authentication configuration for the API.\n",
         "parameters": [
@@ -12145,7 +12145,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "set_id",
+            "name": "gen_ai_config_id",
             "in": "path",
             "description": "The unique ID of the GenAI config.",
             "required": true,
@@ -12181,7 +12181,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "set_id",
+            "name": "gen_ai_config_id",
             "in": "path",
             "description": "The unique ID of the GenAI config.",
             "required": true,
@@ -12229,7 +12229,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "set_id",
+            "name": "gen_ai_config_id",
             "in": "path",
             "description": "The unique ID of the GenAI config.",
             "required": true,
@@ -12410,7 +12410,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "org_gen_ai_config_id",
+            "name": "gen_ai_org_setting_id",
             "in": "path",
             "description": "The unique ID of the GenAI config.",
             "required": true,
@@ -12446,7 +12446,7 @@
             "$ref": "#/components/parameters/accept"
           },
           {
-            "name": "org_gen_ai_config_id",
+            "name": "gen_ai_org_setting_id",
             "in": "path",
             "description": "The unique ID of the GenAI config.",
             "required": true,

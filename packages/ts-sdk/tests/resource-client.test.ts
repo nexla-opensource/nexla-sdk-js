@@ -43,12 +43,13 @@ describe("ResourceClient", () => {
     });
 
     await client.flows.flow_activate_with_flow_id({
-      params: { path: { flow_id: 123, all: 1 } }
+      params: { path: { flow_id: 123 }, query: { all: 1 } }
     });
 
     const request = calls[0];
     if (!request) throw new Error("No request captured");
     expect(request.url).toContain("/flows/123/activate");
+    expect(new URL(request.url).searchParams.get("all")).toBe("1");
     expect(request.method).toBe("PUT");
   });
 });

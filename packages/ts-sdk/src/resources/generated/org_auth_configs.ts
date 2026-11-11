@@ -17,8 +17,8 @@ export class OrgAuthConfigsResource {
     return this.client.requestOperation("create_api_auth_config", "post", "/api_auth_configs", init);
   }
 
-  async get(init?: OperationInit<"get_api_auth_configs">): Promise<OperationData<"get_api_auth_configs">> {
-    return this.client.requestOperation("get_api_auth_configs", "get", "/api_auth_configs/{auth_config_id}", init);
+  async get(init?: OperationInit<"get_api_auth_config">): Promise<OperationData<"get_api_auth_config">> {
+    return this.client.requestOperation("get_api_auth_config", "get", "/api_auth_configs/{auth_config_id}", init);
   }
 
   async update(init?: OperationInit<"update_api_auth_config">): Promise<OperationData<"update_api_auth_config">> {
@@ -54,6 +54,11 @@ export class OrgAuthConfigsResource {
   }
 
   /** Get auth configs. */
+  async get_api_auth_config(init?: OperationInit<"get_api_auth_config">): Promise<OperationData<"get_api_auth_config">> {
+    return this.client.requestOperation("get_api_auth_config", "get", "/api_auth_configs/{auth_config_id}", init);
+  }
+
+  /** Get auth configs. */
   async get_api_auth_configs(init?: OperationInit<"get_api_auth_configs">): Promise<OperationData<"get_api_auth_configs">> {
     return this.client.requestOperation("get_api_auth_configs", "get", "/api_auth_configs", init);
   }
@@ -80,5 +85,10 @@ export class OrgAuthConfigsResource {
   /** Update auth config. */
   async update_api_auth_config(init?: OperationInit<"update_api_auth_config">): Promise<OperationData<"update_api_auth_config">> {
     return this.client.requestOperation("update_api_auth_config", "put", "/api_auth_configs/{auth_config_id}", init);
+  }
+
+  /** Update auth config (enable/disable). */
+  async update_org_auth_setting(init?: OperationInit<"update_org_auth_setting">): Promise<OperationData<"update_org_auth_setting">> {
+    return this.client.requestOperation("update_org_auth_setting", "put", "/orgs/{org_id}/auth_settings/{auth_setting_id}", init);
   }
 }
