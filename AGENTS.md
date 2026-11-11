@@ -30,7 +30,7 @@
 ## Commit & Pull Request Guidelines
 - Commits: imperative, concise; prefer Conventional style: `feat:`, `fix:`, `docs:`, `refactor:`, `test:` (e.g., `feat: add webhook delivery history`).
 - PRs: clear description, linked issues, test plan (commands/output), and docs/examples updates when behavior changes.
-- **Changesets**: every user-visible change must include a `.changeset/*.md` entry — run `pnpm changeset`.
+- **Changesets**: for every user-visible change, run `pnpm changeset`, then `pnpm changeset version`, and commit the version bump and `CHANGELOG.md`. Merging the PR publishes to npm.
 - CI must pass (lint + typecheck + coverage + build on Node 20).
 
 ## Security & Configuration Tips

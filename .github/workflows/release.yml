@@ -1,19 +1,17 @@
 name: Release
 
+# A release PR runs `pnpm changeset version` and commits the version bump and
+# CHANGELOG. Merging that PR to main publishes the new version. `changeset
+# publish` skips any version that is already on npm, so other pushes are no-ops.
 on:
   push:
     branches: [ main ]
     paths:
-      - "packages/ts-sdk/**"
-      - ".changeset/**"
-      - "pnpm-workspace.yaml"
-      - "package.json"
-      - "pnpm-lock.yaml"
+      - "packages/ts-sdk/package.json"
       - ".github/workflows/release.yml"
 
 permissions:
   contents: write
-  pull-requests: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -35,14 +33,22 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create release PR or publish
-        uses: changesets/action@v1
-        with:
-          publish: pnpm release
+      # `changeset publish` creates annotated git tags, which need an identity.
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # prepublishOnly runs build and tests before each publish.
+      - name: Publish versions not yet on npm
+        run: pnpm release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Push release tags
+        run: git push origin --tags

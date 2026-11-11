@@ -10,6 +10,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "turbo.json"
+      - ".changeset/**"
       - ".github/workflows/ci.yml"
   pull_request:
     branches: [ main ]
@@ -20,6 +21,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "turbo.json"
+      - ".changeset/**"
       - ".github/workflows/ci.yml"
 
 jobs:
@@ -41,6 +43,15 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # Releases publish on merge, so each PR must commit its own version bump.
+      - name: Require versioned changesets
+        run: |
+          pending=$(find .changeset -name '*.md' ! -name 'README.md')
+          if [ -n "$pending" ]; then
+            echo "::error::Unversioned changesets: $pending. Run 'pnpm changeset version' and commit the result."
+            exit 1
+          fi
 
       - name: Validate generated coverage and spec metadata
         run: pnpm -C packages/ts-sdk check:generated
