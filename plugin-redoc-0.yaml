@@ -3025,6 +3025,8 @@ paths:
       tags:
         - Projects
       operationId: get_project_flows_(deprecated)
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Get Project Flows (Deprecated)
       description: >
         Returns a list of flows belonging to a project.
@@ -3055,6 +3057,8 @@ paths:
       tags:
         - Projects
       operationId: replace_project_flows_(deprecated)
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Replace Project Flows List (Deprecated)
       description: >
         Replaces the list of flows belonging to a project. Existing flows are
@@ -3091,6 +3095,8 @@ paths:
       tags:
         - Projects
       operationId: add_project_flows_(deprecated)
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Add Flows to Project (Deprecated)
       description: >
         Adds a list of flows to a project. The existing flow list is retained
@@ -3127,6 +3133,8 @@ paths:
       tags:
         - Projects
       operationId: remove_project_flows_(deprecated)
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Remove Flows From A Project (Deprecated)
       description: >
         Removes data flows from a project. If no request body is provided, all
@@ -3798,6 +3806,8 @@ paths:
   /notifications/all:
     delete:
       operationId: delete_all_notifications
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. DELETE /notifications deletes by IDs in the body and is not a delete-all."
       summary: Delete All Notifications
       description: >
         Deletes all notifications belonging to the authenticated user. Note that
@@ -4706,6 +4716,8 @@ paths:
       tags:
         - Metrics
       operationId: get_flow_metrics
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Get Metrics for a Flow
       description: >
         Retrieves data processing metrics of a flow. Metrics are aggregated for
@@ -4797,6 +4809,8 @@ paths:
       tags:
         - Metrics
       operationId: get_flow_logs_for_run_id
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Get Flow Execution Logs for Run ID of a Flow
       description: >
         Retrieves flow execution logs for a specific run id of a flow.
@@ -5515,7 +5529,7 @@ paths:
         '403':
           description: Forbidden
   /approval_requests/{request_id}/reject:
-    delete:
+    put:
       tags:
         - Approval Requests
       operationId: reject_approval_request
@@ -6341,6 +6355,8 @@ paths:
       tags:
         - Access Control
       operationId: get_flow_accessors_(deprecated)
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Get Access Rules on Flow (Deprecated)
       description: >
         Returns a list of the access-control rules set for this data flow. 
@@ -6373,6 +6389,8 @@ paths:
       tags:
         - Access Control
       operationId: replace_flow_accessors_(deprecated)
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Replace Access Rules on Flow (Deprecated)
       description: >
         Replace the list of access-control rules set for this data flow.
@@ -6413,6 +6431,8 @@ paths:
       tags:
         - Access Control
       operationId: add_flow_accessors_(deprecated)
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Add Access Rules on Flow (Deprecated)
       description: >
         Add new access-control rules to this data flow. This version uses a
@@ -6451,6 +6471,8 @@ paths:
       tags:
         - Access Control
       operationId: delete_flow_accessors_(deprecated)
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Delete Access Rules on Flow (Deprecated)
       description: >
         Remove access-control rules from a data flow. If no request body is
@@ -7052,28 +7074,6 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden
-    post:
-      tags:
-        - Marketplace
-      operationId: create_domain
-      summary: Create a single marketplace domain.
-      description: >
-        Use this endpoint to create a marketplace domain. You need a manage
-        permission for the org.
-      parameters:
-        - $ref: '#/components/parameters/accept'
-      requestBody:
-        content:
-          application/vnd.nexla.api.v1+json:
-            schema:
-              $ref: '#/components/schemas/MarketplaceDomainCreate'
-      responses:
-        '200':
-          $ref: '#/components/responses/domains_one'
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
     delete:
       tags:
         - Marketplace
@@ -7174,35 +7174,6 @@ paths:
     put:
       tags:
         - Marketplace
-      operationId: update_domain_custodians
-      summary: Update custodians for a marketplace domain.
-      description: >
-        Use this endpoint to update custodians for a marketplace domain. You
-        need a manage permission for the domain.
-      parameters:
-        - $ref: '#/components/parameters/accept'
-        - name: domain_id
-          in: path
-          description: The unique ID of the domain.
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/vnd.nexla.api.v1+json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/CustodiansPayload'
-      responses:
-        '200':
-          $ref: '#/components/responses/custodians_many'
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-    post:
-      tags:
-        - Marketplace
       operationId: add_domain_custodians
       summary: Add custodians to a marketplace domain.
       description: >
@@ -7221,7 +7192,36 @@ paths:
           application/vnd.nexla.api.v1+json:
             schema:
               allOf:
-                - $ref: '#/components/schemas/CustodiansPayload'
+                - $ref: '#/components/schemas/CustodiansRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/custodians_many'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    post:
+      tags:
+        - Marketplace
+      operationId: reset_domain_custodians
+      summary: Reset custodians of a marketplace domain.
+      description: >
+        Use this endpoint to replace all custodians of a marketplace domain. You
+        need a manage permission for the domain.
+      parameters:
+        - $ref: '#/components/parameters/accept'
+        - name: domain_id
+          in: path
+          description: The unique ID of the domain.
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/vnd.nexla.api.v1+json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CustodiansRequest'
       responses:
         '200':
           $ref: '#/components/responses/custodians_many'
@@ -7250,7 +7250,7 @@ paths:
           application/vnd.nexla.api.v1+json:
             schema:
               allOf:
-                - $ref: '#/components/schemas/CustodiansPayload'
+                - $ref: '#/components/schemas/CustodiansRequest'
       responses:
         '200':
           description: Successfully deleted
@@ -7283,10 +7283,10 @@ paths:
     put:
       tags:
         - Organizations
-      operationId: update_org_custodians
-      summary: Update organization custodians.
+      operationId: add_org_custodians
+      summary: Add organization custodians.
       description: >
-        Users listed within the request body will be updated as custodians for
+        Users listed within the request body will be added as custodians for
         the organization. Users can be identified by their email or id.
       parameters:
         - $ref: '#/components/parameters/accept'
@@ -7300,7 +7300,7 @@ paths:
         content:
           application/vnd.nexla.api.v1+json:
             schema:
-              $ref: '#/components/schemas/CustodiansPayload'
+              $ref: '#/components/schemas/CustodiansRequest'
       responses:
         '200':
           $ref: '#/components/responses/custodians_many'
@@ -7311,10 +7311,10 @@ paths:
     post:
       tags:
         - Organizations
-      operationId: add_org_custodians
-      summary: Add organization custodians.
+      operationId: reset_org_custodians
+      summary: Reset organization custodians.
       description: >
-        Users listed within the request body will be added as custodians to the
+        Users listed within the request body will replace all custodians of the
         organization. Users can be identified by their email or id.
       parameters:
         - $ref: '#/components/parameters/accept'
@@ -7328,7 +7328,7 @@ paths:
         content:
           application/vnd.nexla.api.v1+json:
             schema:
-              $ref: '#/components/schemas/CustodiansPayload'
+              $ref: '#/components/schemas/CustodiansRequest'
       responses:
         '200':
           $ref: '#/components/responses/custodians_many'
@@ -7356,7 +7356,7 @@ paths:
         content:
           application/vnd.nexla.api.v1+json:
             schema:
-              $ref: '#/components/schemas/CustodiansPayload'
+              $ref: '#/components/schemas/CustodiansRequest'
       responses:
         '200':
           description: Successfully deleted
@@ -7533,6 +7533,8 @@ paths:
       tags:
         - Org authentication configs
       operationId: get_all_api_auth_configs
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Use get_api_auth_configs, which lists the caller's org configs."
       summary: Get all auth configs.
       description: >
         Get the authentication configurations for the API. This will return all
@@ -7675,7 +7677,7 @@ paths:
         '403':
           description: Forbidden
   /self_signup_requests/{request_id}/approve:
-    put:
+    post:
       operationId: approve_self_sign_up_request
       summary: Approve Self Sign Up Request
       description: >
@@ -7799,6 +7801,8 @@ paths:
       tags:
         - Org authentication configs
       operationId: get_api_auth_settings
+      deprecated: true
+      x-deprecation-message: "No backend route exists for this path. Calls fail."
       summary: Get auth settings for org.
       description: >
         Get the authentication settings for the given org. This allows to enable
@@ -23431,6 +23435,13 @@ components:
             type: integer
           email:
             type: string
+    CustodiansRequest:
+      type: object
+      required:
+        - custodians
+      properties:
+        custodians:
+          $ref: '#/components/schemas/CustodiansPayload'
     OrgsUpdate:
       type: object
       properties:

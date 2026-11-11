@@ -26,6 +26,6 @@ export class ApprovalRequestsResource {
 
   /** Reject pending approval requests */
   async reject_approval_request(init?: OperationInit<"reject_approval_request">): Promise<OperationData<"reject_approval_request">> {
-    return this.client.requestOperation("reject_approval_request", "delete", "/approval_requests/{request_id}/reject", init);
+    return this.client.requestOperation("reject_approval_request", "put", "/approval_requests/{request_id}/reject", init);
   }
 }

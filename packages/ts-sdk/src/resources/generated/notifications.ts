@@ -31,7 +31,11 @@ export class NotificationsResource {
     return this.client.requestOperation("create_notification_setting", "post", "/notification_settings", init);
   }
 
-  /** Delete All Notifications */
+  /**
+   * Delete All Notifications
+   *
+   * @deprecated No backend route exists for this path. DELETE /notifications deletes by IDs in the body and is not a delete-all.
+   */
   async delete_all_notifications(init?: OperationInit<"delete_all_notifications">): Promise<OperationData<"delete_all_notifications">> {
     return this.client.requestOperation("delete_all_notifications", "delete", "/notifications/all", init);
   }

@@ -49,7 +49,11 @@ export class AccessControlResource {
     return this.client.requestOperation("add_flow_accessors", "put", "/flows/{flow_id}/accessors", init);
   }
 
-  /** Add Access Rules on Flow (Deprecated) */
+  /**
+   * Add Access Rules on Flow (Deprecated)
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async ["add_flow_accessors_(deprecated)"](init?: OperationInit<"add_flow_accessors_(deprecated)">): Promise<OperationData<"add_flow_accessors_(deprecated)">> {
     return this.client.requestOperation("add_flow_accessors_(deprecated)", "put", "/data_flows/{data_flow_id}/accessors", init);
   }
@@ -109,7 +113,11 @@ export class AccessControlResource {
     return this.client.requestOperation("delete_flow_accessors", "delete", "/flows/{flow_id}/accessors", init);
   }
 
-  /** Delete Access Rules on Flow (Deprecated) */
+  /**
+   * Delete Access Rules on Flow (Deprecated)
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async ["delete_flow_accessors_(deprecated)"](init?: OperationInit<"delete_flow_accessors_(deprecated)">): Promise<OperationData<"delete_flow_accessors_(deprecated)">> {
     return this.client.requestOperation("delete_flow_accessors_(deprecated)", "delete", "/data_flows/{data_flow_id}/accessors", init);
   }
@@ -169,7 +177,11 @@ export class AccessControlResource {
     return this.client.requestOperation("get_flow_accessors", "get", "/flows/{flow_id}/accessors", init);
   }
 
-  /** Get Access Rules on Flow (Deprecated) */
+  /**
+   * Get Access Rules on Flow (Deprecated)
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async ["get_flow_accessors_(deprecated)"](init?: OperationInit<"get_flow_accessors_(deprecated)">): Promise<OperationData<"get_flow_accessors_(deprecated)">> {
     return this.client.requestOperation("get_flow_accessors_(deprecated)", "get", "/data_flows/{data_flow_id}/accessors", init);
   }
@@ -229,7 +241,11 @@ export class AccessControlResource {
     return this.client.requestOperation("replace_flow_accessors", "post", "/flows/{flow_id}/accessors", init);
   }
 
-  /** Replace Access Rules on Flow (Deprecated) */
+  /**
+   * Replace Access Rules on Flow (Deprecated)
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async ["replace_flow_accessors_(deprecated)"](init?: OperationInit<"replace_flow_accessors_(deprecated)">): Promise<OperationData<"replace_flow_accessors_(deprecated)">> {
     return this.client.requestOperation("replace_flow_accessors_(deprecated)", "post", "/data_flows/{data_flow_id}/accessors", init);
   }

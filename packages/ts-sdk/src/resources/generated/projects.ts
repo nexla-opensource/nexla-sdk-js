@@ -34,7 +34,11 @@ export class ProjectsResource {
     return this.client.requestOperation("add_project_flows", "put", "/projects/{project_id}/flows", init);
   }
 
-  /** Add Flows to Project (Deprecated) */
+  /**
+   * Add Flows to Project (Deprecated)
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async ["add_project_flows_(deprecated)"](init?: OperationInit<"add_project_flows_(deprecated)">): Promise<OperationData<"add_project_flows_(deprecated)">> {
     return this.client.requestOperation("add_project_flows_(deprecated)", "put", "/projects/{project_id}/data_flows", init);
   }
@@ -59,7 +63,11 @@ export class ProjectsResource {
     return this.client.requestOperation("get_project_flows", "get", "/projects/{project_id}/flows", init);
   }
 
-  /** Get Project Flows (Deprecated) */
+  /**
+   * Get Project Flows (Deprecated)
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async ["get_project_flows_(deprecated)"](init?: OperationInit<"get_project_flows_(deprecated)">): Promise<OperationData<"get_project_flows_(deprecated)">> {
     return this.client.requestOperation("get_project_flows_(deprecated)", "get", "/projects/{project_id}/data_flows", init);
   }
@@ -74,7 +82,11 @@ export class ProjectsResource {
     return this.client.requestOperation("remove_project_flows", "delete", "/projects/{project_id}/flows", init);
   }
 
-  /** Remove Flows From A Project (Deprecated) */
+  /**
+   * Remove Flows From A Project (Deprecated)
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async ["remove_project_flows_(deprecated)"](init?: OperationInit<"remove_project_flows_(deprecated)">): Promise<OperationData<"remove_project_flows_(deprecated)">> {
     return this.client.requestOperation("remove_project_flows_(deprecated)", "delete", "/projects/{project_id}/data_flows", init);
   }
@@ -84,7 +96,11 @@ export class ProjectsResource {
     return this.client.requestOperation("replace_project_flows", "post", "/projects/{project_id}/flows", init);
   }
 
-  /** Replace Project Flows List (Deprecated) */
+  /**
+   * Replace Project Flows List (Deprecated)
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async ["replace_project_flows_(deprecated)"](init?: OperationInit<"replace_project_flows_(deprecated)">): Promise<OperationData<"replace_project_flows_(deprecated)">> {
     return this.client.requestOperation("replace_project_flows_(deprecated)", "post", "/projects/{project_id}/data_flows", init);
   }

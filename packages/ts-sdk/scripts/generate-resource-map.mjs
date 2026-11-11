@@ -198,7 +198,9 @@ for (const [apiPath, pathItem] of Object.entries(paths)) {
       method,
       path: apiPath,
       summary: operation.summary ?? "",
-      skipAuth: !requiresSessionToken(operation.security)
+      skipAuth: !requiresSessionToken(operation.security),
+      deprecated: operation.deprecated === true,
+      deprecationMessage: operation["x-deprecation-message"] ?? "Do not use."
     };
 
     if (!operationsByResource.has(resourceKey)) {
@@ -317,8 +319,13 @@ for (const resourceKey of resourceKeys) {
     if (methodNames.has(opId)) continue;
     methodNames.add(opId);
     lines.push("");
-    if (op.summary) {
-      lines.push(`  /** ${op.summary.replace(/\*/g, "").trim()} */`);
+    const summaryText = op.summary ? op.summary.replace(/\*/g, "").trim() : "";
+    if (op.deprecated) {
+      lines.push("  /**");
+      if (summaryText) lines.push(`   * ${summaryText}`, "   *");
+      lines.push(`   * @deprecated ${op.deprecationMessage.replace(/\*\//g, "")}`, "   */");
+    } else if (summaryText) {
+      lines.push(`  /** ${summaryText} */`);
     }
     const methodName = isValidIdentifier(opId) ? opId : `[\"${opId.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"")}\"]`;
     const initVar = op.skipAuth ? "withSkipAuth(init)" : "init";

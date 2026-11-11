@@ -39,7 +39,11 @@ export class OrgAuthConfigsResource {
     return this.client.requestOperation("delete_api_auth_config", "delete", "/api_auth_configs/{auth_config_id}", init);
   }
 
-  /** Get all auth configs. */
+  /**
+   * Get all auth configs.
+   *
+   * @deprecated No backend route exists for this path. Use get_api_auth_configs, which lists the caller's org configs.
+   */
   async get_all_api_auth_configs(init?: OperationInit<"get_all_api_auth_configs">): Promise<OperationData<"get_all_api_auth_configs">> {
     return this.client.requestOperation("get_all_api_auth_configs", "get", "/api_auth_configs/all", init);
   }
@@ -49,7 +53,11 @@ export class OrgAuthConfigsResource {
     return this.client.requestOperation("get_api_auth_configs", "get", "/api_auth_configs", init);
   }
 
-  /** Get auth settings for org. */
+  /**
+   * Get auth settings for org.
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async get_api_auth_settings(init?: OperationInit<"get_api_auth_settings">): Promise<OperationData<"get_api_auth_settings">> {
     return this.client.requestOperation("get_api_auth_settings", "get", "/orgs/{org_id}/auth_settings", init);
   }

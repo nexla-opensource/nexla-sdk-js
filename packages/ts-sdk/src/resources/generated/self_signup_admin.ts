@@ -16,7 +16,7 @@ export class SelfSignupAdminResource {
 
   /** Approve Self Sign Up Request */
   async approve_self_sign_up_request(init?: OperationInit<"approve_self_sign_up_request">): Promise<OperationData<"approve_self_sign_up_request">> {
-    return this.client.requestOperation("approve_self_sign_up_request", "put", "/self_signup_requests/{request_id}/approve", init);
+    return this.client.requestOperation("approve_self_sign_up_request", "post", "/self_signup_requests/{request_id}/approve", init);
   }
 
   /** Delete self-sign-up blocked domain for admins. */

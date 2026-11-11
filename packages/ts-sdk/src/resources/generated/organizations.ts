@@ -23,7 +23,7 @@ export class OrganizationsResource {
 
   /** Add organization custodians. */
   async add_org_custodians(init?: OperationInit<"add_org_custodians">): Promise<OperationData<"add_org_custodians">> {
-    return this.client.requestOperation("add_org_custodians", "post", "/orgs/{org_id}/custodians", init);
+    return this.client.requestOperation("add_org_custodians", "put", "/orgs/{org_id}/custodians", init);
   }
 
   /** Remove Members from an Organization. */
@@ -56,14 +56,14 @@ export class OrganizationsResource {
     return this.client.requestOperation("remove_org_custodians", "delete", "/orgs/{org_id}/custodians", init);
   }
 
+  /** Reset organization custodians. */
+  async reset_org_custodians(init?: OperationInit<"reset_org_custodians">): Promise<OperationData<"reset_org_custodians">> {
+    return this.client.requestOperation("reset_org_custodians", "post", "/orgs/{org_id}/custodians", init);
+  }
+
   /** Update an Organization */
   async update_org(init?: OperationInit<"update_org">): Promise<OperationData<"update_org">> {
     return this.client.requestOperation("update_org", "put", "/orgs/{org_id}", init);
-  }
-
-  /** Update organization custodians. */
-  async update_org_custodians(init?: OperationInit<"update_org_custodians">): Promise<OperationData<"update_org_custodians">> {
-    return this.client.requestOperation("update_org_custodians", "put", "/orgs/{org_id}/custodians", init);
   }
 
   /** Update Organization Members */
@@ -74,5 +74,14 @@ export class OrganizationsResource {
   /** Get Audit Log for an Organization */
   async get_audit_log(init?: OperationInit<"get_org_audit_log">): Promise<OperationData<"get_org_audit_log">> {
     return this.client.requestOperation("get_org_audit_log", "get", "/orgs/{org_id}/audit_log", init);
+  }
+
+  /**
+   * Update organization custodians.
+   *
+   * @deprecated Use add_org_custodians (PUT) to add, or reset_org_custodians (POST) to replace all custodians.
+   */
+  async update_org_custodians(init?: OperationInit<"add_org_custodians">): Promise<OperationData<"add_org_custodians">> {
+    return this.client.requestOperation("add_org_custodians", "put", "/orgs/{org_id}/custodians", init);
   }
 }
