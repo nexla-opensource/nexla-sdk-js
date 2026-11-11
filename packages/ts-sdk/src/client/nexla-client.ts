@@ -10,11 +10,25 @@ import type { RequestOptions } from "./types.js";
 import type { OperationData, OperationId, OperationInit } from "./operation-types.js";
 import { createGeneratedResources, type GeneratedResourceClients } from "../resources/generated/index.js";
 import { WebhooksClient } from "../webhooks/index.js";
+import { base64Encode, readEnv } from "../runtime.js";
 
 export interface NexlaClientOptions {
+  /** Service key, sent as `Basic <serviceKey>` on POST /token. Env: NEXLA_SERVICE_KEY. */
   serviceKey?: string;
+  /** API key, sent as `Basic <apiKey>` on POST /token. Env: NEXLA_API_KEY. */
+  apiKey?: string;
+  /** Login email. Use with `password`. */
+  email?: string;
+  /** Login password. Use with `email`. */
+  password?: string;
+  /** Org context for email and password login. */
+  orgId?: number;
+  /** Direct bearer token. No refresh. Env: NEXLA_ACCESS_TOKEN. */
   accessToken?: string;
+  /** Sent as X-Nexla-Dataplane on POST /token only. */
+  dataplane?: string;
   baseUrl?: string;
+  /** @deprecated Versioning is path-only. This value no longer changes request headers. */
   apiVersion?: string;
   tokenRefreshMargin?: number;
   retry?: RetryOptions;
@@ -35,21 +49,11 @@ export class NexlaClient {
 
 
   constructor(options: NexlaClientOptions = {}) {
-    const serviceKey = options.serviceKey ?? process.env.NEXLA_SERVICE_KEY;
-    const accessToken = options.accessToken ?? process.env.NEXLA_ACCESS_TOKEN;
+    const credentials = resolveCredentials(options);
 
-    if (!serviceKey && !accessToken) {
-      throw new NexlaError(
-        "Either serviceKey or accessToken must be provided (or set NEXLA_SERVICE_KEY/NEXLA_ACCESS_TOKEN)."
-      );
-    }
-    if (serviceKey && accessToken) {
-      throw new NexlaError("Cannot provide both serviceKey and accessToken.");
-    }
-
-    this.baseUrl = (options.baseUrl ?? process.env.NEXLA_API_URL ?? "https://dataops.nexla.io/nexla-api").replace(/\/$/, "");
+    this.baseUrl = (options.baseUrl ?? readEnv("NEXLA_API_URL") ?? "https://dataops.nexla.io/nexla-api").replace(/\/$/, "");
     this.apiVersion = options.apiVersion ?? "v1";
-    this.acceptHeader = `application/vnd.nexla.api.${this.apiVersion}+json`;
+    this.acceptHeader = "application/json";
 
     const fetchImpl = options.fetch ?? globalThis.fetch;
     const httpOptions: HttpOptions = {
@@ -61,20 +65,18 @@ export class NexlaClient {
     const authFetch: typeof fetch = (input, init) =>
       fetchWithRetry(input instanceof Request ? input : new Request(input, init));
 
-    if (serviceKey) {
+    if (credentials.kind === "basic") {
       const authOptions = {
-        serviceKey,
+        basicCredential: credentials.value,
         baseUrl: this.baseUrl,
-        apiVersion: this.apiVersion,
         tokenRefreshMargin: options.tokenRefreshMargin ?? 3600,
-        fetchFn: authFetch
-      } as const;
-      const provider = new ServiceKeyAuthProvider(
-        options.userAgent ? { ...authOptions, userAgent: options.userAgent } : authOptions
-      );
-      this.authProvider = provider;
+        fetchFn: authFetch,
+        ...(options.userAgent ? { userAgent: options.userAgent } : {}),
+        ...(options.dataplane ? { dataplane: options.dataplane } : {})
+      };
+      this.authProvider = new ServiceKeyAuthProvider(authOptions);
     } else {
-      this.authProvider = new AccessTokenAuthProvider(accessToken ?? "");
+      this.authProvider = new AccessTokenAuthProvider(credentials.value);
     }
 
     this.raw = createClient<paths>({ baseUrl: this.baseUrl, fetch: fetchWithRetry });
@@ -151,6 +153,11 @@ export class NexlaClient {
     await this.authProvider.logout();
   }
 
+  /** Replaces the session token with one scoped to `orgId`. Needs a token-exchange credential. */
+  async switchOrg(orgId: number): Promise<void> {
+    await this.authProvider.switchOrg(orgId);
+  }
+
   private invoke<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>>(
     method: Method,
     path: Path,
@@ -182,5 +189,55 @@ export class NexlaClient {
     return errorFromResponse(response, errorBody, { method, path, url: response.url || undefined });
   }
 }
+
+type CredentialMode = "serviceKey" | "apiKey" | "password" | "accessToken";
+type Credentials = { kind: "basic"; value: string } | { kind: "accessToken"; value: string };
+
+const ENV_VARS = {
+  serviceKey: "NEXLA_SERVICE_KEY",
+  apiKey: "NEXLA_API_KEY",
+  accessToken: "NEXLA_ACCESS_TOKEN"
+} as const;
+
+/**
+ * One credential mode. Explicit options win over environment variables. Two explicit
+ * credentials, or two environment credentials with no explicit one, are an error.
+ */
+const resolveCredentials = (options: NexlaClientOptions): Credentials => {
+  const explicit: CredentialMode[] = [];
+  if (options.serviceKey) explicit.push("serviceKey");
+  if (options.apiKey) explicit.push("apiKey");
+  if (options.email !== undefined || options.password !== undefined) explicit.push("password");
+  if (options.accessToken) explicit.push("accessToken");
+  if (explicit.length > 1) {
+    throw new NexlaError(`Provide one credential, not ${explicit.join(" and ")}.`);
+  }
+
+  const fromEnv = (["serviceKey", "apiKey", "accessToken"] as const).filter((mode) => readEnv(ENV_VARS[mode]));
+  if (explicit.length === 0 && fromEnv.length > 1) {
+    throw new NexlaError(`Set one credential environment variable, not ${fromEnv.map((mode) => ENV_VARS[mode]).join(" and ")}.`);
+  }
+
+  const mode = explicit[0] ?? fromEnv[0];
+  switch (mode) {
+    case "serviceKey":
+      return { kind: "basic", value: options.serviceKey ?? readEnv(ENV_VARS.serviceKey) ?? "" };
+    case "apiKey":
+      return { kind: "basic", value: options.apiKey ?? readEnv(ENV_VARS.apiKey) ?? "" };
+    case "password": {
+      if (options.email === undefined || options.password === undefined) {
+        throw new NexlaError("Password login needs both email and password.");
+      }
+      const orgPart = options.orgId !== undefined ? `:${options.orgId}` : "";
+      return { kind: "basic", value: base64Encode(`${options.email}:${options.password}${orgPart}`) };
+    }
+    case "accessToken":
+      return { kind: "accessToken", value: options.accessToken ?? readEnv(ENV_VARS.accessToken) ?? "" };
+    default:
+      throw new NexlaError(
+        "Either serviceKey, apiKey, email and password, or accessToken must be provided (or set NEXLA_SERVICE_KEY, NEXLA_API_KEY, or NEXLA_ACCESS_TOKEN)."
+      );
+  }
+};
 
 export interface NexlaClient extends GeneratedResourceClients {}

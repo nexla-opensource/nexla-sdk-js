@@ -38,15 +38,15 @@ packages/ts-sdk/
 2. `createFetchWithRetry` wraps `fetch` with retry/backoff behavior.
 3. `openapi-fetch` middleware injects headers:
    - `Authorization: Bearer <token>`
-   - `Accept: application/vnd.nexla.api.<version>+json`
+   - `Accept: application/json` (versioning is path-only)
    - `Content-Type: application/json` for non-GET/HEAD
 4. Typed requests flow through `request` / `requestOperation`.
 5. HTTP status codes map to SDK errors (`AuthenticationError`, `ValidationError`, `RateLimitError`, etc.).
-6. Service-key auth can auto-refresh on 401 and retry once.
+6. Basic-credential auth (service key, API key, email and password) can auto-refresh on 401 and retry once. A 423 is not refreshed.
 
 ## Authentication Architecture
 
-- `serviceKey`: obtains session tokens via `/token`, caches token, refreshes with margin.
+- `serviceKey`, `apiKey`, `email`/`password`: obtain session tokens via `POST /token`, cache the token, and refresh with a margin. Concurrent callers share one in-flight `/token` request.
 - `accessToken`: direct bearer token, no refresh flow.
 - `webhookApiKey`: optional webhook client (`client.webhooks`) for webhook endpoints.
 

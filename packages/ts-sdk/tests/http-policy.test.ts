@@ -319,3 +319,21 @@ describe("NexlaClient wiring", () => {
     expect((error as RateLimitError).retryAfter).toBe(120);
   });
 });
+
+describe("per-call signal", () => {
+  it("cancels a client request with the caller's signal and does not raise NexlaTimeoutError", async () => {
+    const client = new NexlaClient({
+      accessToken: "tok",
+      baseUrl: "https://example.com",
+      fetch: hangUntilAborted,
+      retry: { maxRetries: 3, sleep: async () => {} }
+    });
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(new Error("stop")), 5);
+
+    const error = await client.request("get", "/flows", { signal: controller.signal }).catch((caught: unknown) => caught);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toBe("stop");
+    expect(error).not.toBeInstanceOf(NexlaTimeoutError);
+  });
+});

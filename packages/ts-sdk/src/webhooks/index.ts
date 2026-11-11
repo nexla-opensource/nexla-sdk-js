@@ -1,4 +1,5 @@
 import { errorFromResponse, readErrorBody } from "../errors.js";
+import { base64Encode } from "../runtime.js";
 
 export interface WebhookSendOptions {
   includeHeaders?: boolean;
@@ -54,7 +55,7 @@ export class WebhooksClient {
 
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (authMethod === "header") {
-      headers["Authorization"] = `Basic ${Buffer.from(this.apiKey).toString("base64")}`;
+      headers["Authorization"] = `Basic ${base64Encode(this.apiKey)}`;
     }
 
     const response = await this.fetchFn(url.toString(), {
