@@ -18,7 +18,7 @@ Workflow
   pnpm -C packages/ts-sdk coverage
   pnpm -C packages/ts-sdk build
   ```
-- Add a changeset for any user-visible change: `pnpm changeset` and commit the generated file.
+- For any user-visible change, run `pnpm changeset`, then `pnpm changeset version`, and commit the version bump and `CHANGELOG.md`. CI fails if an unversioned `.changeset/*.md` file is left in the PR.
 
 Coding standards
 - TypeScript strict mode; ES2020 target.
@@ -31,5 +31,6 @@ Testing
 
 Release
 - Versions are managed by [Changesets](https://github.com/changesets/changesets).
-- Merging a PR with a changeset triggers `.github/workflows/release.yml` to either open a "Version Packages" PR or publish to npm.
+- Each release PR contains its own version bump and `CHANGELOG.md` entry (`pnpm changeset version`).
+- Merging a PR that changes `packages/ts-sdk/package.json` runs `.github/workflows/release.yml`. It publishes the version if npm does not have it yet, then pushes the git tag. There is no bot "Version Packages" PR.
 - Update `docs/ts-sdk/` for any user-facing change.

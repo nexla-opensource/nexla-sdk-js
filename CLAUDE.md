@@ -119,15 +119,16 @@ const webhooks = new WebhooksClient({ apiKey: process.env.NEXLA_WEBHOOK_API_KEY 
 ## CI, Docs, and Release
 - **CI** (`.github/workflows/ci.yml`): pnpm install → `check:generated` → `gen` (verifies idempotency) → lint → typecheck → coverage → build, on Node 20.
 - **Integration CI** (`.github/workflows/ci-integration.yml`): scheduled weekly + manual dispatch + PRs touching ts-sdk; gated by repository secrets.
-- **Release** (`.github/workflows/release.yml`): Changesets-driven npm publish on push to `main`.
+- **Release** (`.github/workflows/release.yml`): on push to `main` that changes `packages/ts-sdk/package.json`, publishes any version not yet on npm and pushes the git tag.
 
 ## Adding a Changeset
 
 Whenever you make a user-visible change:
 
 ```bash
-pnpm changeset       # interactive: pick package, bump kind, write summary
-git add .changeset/<file>.md
+pnpm changeset          # interactive: pick package, bump kind, write summary
+pnpm changeset version  # applies the bump, writes CHANGELOG.md, removes the changeset file
+git add -A .changeset packages/ts-sdk/package.json packages/ts-sdk/CHANGELOG.md
 ```
 
-Merging a PR with a changeset triggers the release workflow to either open a "Version Packages" PR or publish to npm.
+CI fails if a PR leaves an unversioned `.changeset/*.md` file. Merging the PR publishes the new version to npm. There is no bot "Version Packages" PR.
