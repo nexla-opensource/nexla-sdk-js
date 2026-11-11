@@ -49,6 +49,10 @@ export const normalizePath = (apiPath) => {
   return templated.replace(/\/+$/, "") || "/";
 };
 
+// Backend /data_flows/* routes alias /flows. The metrics routes are not aliases and stay live.
+export const isDataFlowsAlias = (apiPath) =>
+  apiPath.startsWith("/data_flows/") && !apiPath.startsWith("/data_flows/metrics/");
+
 export const resourceKeyForPath = (apiPath) => {
   const first = apiPath.split("/").find((segment) => segment.length > 0);
   if (!first) return "root";
@@ -148,6 +152,10 @@ export const buildMergedSpec = (redoc, pub) => {
     }
     usedOperationIds.add(next.operationId);
     next.tags = [resource];
+    if (isDataFlowsAlias(apiPath)) {
+      next.deprecated = true;
+      next["x-deprecation-message"] = "Backwards-compatible alias of /flows. Use the flows methods instead.";
+    }
     if (Array.isArray(next.security)) next.security = mapSecurity(next.security);
     rewriteSchemaRefs(next, referencedSchemas);
 

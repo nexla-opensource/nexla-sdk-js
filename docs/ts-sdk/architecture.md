@@ -82,6 +82,7 @@ Merge rules (`scripts/build-merged-spec.mjs`):
 - The backend `HTTPBearer` security requirement becomes `NexlaSessionToken`. An operation without a `security` field keeps the default, which requires a session token.
 - Each added operation gets a tag that equals its resource key. The first path segment selects the key. `data_sources` maps to `sources`, `data_sinks` to `destinations`, `data_sets` to `nexsets`, `data_credentials` to `credentials`, `data_maps` to `lookups`, `orgs` to `organizations`, `api_auth_configs` to `org_auth_configs`, `gen_ai_*` to `genai`, `token` to `tokens`, `transform` to `transforms`, and `notification_setting` to `notification_settings`. Any other segment becomes its own resource key. The root path becomes `root`.
 - When an added `operationId` matches an existing one, the resource key is added as a prefix.
+- Backend operations under `/data_flows/*` are backwards-compatible aliases of `/flows`. They are marked `deprecated`, so their generated methods carry `@deprecated`. The `/data_flows/metrics/*` routes are not aliases and are not marked.
 
 ```bash
 pnpm -C packages/ts-sdk gen

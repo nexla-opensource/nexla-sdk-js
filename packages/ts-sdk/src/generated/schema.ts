@@ -3736,6 +3736,7 @@ export interface paths {
   "/data_flows/data_sink/{data_sink_id}": {
     /**
      * Show Data Sink Flow
+     * @deprecated
      * @description Show flow tree for a data sink.
      *
      * Matches Rails: DataFlow.new(data_sink_id: id).flows
@@ -3743,26 +3744,42 @@ export interface paths {
     get: operations["show_data_sink_flow"];
   };
   "/data_flows/data_sink/{resource_id}": {
-    /** Update Flow Via Data Flows Data Sink */
+    /**
+     * Update Flow Via Data Flows Data Sink
+     * @deprecated
+     */
     put: operations["update_flow_via_data_flows_data_sink"];
-    /** Delete Flow Via Data Flows Data Sink */
+    /**
+     * Delete Flow Via Data Flows Data Sink
+     * @deprecated
+     */
     delete: operations["delete_flow_via_data_flows_data_sink"];
   };
   "/data_flows/data_sink/{resource_id}/activate": {
-    /** Activate Flow Via Data Flows Data Sink */
+    /**
+     * Activate Flow Via Data Flows Data Sink
+     * @deprecated
+     */
     put: operations["activate_flow_via_data_flows_data_sink"];
   };
   "/data_flows/data_sink/{resource_id}/copy": {
-    /** Copy Flow Via Data Flows Data Sink */
+    /**
+     * Copy Flow Via Data Flows Data Sink
+     * @deprecated
+     */
     post: operations["copy_flow_via_data_flows_data_sink"];
   };
   "/data_flows/data_sink/{resource_id}/pause": {
-    /** Pause Flow Via Data Flows Data Sink */
+    /**
+     * Pause Flow Via Data Flows Data Sink
+     * @deprecated
+     */
     put: operations["pause_flow_via_data_flows_data_sink"];
   };
   "/data_flows/data_source/{data_source_id}": {
     /**
      * Show Data Source Flow
+     * @deprecated
      * @description Show flow tree for a data source.
      *
      * Matches Rails: DataFlow.new(data_source_id: id).flows
@@ -3777,31 +3794,58 @@ export interface paths {
     get: operations["show_data_source_flow"];
   };
   "/data_flows/data_source/{resource_id}": {
-    /** Update Flow Via Data Flows Data Source */
+    /**
+     * Update Flow Via Data Flows Data Source
+     * @deprecated
+     */
     put: operations["update_flow_via_data_flows_data_source"];
-    /** Delete Flow Via Data Flows Data Source */
+    /**
+     * Delete Flow Via Data Flows Data Source
+     * @deprecated
+     */
     delete: operations["delete_flow_via_data_flows_data_source"];
   };
   "/data_flows/data_source/{resource_id}/activate": {
-    /** Activate Flow Via Data Flows Data Source */
+    /**
+     * Activate Flow Via Data Flows Data Source
+     * @deprecated
+     */
     put: operations["activate_flow_via_data_flows_data_source"];
   };
   "/data_flows/data_source/{resource_id}/copy": {
-    /** Copy Flow Via Data Flows Data Source */
+    /**
+     * Copy Flow Via Data Flows Data Source
+     * @deprecated
+     */
     post: operations["copy_flow_via_data_flows_data_source"];
   };
   "/data_flows/data_source/{resource_id}/docs": {
-    /** List Data Source Flow Docs Bc */
+    /**
+     * List Data Source Flow Docs Bc
+     * @deprecated
+     */
     get: operations["list_data_source_flow_docs_bc"];
-    /** Add Data Source Flow Docs Bc */
+    /**
+     * Add Data Source Flow Docs Bc
+     * @deprecated
+     */
     put: operations["add_data_source_flow_docs_bc"];
-    /** Reset Data Source Flow Docs Bc */
+    /**
+     * Reset Data Source Flow Docs Bc
+     * @deprecated
+     */
     post: operations["reset_data_source_flow_docs_bc"];
-    /** Remove Data Source Flow Docs Bc */
+    /**
+     * Remove Data Source Flow Docs Bc
+     * @deprecated
+     */
     delete: operations["remove_data_source_flow_docs_bc"];
   };
   "/data_flows/data_source/{resource_id}/pause": {
-    /** Pause Flow Via Data Flows Data Source */
+    /**
+     * Pause Flow Via Data Flows Data Source
+     * @deprecated
+     */
     put: operations["pause_flow_via_data_flows_data_source"];
   };
   "/data_flows/metrics/active_flows_metrics": {
@@ -3835,21 +3879,36 @@ export interface paths {
     get: operations["data_flows_metrics_total"];
   };
   "/data_flows/{resource_id}": {
-    /** Update Flow Via Data Flows Data Set */
+    /**
+     * Update Flow Via Data Flows Data Set
+     * @deprecated
+     */
     put: operations["update_flow_via_data_flows_data_set"];
-    /** Delete Flow Via Data Flows Data Set */
+    /**
+     * Delete Flow Via Data Flows Data Set
+     * @deprecated
+     */
     delete: operations["delete_flow_via_data_flows_data_set"];
   };
   "/data_flows/{resource_id}/activate": {
-    /** Activate Flow Via Data Flows Data Set */
+    /**
+     * Activate Flow Via Data Flows Data Set
+     * @deprecated
+     */
     put: operations["activate_flow_via_data_flows_data_set"];
   };
   "/data_flows/{resource_id}/copy": {
-    /** Copy Flow Via Data Flows Data Set */
+    /**
+     * Copy Flow Via Data Flows Data Set
+     * @deprecated
+     */
     post: operations["copy_flow_via_data_flows_data_set"];
   };
   "/data_flows/{resource_id}/pause": {
-    /** Pause Flow Via Data Flows Data Set */
+    /**
+     * Pause Flow Via Data Flows Data Set
+     * @deprecated
+     */
     put: operations["pause_flow_via_data_flows_data_set"];
   };
   "/data_maps/accessible": {
@@ -39038,6 +39097,7 @@ export interface operations {
   };
   /**
    * Show Data Sink Flow
+   * @deprecated
    * @description Show flow tree for a data sink.
    *
    * Matches Rails: DataFlow.new(data_sink_id: id).flows
@@ -39067,7 +39127,10 @@ export interface operations {
       };
     };
   };
-  /** Update Flow Via Data Flows Data Sink */
+  /**
+   * Update Flow Via Data Flows Data Sink
+   * @deprecated
+   */
   update_flow_via_data_flows_data_sink: {
     parameters: {
       path: {
@@ -39096,7 +39159,10 @@ export interface operations {
       };
     };
   };
-  /** Delete Flow Via Data Flows Data Sink */
+  /**
+   * Delete Flow Via Data Flows Data Sink
+   * @deprecated
+   */
   delete_flow_via_data_flows_data_sink: {
     parameters: {
       query?: {
@@ -39122,7 +39188,10 @@ export interface operations {
       };
     };
   };
-  /** Activate Flow Via Data Flows Data Sink */
+  /**
+   * Activate Flow Via Data Flows Data Sink
+   * @deprecated
+   */
   activate_flow_via_data_flows_data_sink: {
     parameters: {
       query?: {
@@ -39149,7 +39218,10 @@ export interface operations {
       };
     };
   };
-  /** Copy Flow Via Data Flows Data Sink */
+  /**
+   * Copy Flow Via Data Flows Data Sink
+   * @deprecated
+   */
   copy_flow_via_data_flows_data_sink: {
     parameters: {
       path: {
@@ -39178,7 +39250,10 @@ export interface operations {
       };
     };
   };
-  /** Pause Flow Via Data Flows Data Sink */
+  /**
+   * Pause Flow Via Data Flows Data Sink
+   * @deprecated
+   */
   pause_flow_via_data_flows_data_sink: {
     parameters: {
       query?: {
@@ -39206,6 +39281,7 @@ export interface operations {
   };
   /**
    * Show Data Source Flow
+   * @deprecated
    * @description Show flow tree for a data source.
    *
    * Matches Rails: DataFlow.new(data_source_id: id).flows
@@ -39241,7 +39317,10 @@ export interface operations {
       };
     };
   };
-  /** Update Flow Via Data Flows Data Source */
+  /**
+   * Update Flow Via Data Flows Data Source
+   * @deprecated
+   */
   update_flow_via_data_flows_data_source: {
     parameters: {
       path: {
@@ -39270,7 +39349,10 @@ export interface operations {
       };
     };
   };
-  /** Delete Flow Via Data Flows Data Source */
+  /**
+   * Delete Flow Via Data Flows Data Source
+   * @deprecated
+   */
   delete_flow_via_data_flows_data_source: {
     parameters: {
       query?: {
@@ -39296,7 +39378,10 @@ export interface operations {
       };
     };
   };
-  /** Activate Flow Via Data Flows Data Source */
+  /**
+   * Activate Flow Via Data Flows Data Source
+   * @deprecated
+   */
   activate_flow_via_data_flows_data_source: {
     parameters: {
       query?: {
@@ -39323,7 +39408,10 @@ export interface operations {
       };
     };
   };
-  /** Copy Flow Via Data Flows Data Source */
+  /**
+   * Copy Flow Via Data Flows Data Source
+   * @deprecated
+   */
   copy_flow_via_data_flows_data_source: {
     parameters: {
       path: {
@@ -39352,7 +39440,10 @@ export interface operations {
       };
     };
   };
-  /** List Data Source Flow Docs Bc */
+  /**
+   * List Data Source Flow Docs Bc
+   * @deprecated
+   */
   list_data_source_flow_docs_bc: {
     parameters: {
       query?: {
@@ -39377,7 +39468,10 @@ export interface operations {
       };
     };
   };
-  /** Add Data Source Flow Docs Bc */
+  /**
+   * Add Data Source Flow Docs Bc
+   * @deprecated
+   */
   add_data_source_flow_docs_bc: {
     parameters: {
       query?: {
@@ -39409,7 +39503,10 @@ export interface operations {
       };
     };
   };
-  /** Reset Data Source Flow Docs Bc */
+  /**
+   * Reset Data Source Flow Docs Bc
+   * @deprecated
+   */
   reset_data_source_flow_docs_bc: {
     parameters: {
       query?: {
@@ -39441,7 +39538,10 @@ export interface operations {
       };
     };
   };
-  /** Remove Data Source Flow Docs Bc */
+  /**
+   * Remove Data Source Flow Docs Bc
+   * @deprecated
+   */
   remove_data_source_flow_docs_bc: {
     parameters: {
       query?: {
@@ -39473,7 +39573,10 @@ export interface operations {
       };
     };
   };
-  /** Pause Flow Via Data Flows Data Source */
+  /**
+   * Pause Flow Via Data Flows Data Source
+   * @deprecated
+   */
   pause_flow_via_data_flows_data_source: {
     parameters: {
       query?: {
@@ -39609,7 +39712,10 @@ export interface operations {
       };
     };
   };
-  /** Update Flow Via Data Flows Data Set */
+  /**
+   * Update Flow Via Data Flows Data Set
+   * @deprecated
+   */
   update_flow_via_data_flows_data_set: {
     parameters: {
       path: {
@@ -39638,7 +39744,10 @@ export interface operations {
       };
     };
   };
-  /** Delete Flow Via Data Flows Data Set */
+  /**
+   * Delete Flow Via Data Flows Data Set
+   * @deprecated
+   */
   delete_flow_via_data_flows_data_set: {
     parameters: {
       query?: {
@@ -39664,7 +39773,10 @@ export interface operations {
       };
     };
   };
-  /** Activate Flow Via Data Flows Data Set */
+  /**
+   * Activate Flow Via Data Flows Data Set
+   * @deprecated
+   */
   activate_flow_via_data_flows_data_set: {
     parameters: {
       query?: {
@@ -39691,7 +39803,10 @@ export interface operations {
       };
     };
   };
-  /** Copy Flow Via Data Flows Data Set */
+  /**
+   * Copy Flow Via Data Flows Data Set
+   * @deprecated
+   */
   copy_flow_via_data_flows_data_set: {
     parameters: {
       path: {
@@ -39720,7 +39835,10 @@ export interface operations {
       };
     };
   };
-  /** Pause Flow Via Data Flows Data Set */
+  /**
+   * Pause Flow Via Data Flows Data Set
+   * @deprecated
+   */
   pause_flow_via_data_flows_data_set: {
     parameters: {
       query?: {

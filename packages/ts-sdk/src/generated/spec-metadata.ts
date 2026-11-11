@@ -5,4 +5,4 @@
 
 export const SPEC_SOURCE = "src/generated/merged-spec.json";
 export const SPEC_HASH_ALGORITHM = "sha256";
-export const SPEC_HASH = "d5a09ed13d2c23f9ab35909637bc84ca2ede786c732e6279144666a121f7bceb";
+export const SPEC_HASH = "eb2d595b1b9bee01f7ecff79652818e9d0da6c7e065c5362793d70d9c102fe80";

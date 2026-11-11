@@ -24752,7 +24752,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_sink/{resource_id}": {
@@ -24811,7 +24813,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       },
       "delete": {
         "tags": [
@@ -24874,7 +24878,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_sink/{resource_id}/activate": {
@@ -24957,7 +24963,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_sink/{resource_id}/copy": {
@@ -25022,7 +25030,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_sink/{resource_id}/pause": {
@@ -25089,7 +25099,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_source/{data_source_id}": {
@@ -25147,7 +25159,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_source/{resource_id}": {
@@ -25206,7 +25220,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       },
       "delete": {
         "tags": [
@@ -25269,7 +25285,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_source/{resource_id}/activate": {
@@ -25352,7 +25370,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_source/{resource_id}/copy": {
@@ -25417,7 +25437,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_source/{resource_id}/docs": {
@@ -25480,7 +25502,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       },
       "post": {
         "tags": [
@@ -25553,7 +25577,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       },
       "put": {
         "tags": [
@@ -25626,7 +25652,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       },
       "delete": {
         "tags": [
@@ -25699,7 +25727,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/data_source/{resource_id}/pause": {
@@ -25766,7 +25796,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/metrics/active_flows_metrics": {
@@ -26345,7 +26377,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       },
       "delete": {
         "tags": [
@@ -26408,7 +26442,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/{resource_id}/activate": {
@@ -26491,7 +26527,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/{resource_id}/copy": {
@@ -26556,7 +26594,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_flows/{resource_id}/pause": {
@@ -26623,7 +26663,9 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true,
+        "x-deprecation-message": "Backwards-compatible alias of /flows. Use the flows methods instead."
       }
     },
     "/data_maps/accessible": {
