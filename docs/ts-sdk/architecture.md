@@ -50,6 +50,26 @@ packages/ts-sdk/
 - `accessToken`: direct bearer token, no refresh flow.
 - `webhookApiKey`: optional webhook client (`client.webhooks`) for webhook endpoints.
 
+## Backend OpenAPI Spec (Public)
+
+`openapi/nexla-api.public.json` is generator input. It describes the public Nexla backend API: 1,254 operations and 227 component schemas.
+
+Provenance:
+
+- The backend FastAPI app exports the document with `app.openapi()`.
+- The `/api/v1` prefix is removed from every path.
+- Admin-only routes are removed. The exclusion list is kept with the backend tooling.
+- Each `operationId` is the name of the backend route function. When two routes share a name, the builder adds the resource name or the HTTP method to make it unique.
+
+How to rebuild:
+
+1. Export the OpenAPI document and the route list from the backend.
+2. Run the public spec builder. The builder is maintained with the backend tooling and is not in this repository.
+3. Copy the output to `openapi/nexla-api.public.json`.
+4. Run `pnpm -C packages/ts-sdk gen`.
+
+CI does not rebuild this file. The builder needs the private backend source.
+
 ## OpenAPI Generation Pipeline
 
 The OpenAPI spec (`plugin-redoc-0.yaml`) is the source of truth.
