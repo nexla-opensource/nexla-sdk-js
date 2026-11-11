@@ -11,6 +11,14 @@ on:
       - "pnpm-lock.yaml"
       - ".github/workflows/release.yml"
 
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
