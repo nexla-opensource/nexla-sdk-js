@@ -4,7 +4,7 @@ Contributing to nexla-sdk-js
 Thanks for your interest in contributing!
 
 Setup
-- Node.js >= 20 and pnpm 9 are required (`corepack enable` will pick up the pinned version from `package.json`).
+- Node.js >= 18 and pnpm 9 are required (`corepack enable` will pick up the pinned version from `package.json`). CI runs the checks on Node 20 and the consumer smoke test on Node 18 and 20.
 - Install workspace deps: `pnpm install --frozen-lockfile`
 - Run unit + resource tests: `pnpm -C packages/ts-sdk test`
 
@@ -14,14 +14,19 @@ Workflow
 
   ```bash
   pnpm -C packages/ts-sdk lint
+  pnpm -C packages/ts-sdk format:check
   pnpm -C packages/ts-sdk typecheck
   pnpm -C packages/ts-sdk coverage
   pnpm -C packages/ts-sdk build
+  pnpm -C packages/ts-sdk publint
+  pnpm -C packages/ts-sdk attw
+  pnpm -C packages/ts-sdk size
+  pnpm -C packages/ts-sdk smoke:consumer
   ```
 - For any user-visible change, run `pnpm changeset`, then `pnpm changeset version`, and commit the version bump and `CHANGELOG.md`. CI fails if an unversioned `.changeset/*.md` file is left in the PR.
 
 Coding standards
-- TypeScript strict mode; ES2020 target.
+- TypeScript strict mode; ES2022 target. Format with Prettier (`pnpm -C packages/ts-sdk format`).
 - Keep the public API surface stable; deprecate before breaking.
 - Do not hand-edit `packages/ts-sdk/src/generated/` or `packages/ts-sdk/src/resources/generated/`. Update `plugin-redoc-0.yaml` or `openapi/nexla-api.public.json` (or the upstream OpenAPI source) and re-run `pnpm -C packages/ts-sdk gen`.
 

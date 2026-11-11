@@ -107,11 +107,16 @@ Coverage is enforced by `check-generated-coverage.mjs`, which compares generated
 
 Blocking TypeScript checks are in `.github/workflows/ci.yml`:
 
-- artifact generation + clean diff
-- lint
+- changeset check (no unversioned `.changeset/*.md`)
+- artifact generation + clean diff, and `check:generated`
+- lint and format check
 - typecheck
 - tests/coverage
 - build
+- package checks: publint, attw, and size-limit (budgets in `packages/ts-sdk/package.json`)
+- consumer smoke test on Node 18 and 20 (`scripts/consumer-smoke.mjs`, a separate job)
+
+The package floor is Node.js 18, from `engines` in `packages/ts-sdk/package.json`. The main job runs on Node 20.
 
 Integration tests are intentionally documented as non-blocking relative to publish/release gating:
 
@@ -121,3 +126,4 @@ Integration tests are intentionally documented as non-blocking relative to publi
 
 - [Coverage process](./api-coverage.md)
 - [Integration test policy](./integration-tests.md)
+- [Behavior spec](./behavior-spec.md)

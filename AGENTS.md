@@ -13,10 +13,12 @@
 - Tests (unit + resource): `pnpm -C packages/ts-sdk test` • Coverage: `pnpm -C packages/ts-sdk coverage`
 - Integration (creds required): `NEXLA_SERVICE_KEY=... pnpm -C packages/ts-sdk test:integration`
 - Build: `pnpm -C packages/ts-sdk build` (tsup → dual ESM/CJS + `.d.ts`)
+- Format: `pnpm -C packages/ts-sdk format` (write) and `pnpm -C packages/ts-sdk format:check` (CI)
+- Package checks (after build): `pnpm -C packages/ts-sdk publint`, `attw`, `size`, and `smoke:consumer`
 - Codegen: `pnpm -C packages/ts-sdk gen` (regenerate `src/generated/*` and `src/resources/generated/*` from `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json`).
 
 ## Coding Style & Naming Conventions
-- TypeScript 5.x, strict mode, ES2020 target; 2-space indent, semicolons required.
+- TypeScript 5.x, strict mode, ES2022 target; Prettier formats the code (2-space indent, semicolons).
 - Naming: variables/functions `camelCase`, types/classes `PascalCase`, constants `UPPER_SNAKE_CASE`, files `kebab-case.ts`.
 - ESLint flat config (`packages/ts-sdk/eslint.config.js`) + typescript-eslint v8 enforces style. Run `pnpm -C packages/ts-sdk lint --fix` for auto-fix.
 - Do not hand-edit `src/generated/` or `src/resources/generated/` — regenerate via `pnpm -C packages/ts-sdk gen`.
@@ -31,7 +33,7 @@
 - Commits: imperative, concise; prefer Conventional style: `feat:`, `fix:`, `docs:`, `refactor:`, `test:` (e.g., `feat: add webhook delivery history`).
 - PRs: clear description, linked issues, test plan (commands/output), and docs/examples updates when behavior changes.
 - **Changesets**: for every user-visible change, run `pnpm changeset`, then `pnpm changeset version`, and commit the version bump and `CHANGELOG.md`. Merging the PR publishes to npm.
-- CI must pass (lint + typecheck + coverage + build on Node 20).
+- CI must pass: changeset check, `check:generated`, format check, lint, typecheck, coverage, build, and the package checks on Node 20. The consumer smoke test also runs on Node 18.
 
 ## Security & Configuration Tips
 - Do not hardcode tokens or URLs; read from env (`NEXLA_API_URL`, `NEXLA_SERVICE_KEY`, `NEXLA_ACCESS_TOKEN`).

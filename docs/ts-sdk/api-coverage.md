@@ -41,7 +41,7 @@ What this does:
 `.github/workflows/ci.yml` enforces:
 
 - Generated artifact consistency (`pnpm -C packages/ts-sdk gen` followed by `git diff --exit-code`).
-- `check:generated` (operation coverage gate).
+- `check:generated` (operation coverage gate). It also fails when one `operationId` names two routes, or when a path template placeholder and its path parameter disagree.
 - Lint, typecheck, coverage, and build.
 
 Stale generated files block merges.

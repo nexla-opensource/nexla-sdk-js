@@ -7,7 +7,7 @@ This document defines how to add and run TS integration tests without turning th
 - Integration tests are **non-blocking** relative to TypeScript release/publish gates.
 - Unit/lint/typecheck/build remain the blocking CI checks.
 - Integration runs are for confidence, signal, and early regression detection.
-- Existing workflow: `.github/workflows/ci-ts-integration.yml` (scheduled + manual + PR path-based).
+- Existing workflow: `.github/workflows/ci-integration.yml`. It runs on a weekly schedule (Mondays, 09:00 UTC), on manual dispatch, and on pull requests to `main` that touch the SDK. The job uses `continue-on-error`, and its steps run only when a repository secret is set.
 
 ## When to Add Integration Tests
 
@@ -35,7 +35,7 @@ Never commit credentials or test fixtures containing secrets.
 ## Local Run Commands
 
 ```bash
-NEXLA_SERVICE_KEY=... pnpm -C packages/ts-sdk test -- --passWithNoTests tests/integration
+NEXLA_SERVICE_KEY=... pnpm -C packages/ts-sdk test:integration
 ```
 
 For iterative runs:
@@ -46,7 +46,7 @@ NEXLA_SERVICE_KEY=... pnpm -C packages/ts-sdk test:watch -- tests/integration
 
 ## Suggested CI Shape (Non-Blocking)
 
-If a CI workflow is added for TS integration tests, keep it isolated from release gating. Recommended options:
+The existing workflow already follows these rules. Keep the same shape for any new integration job:
 
 - separate workflow (`workflow_dispatch` and/or scheduled)
 - `continue-on-error: true` on the integration job
