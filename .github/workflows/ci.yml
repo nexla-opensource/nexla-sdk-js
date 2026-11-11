@@ -66,6 +66,9 @@ jobs:
       - name: Lint
         run: pnpm -C packages/ts-sdk lint
 
+      - name: Format check
+        run: pnpm -C packages/ts-sdk format:check
+
       - name: Typecheck
         run: pnpm -C packages/ts-sdk typecheck
 
