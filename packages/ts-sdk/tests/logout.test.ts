@@ -3,18 +3,18 @@ import { ServiceKeyAuthProvider } from "../src/auth/service-key.js";
 
 const createMockFetch = () => {
   const calls: Request[] = [];
-  const fetchFn: typeof fetch = async (input, init) => {
+  const fetchFn: typeof fetch = (input, init) => {
     const request = input instanceof Request ? input : new Request(input, init);
     calls.push(request);
 
     if (request.url.endsWith("/token")) {
-      return new Response(JSON.stringify({ access_token: "token-1", expires_in: 1 }), {
+      return Promise.resolve(new Response(JSON.stringify({ access_token: "token-1", expires_in: 1 }), {
         status: 200,
         headers: { "content-type": "application/json" }
-      });
+      }));
     }
 
-    return new Response("", { status: 204 });
+    return Promise.resolve(new Response("", { status: 204 }));
   };
   return { fetchFn, calls };
 };

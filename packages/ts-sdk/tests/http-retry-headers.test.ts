@@ -13,10 +13,10 @@ const createResponse = (status: number, retryAfter?: string) =>
 describe("createFetchWithRetry", () => {
   it("respects retry-after header", async () => {
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      if (calls === 1) return createResponse(429, "0");
-      return createResponse(200);
+      if (calls === 1) return Promise.resolve(createResponse(429, "0"));
+      return Promise.resolve(createResponse(200));
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, backoffMs: 1, maxBackoffMs: 5 });

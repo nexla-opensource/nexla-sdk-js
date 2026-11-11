@@ -52,7 +52,7 @@ export interface NexlaClientOptions {
   webhookApiKey?: string;
 }
 
-export class NexlaClient {
+class NexlaClientBase {
   readonly raw: Client<paths>;
   readonly baseUrl: string;
   readonly apiVersion: string;
@@ -120,7 +120,8 @@ export class NexlaClient {
       this.webhooks = new WebhooksClient({ apiKey: options.webhookApiKey, fetch: fetchImpl });
     }
 
-    Object.assign(this, createGeneratedResources(this));
+    // The resources receive the client after the generated properties are attached.
+    Object.assign(this, createGeneratedResources(this as unknown as NexlaClient));
   }
 
   async request<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>>(
@@ -146,7 +147,7 @@ export class NexlaClient {
       // so decide on the HTTP status, not on the error value.
       const res = response ?? new Response(null, { status: 500 });
       if (!res.ok) {
-        throw this.mapError(error, res, method, path as string);
+        throw this.mapError(error, res, method, path);
       }
       return { data, headers: res.headers };
     };
@@ -300,4 +301,7 @@ const resolveCredentials = (options: NexlaClientOptions): Credentials => {
   }
 };
 
-export interface NexlaClient extends GeneratedResourceClients {}
+// Generated resource properties are added through the type. A class and interface
+// merge would also work, but the lint rule no-unsafe-declaration-merging rejects it.
+export type NexlaClient = NexlaClientBase & GeneratedResourceClients;
+export const NexlaClient = NexlaClientBase as new (options?: NexlaClientOptions) => NexlaClient;

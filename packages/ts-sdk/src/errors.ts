@@ -28,7 +28,7 @@ export class NexlaError extends Error {
   readonly originalError: Error | undefined;
   readonly statusCode: number | undefined;
   /** @deprecated Use `body`. */
-  readonly response: unknown | undefined;
+  readonly response: unknown;
   /** Parsed JSON body, the text body, or `undefined` when the body was empty. */
   readonly body: unknown;
   /** Backend error code: `error_code`, or `error.type` on 429 responses. */

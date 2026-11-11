@@ -9,9 +9,9 @@ const createResponse = (status: number, contentType = "application/json") =>
 describe("branch coverage extras", () => {
   it("does not retry on non-retryable status", async () => {
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      return createResponse(400);
+      return Promise.resolve(createResponse(400));
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, backoffMs: 1, maxBackoffMs: 5 });
@@ -22,12 +22,12 @@ describe("branch coverage extras", () => {
   });
 
   it("handles non-json responses in service key auth", async () => {
-    const fetchFn: typeof fetch = async (input, init) => {
+    const fetchFn: typeof fetch = (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
       if (request.url.endsWith("/token")) {
-        return createResponse(200, "text/plain");
+        return Promise.resolve(createResponse(200, "text/plain"));
       }
-      return createResponse(200);
+      return Promise.resolve(createResponse(200));
     };
 
     const provider = new ServiceKeyAuthProvider({
@@ -42,8 +42,8 @@ describe("branch coverage extras", () => {
   });
 
   it("defaults error message when response body is not JSON", async () => {
-    const fetchFn: typeof fetch = async () => {
-      return new Response("no-json", { status: 500, headers: { "content-type": "text/plain" } });
+    const fetchFn: typeof fetch = () => {
+      return Promise.resolve(new Response("no-json", { status: 500, headers: { "content-type": "text/plain" } }));
     };
 
     const client = new NexlaClient({

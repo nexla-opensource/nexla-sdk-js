@@ -1,7 +1,7 @@
-import tseslint from "@typescript-eslint/eslint-plugin";
-import parser from "@typescript-eslint/parser";
+import tseslint from "typescript-eslint";
+import prettier from "eslint-config-prettier";
 
-export default [
+export default tseslint.config(
   {
     ignores: [
       "coverage/**",
@@ -13,17 +13,13 @@ export default [
       "vitest.config.ts"
     ]
   },
+  ...tseslint.configs.recommendedTypeChecked,
   {
     files: ["src/**/*.ts", "tests/**/*.ts"],
     languageOptions: {
-      parser,
       parserOptions: {
-        sourceType: "module",
-        project: "./tsconfig.json"
+        projectService: true
       }
-    },
-    plugins: {
-      "@typescript-eslint": tseslint
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
@@ -31,5 +27,7 @@ export default [
       "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
       "@typescript-eslint/ban-ts-comment": ["error", { "ts-ignore": "allow-with-description" }]
     }
-  }
-];
+  },
+  // Turns off stylistic ESLint rules that Prettier owns. Keep this last.
+  prettier
+);

@@ -34,7 +34,7 @@ const toResponse = (scripted: Scripted): Response => {
 };
 
 const errorFor = async (scripted: Scripted): Promise<NexlaError> => {
-  const fetchFn: typeof fetch = async () => toResponse(scripted);
+  const fetchFn: typeof fetch = () => Promise.resolve(toResponse(scripted));
   const client = new NexlaClient({
     accessToken: "tok",
     baseUrl: "https://example.com",
@@ -150,16 +150,16 @@ describe("error classes and fields", () => {
 describe("423 is not refreshed like 401", () => {
   it("does not fetch a new service token on 423", async () => {
     let tokenCalls = 0;
-    const fetchFn: typeof fetch = async (input, init) => {
+    const fetchFn: typeof fetch = (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
       if (request.url.endsWith("/token")) {
         tokenCalls += 1;
-        return new Response(JSON.stringify({ access_token: "tok", expires_in: 86400 }), {
+        return Promise.resolve(new Response(JSON.stringify({ access_token: "tok", expires_in: 86400 }), {
           status: 200,
           headers: { "content-type": "application/json" }
-        });
+        }));
       }
-      return new Response("", { status: 423 });
+      return Promise.resolve(new Response("", { status: 423 }));
     };
     const client = new NexlaClient({ serviceKey: "svc", baseUrl: "https://example.com", fetch: fetchFn, retry: { maxRetries: 0 } });
 

@@ -71,12 +71,12 @@ const runCall = async (
   try {
     switch (op) {
       case "get_source":
-        return { result: await client.request("get", "/data_sources/{source_id}", { params: { path: { source_id: args["id"] as number } } }) };
+        return { result: await client.request("get", "/data_sources/{source_id}", { params: { path: { source_id: args["id"] } } }) };
       case "create_source":
         return { result: await client.request("post", "/data_sources", { body: args["body"] }) };
       case "list_sources_all": {
         const items: unknown[] = [];
-        for await (const item of client.paginateItems("get", "/data_sources", { params: { query: { per_page: args["per_page"] as number } } })) {
+        for await (const item of client.paginateItems("get", "/data_sources", { params: { query: { per_page: args["per_page"] } } })) {
           items.push(item);
         }
         return { result: items };

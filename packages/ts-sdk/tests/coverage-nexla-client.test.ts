@@ -4,21 +4,21 @@ import { AuthenticationError, RateLimitError, ServerError } from "../src/errors.
 
 const createFetchSequence = (responses: Array<{ status: number; body?: unknown; headers?: Record<string, string> }>) => {
   const calls: Request[] = [];
-  const fetchFn: typeof fetch = async (input, init) => {
+  const fetchFn: typeof fetch = (input, init) => {
     const request = input instanceof Request ? input : new Request(input, init);
     calls.push(request);
 
     const url = request.url;
     if (url.endsWith("/token")) {
       const body = JSON.stringify({ access_token: "token-1", expires_in: 3600 });
-      return new Response(body, { status: 200, headers: { "content-type": "application/json" } });
+      return Promise.resolve(new Response(body, { status: 200, headers: { "content-type": "application/json" } }));
     }
 
     const next = responses.shift() ?? { status: 200, body: {} };
-    return new Response(JSON.stringify(next.body ?? {}), {
+    return Promise.resolve(new Response(JSON.stringify(next.body ?? {}), {
       status: next.status,
       headers: { "content-type": "application/json", ...(next.headers ?? {}) }
-    });
+    }));
   };
   return { fetchFn, calls };
 };

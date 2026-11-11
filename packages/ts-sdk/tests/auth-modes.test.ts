@@ -178,10 +178,10 @@ describe("runtime neutrality", () => {
 
   it("sends a webhook header credential without Buffer", async () => {
     let authorization: string | null = null;
-    const fetchFn: typeof fetch = async (input, init) => {
+    const fetchFn: typeof fetch = (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
       authorization = request.headers.get("authorization");
-      return new Response("{}", { status: 200, headers: { "content-type": "application/json" } });
+      return Promise.resolve(new Response("{}", { status: 200, headers: { "content-type": "application/json" } }));
     };
     const webhooks = new WebhooksClient({ apiKey: "wk", fetch: fetchFn });
 

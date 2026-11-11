@@ -141,7 +141,7 @@ const parseTokenResponse = async (response: Response): Promise<TokenResponse> =>
     throw new NexlaError("Missing access token in response", { response: data });
   }
 
-  return { ...data, access_token: accessToken } as TokenResponse;
+  return { ...data, access_token: accessToken };
 };
 
 const safeParseJson = async (response: Response): Promise<unknown> => {

@@ -4,16 +4,16 @@ import { AuthenticationError } from "../src/errors.js";
 
 const createMockFetch = (responses: Array<{ status: number; body?: unknown }>) => {
   const calls: Request[] = [];
-  const fetchFn: typeof fetch = async (input, init) => {
+  const fetchFn: typeof fetch = (input, init) => {
     const request = input instanceof Request ? input : new Request(input, init);
     calls.push(request);
 
     const next = responses.shift() ?? { status: 200, body: {} };
     const body = JSON.stringify(next.body ?? {});
-    return new Response(body, {
+    return Promise.resolve(new Response(body, {
       status: next.status,
       headers: { "content-type": "application/json" }
-    });
+    }));
   };
   return { fetchFn, calls };
 };

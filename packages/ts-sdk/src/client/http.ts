@@ -149,12 +149,12 @@ const messageOf = (error: unknown): string => (error instanceof Error ? error.me
 const defaultSleep = (ms: number, signal?: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
     if (signal?.aborted) {
-      reject(signal.reason);
+      reject(signal.reason as Error);
       return;
     }
     const onAbort = () => {
       clearTimeout(timer);
-      reject(signal?.reason);
+      reject(signal?.reason as Error);
     };
     const timer = setTimeout(() => {
       signal?.removeEventListener("abort", onAbort);
