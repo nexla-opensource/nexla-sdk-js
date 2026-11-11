@@ -5,7 +5,7 @@
     "turbo.json",
     "tsconfig.json"
   ],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**"]
