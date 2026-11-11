@@ -1,0 +1,59 @@
+name: CI Integration
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 1"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "packages/ts-sdk/**"
+      - "plugin-redoc-0.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci-integration.yml"
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    # The `secrets` context is not allowed in a job-level `if:`.
+    # Expose the secrets as env and gate each step on them instead.
+    env:
+      NEXLA_SERVICE_KEY: ${{ secrets.NEXLA_SERVICE_KEY }}
+      NEXLA_ACCESS_TOKEN: ${{ secrets.NEXLA_ACCESS_TOKEN }}
+      NEXLA_API_URL: ${{ vars.NEXLA_API_URL }}
+      HAS_CREDENTIALS: ${{ secrets.NEXLA_SERVICE_KEY != '' || secrets.NEXLA_ACCESS_TOKEN != '' }}
+    steps:
+      - name: Skip notice
+        if: env.HAS_CREDENTIALS != 'true'
+        run: echo "No NEXLA_SERVICE_KEY or NEXLA_ACCESS_TOKEN secret; skipping integration tests."
+
+      - if: env.HAS_CREDENTIALS == 'true'
+        uses: actions/checkout@v5
+
+      # pnpm must be on PATH before setup-node resolves `cache: pnpm`.
+      # The version comes from package.json "packageManager".
+      - name: Setup pnpm
+        if: env.HAS_CREDENTIALS == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: env.HAS_CREDENTIALS == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        if: env.HAS_CREDENTIALS == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate SDK artifacts
+        if: env.HAS_CREDENTIALS == 'true'
+        run: pnpm -C packages/ts-sdk gen
+
+      - name: Run integration tests
+        if: env.HAS_CREDENTIALS == 'true'
+        run: pnpm -C packages/ts-sdk test:integration
