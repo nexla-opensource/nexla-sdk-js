@@ -2,15 +2,14 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import YAML from "yaml";
+import { MERGED_SPEC_PATH, buildMergedSpecText } from "./build-merged-spec.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const packageRoot = path.resolve(__dirname, "..");
-const repoRoot = path.resolve(packageRoot, "..", "..");
 
-const specPath = path.join(repoRoot, "plugin-redoc-0.yaml");
+const specPath = MERGED_SPEC_PATH;
 const generatedResourcesDir = path.join(packageRoot, "src", "resources", "generated");
 const specMetadataPath = path.join(packageRoot, "src", "generated", "spec-metadata.ts");
 
@@ -21,7 +20,7 @@ const normalizeTag = (value) => String(value).replace(/\s+/g, " ").trim();
 
 const readSpecOperations = () => {
   const rawSpec = fs.readFileSync(specPath, "utf8");
-  const spec = YAML.parse(rawSpec);
+  const spec = JSON.parse(rawSpec);
   const endpointToOperationId = new Map();
 
   for (const [apiPath, pathItem] of Object.entries(spec?.paths ?? {})) {
@@ -94,6 +93,15 @@ const parseSpecMetadata = () => {
   };
 };
 
+// The committed merged spec must equal the output of its inputs (plugin-redoc and the public backend spec).
+const checkMergedSpecInSync = () => {
+  const expected = buildMergedSpecText().text;
+  const actual = fs.readFileSync(specPath, "utf8");
+  return expected === actual
+    ? null
+    : `${path.relative(packageRoot, specPath)} is out of date with its inputs. Run: pnpm -C packages/ts-sdk gen:merged-spec`;
+};
+
 const computeSpecHash = (hashAlgorithm) =>
   crypto.createHash(hashAlgorithm).update(fs.readFileSync(specPath)).digest("hex");
 
@@ -131,6 +139,9 @@ coveredByOperationId.sort();
 const extraEndpoints = [...generatedEndpoints].filter((key) => !specEndpoints.has(key)).sort();
 
 const errors = [];
+
+const mergedSpecDrift = checkMergedSpecInSync();
+if (mergedSpecDrift) errors.push(mergedSpecDrift);
 
 if (hardMissingEndpoints.length > 0) {
   errors.push(

@@ -23,7 +23,7 @@ Workflow
 Coding standards
 - TypeScript strict mode; ES2020 target.
 - Keep the public API surface stable; deprecate before breaking.
-- Do not hand-edit `packages/ts-sdk/src/generated/` or `packages/ts-sdk/src/resources/generated/`. Update `plugin-redoc-0.yaml` (or the upstream OpenAPI source) and re-run `pnpm -C packages/ts-sdk gen`.
+- Do not hand-edit `packages/ts-sdk/src/generated/` or `packages/ts-sdk/src/resources/generated/`. Update `plugin-redoc-0.yaml` or `openapi/nexla-api.public.json` (or the upstream OpenAPI source) and re-run `pnpm -C packages/ts-sdk gen`.
 
 Testing
 - Prefer unit tests with mocked `fetch` (see `packages/ts-sdk/tests/utils/factories/`).

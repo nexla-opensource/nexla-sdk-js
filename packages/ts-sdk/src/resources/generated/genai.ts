@@ -29,9 +29,29 @@ export class GenaiResource {
     return this.client.requestOperation("delete_gen_ai_org_setting", "delete", "/gen_ai_org_settings/{gen_ai_org_setting_id}", init);
   }
 
+  /** Destroy Collection Route */
+  async destroy_collection_route(init?: OperationInit<"destroy_collection_route">): Promise<OperationData<"destroy_collection_route">> {
+    return this.client.requestOperation("destroy_collection_route", "delete", "/gen_ai_org_settings/destroy", init);
+  }
+
+  /** Update Gen Ai Config */
+  async gen_ai_integration_configs_update_gen_ai_config(init?: OperationInit<"gen_ai_integration_configs_update_gen_ai_config">): Promise<OperationData<"gen_ai_integration_configs_update_gen_ai_config">> {
+    return this.client.requestOperation("gen_ai_integration_configs_update_gen_ai_config", "patch", "/gen_ai_integration_configs/{gen_ai_config_id}", init);
+  }
+
   /** Shows active GenAI Configuration for specific usage */
   async gen_ai_org_settings_show_active(init?: OperationInit<"gen_ai_org_settings_show_active">): Promise<OperationData<"gen_ai_org_settings_show_active">> {
     return this.client.requestOperation("gen_ai_org_settings_show_active", "get", "/gen_ai_org_settings/active_config", init);
+  }
+
+  /** Update Setting Dead Route */
+  async gen_ai_org_settings_update_setting_dead_route(init?: OperationInit<"gen_ai_org_settings_update_setting_dead_route">): Promise<OperationData<"gen_ai_org_settings_update_setting_dead_route">> {
+    return this.client.requestOperation("gen_ai_org_settings_update_setting_dead_route", "patch", "/gen_ai_org_settings/{setting_id}", init);
+  }
+
+  /** Update Setting Dead Route */
+  async gen_ai_org_settings_update_setting_dead_route_put(init?: OperationInit<"gen_ai_org_settings_update_setting_dead_route_put">): Promise<OperationData<"gen_ai_org_settings_update_setting_dead_route_put">> {
+    return this.client.requestOperation("gen_ai_org_settings_update_setting_dead_route_put", "put", "/gen_ai_org_settings/{setting_id}", init);
   }
 
   /** Get all GenAI configs in org */

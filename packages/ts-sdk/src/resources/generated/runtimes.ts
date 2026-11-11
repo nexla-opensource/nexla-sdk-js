@@ -59,6 +59,11 @@ export class RuntimesResource {
     return this.client.requestOperation("pause_runtime", "put", "/runtimes/{runtime_id}/pause", init);
   }
 
+  /** Update Runtime */
+  async runtimes_update_runtime(init?: OperationInit<"runtimes_update_runtime">): Promise<OperationData<"runtimes_update_runtime">> {
+    return this.client.requestOperation("runtimes_update_runtime", "patch", "/runtimes/{runtime_id}", init);
+  }
+
   /** Update a Custom Runtime */
   async update_runtime(init?: OperationInit<"update_runtime">): Promise<OperationData<"update_runtime">> {
     return this.client.requestOperation("update_runtime", "put", "/runtimes/{runtime_id}", init);

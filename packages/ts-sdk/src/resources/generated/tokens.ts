@@ -23,4 +23,34 @@ export class TokensResource {
   async logout(init?: OperationInit<"logout">): Promise<OperationData<"logout">> {
     return this.client.requestOperation("logout", "post", "/token/logout", init);
   }
+
+  /** IDP Token */
+  async token_create_idp_token(init?: OperationInit<"token_create_idp_token">): Promise<OperationData<"token_create_idp_token">> {
+    return this.client.requestOperation("token_create_idp_token", "put", "/token/{uid}", init);
+  }
+
+  /** IDP Token */
+  async token_create_idp_token_post(init?: OperationInit<"token_create_idp_token_post">): Promise<OperationData<"token_create_idp_token_post">> {
+    return this.client.requestOperation("token_create_idp_token_post", "post", "/token/{uid}", init);
+  }
+
+  /** Generate Token */
+  async token_create_token(init?: OperationInit<"token_create_token">): Promise<OperationData<"token_create_token">> {
+    return this.client.requestOperation("token_create_token", "put", "/token", init);
+  }
+
+  /** Logout */
+  async token_logout_token(init?: OperationInit<"token_logout_token">): Promise<OperationData<"token_logout_token">> {
+    return this.client.requestOperation("token_logout_token", "put", "/token/logout", init);
+  }
+
+  /** Refresh Token */
+  async token_refresh_token(init?: OperationInit<"token_refresh_token">): Promise<OperationData<"token_refresh_token">> {
+    return this.client.requestOperation("token_refresh_token", "put", "/token/refresh", init);
+  }
+
+  /** Refresh Token */
+  async token_refresh_token_post(init?: OperationInit<"token_refresh_token_post">): Promise<OperationData<"token_refresh_token_post">> {
+    return this.client.requestOperation("token_refresh_token_post", "post", "/token/refresh", init);
+  }
 }

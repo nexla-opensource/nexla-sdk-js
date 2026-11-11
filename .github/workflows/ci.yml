@@ -6,6 +6,7 @@ on:
     paths:
       - "packages/ts-sdk/**"
       - "plugin-redoc-0.yaml"
+      - "openapi/**"
       - "pnpm-workspace.yaml"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -17,6 +18,7 @@ on:
     paths:
       - "packages/ts-sdk/**"
       - "plugin-redoc-0.yaml"
+      - "openapi/**"
       - "pnpm-workspace.yaml"
       - "package.json"
       - "pnpm-lock.yaml"

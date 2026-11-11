@@ -1,8 +1,8 @@
 /**
- * Auto-generated spec metadata from ../../plugin-redoc-0.yaml.
+ * Auto-generated spec metadata from src/generated/merged-spec.json.
  * Do not edit manually.
  */
 
-export const SPEC_SOURCE = "../../plugin-redoc-0.yaml";
+export const SPEC_SOURCE = "src/generated/merged-spec.json";
 export const SPEC_HASH_ALGORITHM = "sha256";
-export const SPEC_HASH = "e589c90c5daccec08895c85b7f9c12eba59e99f17197e3ca759a75611dcadb6a";
+export const SPEC_HASH = "842241254197d61e4197cbfb053b82b3bd0e2278398db95b890af498e31de6d9";

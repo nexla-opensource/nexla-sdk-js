@@ -4,13 +4,14 @@
 
 The SDK tracks one coverage dimension:
 
-- **OpenAPI operation coverage:** every operation declared in `plugin-redoc-0.yaml` (excluding webhook-tagged operations, which are served by the separate webhook client) must have a matching method on a generated TS resource client.
+- **OpenAPI operation coverage:** every operation in the merged spec (`packages/ts-sdk/src/generated/merged-spec.json`, built from `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json`), excluding webhook-tagged operations, must have a matching method on a generated TS resource client.
 
 Coverage is enforced in CI; the build fails if generated artifacts drift from the spec.
 
 ## Source of Truth
 
-- OpenAPI spec: `plugin-redoc-0.yaml`
+- OpenAPI inputs: `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json`
+- Merged spec (generated, committed): `packages/ts-sdk/src/generated/merged-spec.json`
 - Generated TS schema: `packages/ts-sdk/src/generated/schema.ts`
 - Generated TS resource map: `packages/ts-sdk/src/generated/resource-map.ts`
 - Generated TS resource clients: `packages/ts-sdk/src/resources/generated/*.ts`
@@ -54,7 +55,7 @@ If an operation is not yet exposed via a first-class generated method:
 
 ## PR Checklist (Coverage-Sensitive Changes)
 
-1. Update `plugin-redoc-0.yaml` (or the upstream spec source).
+1. Update `plugin-redoc-0.yaml` or `openapi/nexla-api.public.json` (or the upstream spec source).
 2. Regenerate TS artifacts (`pnpm -C packages/ts-sdk gen`).
 3. Run `pnpm -C packages/ts-sdk check:generated` and confirm clean output.
 4. Run lint, typecheck, coverage, and build for the TS SDK.

@@ -72,7 +72,16 @@ CI does not rebuild this file. The builder needs the private backend source.
 
 ## OpenAPI Generation Pipeline
 
-The OpenAPI spec (`plugin-redoc-0.yaml`) is the source of truth.
+The inputs are `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json`. The codegen reads one merged document, `packages/ts-sdk/src/generated/merged-spec.json`, which `gen` builds from both inputs.
+
+Merge rules (`scripts/build-merged-spec.mjs`):
+
+- Every plugin-redoc operation is kept unchanged.
+- A backend operation is added only when its method and normalized path are not in plugin-redoc. A path is normalized by replacing `{...}` with `{}` and removing any query string and trailing slash.
+- Backend component schemas are copied under a `Backend` prefix, and their `$ref`s are rewritten. Only schemas that the added operations reach are copied.
+- The backend `HTTPBearer` security requirement becomes `NexlaSessionToken`. An operation without a `security` field keeps the default, which requires a session token.
+- Each added operation gets a tag that equals its resource key. The first path segment selects the key. `data_sources` maps to `sources`, `data_sinks` to `destinations`, `data_sets` to `nexsets`, `data_credentials` to `credentials`, `data_maps` to `lookups`, `orgs` to `organizations`, `api_auth_configs` to `org_auth_configs`, `gen_ai_*` to `genai`, `token` to `tokens`, `transform` to `transforms`, and `notification_setting` to `notification_settings`. Any other segment becomes its own resource key. The root path becomes `root`.
+- When an added `operationId` matches an existing one, the resource key is added as a prefix.
 
 ```bash
 pnpm -C packages/ts-sdk gen
@@ -80,12 +89,13 @@ pnpm -C packages/ts-sdk gen
 
 This generates:
 
+- `packages/ts-sdk/src/generated/merged-spec.json` (merged input, committed)
 - `packages/ts-sdk/src/generated/schema.ts` (all paths/components/operations types)
 - `packages/ts-sdk/src/generated/resource-map.ts` (CRUD alias map)
 - `packages/ts-sdk/src/generated/spec-metadata.ts` (spec hash + endpoint inventory)
 - `packages/ts-sdk/src/resources/generated/*.ts` (per-resource operation clients)
 
-Coverage is enforced by `check-generated-coverage.mjs`, which compares generated operationIds against the spec.
+Coverage is enforced by `check-generated-coverage.mjs`, which compares generated endpoints against the merged spec. It also fails when the committed merged spec differs from a rebuild of its inputs.
 
 ## Coverage Model
 

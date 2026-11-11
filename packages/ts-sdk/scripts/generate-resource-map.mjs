@@ -3,12 +3,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { manualMethods } from "./manual-methods.config.mjs";
+import { MERGED_SPEC_PATH } from "./build-merged-spec.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const repoRoot = path.resolve(__dirname, "..", "..", "..");
-const specPath = path.join(repoRoot, "plugin-redoc-0.yaml");
 const generatedDir = path.join(__dirname, "..", "src", "generated");
 const resourcesDir = path.join(__dirname, "..", "src", "resources", "generated");
 
@@ -135,7 +134,7 @@ const tagToResource = {
   "CubeJS": "cubejs"
 };
 
-const rawSpec = fs.readFileSync(specPath, "utf8");
+const rawSpec = fs.readFileSync(MERGED_SPEC_PATH, "utf8");
 const spec = YAML.parse(rawSpec);
 const paths = spec?.paths ?? {};
 
@@ -234,7 +233,8 @@ for (const [resourceKey, basePath] of Object.entries(basePaths)) {
     if (itemOps.delete) entry.delete = { path: itemPath, method: "delete" };
   }
 
-  resourceMap[resourceKey] = entry;
+  // A key with no action is dropped. Its class is still generated, but it has no aliases.
+  if (Object.keys(entry).length > 0) resourceMap[resourceKey] = entry;
 }
 
 const resourceMapContents = `/**\n * Auto-generated resource map from OpenAPI.\n * Do not edit manually.\n */\n\nexport const resourceMap = ${JSON.stringify(resourceMap, null, 2)} as const;\n\nexport type ResourceMap = typeof resourceMap;\n`;

@@ -17,6 +17,10 @@ export class NotificationsResource {
     return this.client.requestOperation("get_notification", "get", "/notifications/{notification_id}", init);
   }
 
+  async update(init?: OperationInit<"notifications_update_notification_put">): Promise<OperationData<"notifications_update_notification_put">> {
+    return this.client.requestOperation("notifications_update_notification_put", "put", "/notifications/{notification_id}", init);
+  }
+
   async delete(init?: OperationInit<"delete_notifications">): Promise<OperationData<"delete_notifications">> {
     return this.client.requestOperation("delete_notifications", "delete", "/notifications/{notification_id}", init);
   }
@@ -55,6 +59,11 @@ export class NotificationsResource {
     return this.client.requestOperation("delete_notifications", "delete", "/notifications/{notification_id}", init);
   }
 
+  /** Delete Notifications Collection */
+  async delete_notifications_collection(init?: OperationInit<"delete_notifications_collection">): Promise<OperationData<"delete_notifications_collection">> {
+    return this.client.requestOperation("delete_notifications_collection", "delete", "/notifications", init);
+  }
+
   /** Get a Notification */
   async get_notification(init?: OperationInit<"get_notification">): Promise<OperationData<"get_notification">> {
     return this.client.requestOperation("get_notification", "get", "/notifications/{notification_id}", init);
@@ -70,9 +79,19 @@ export class NotificationsResource {
     return this.client.requestOperation("get_notification_count", "get", "/notifications/count", init);
   }
 
+  /** Get Notification Schema */
+  async get_notification_schema(init?: OperationInit<"get_notification_schema">): Promise<OperationData<"get_notification_schema">> {
+    return this.client.requestOperation("get_notification_schema", "get", "/notifications/schema", init);
+  }
+
   /** Get a Notification Setting */
   async get_notification_setting(init?: OperationInit<"get_notification_setting">): Promise<OperationData<"get_notification_setting">> {
     return this.client.requestOperation("get_notification_setting", "get", "/notification_settings/{notification_setting_id}", init);
+  }
+
+  /** Get Notification Summary */
+  async get_notification_summary(init?: OperationInit<"get_notification_summary">): Promise<OperationData<"get_notification_summary">> {
+    return this.client.requestOperation("get_notification_summary", "get", "/notifications/summary", init);
   }
 
   /** Get All Notification Types */
@@ -83,6 +102,11 @@ export class NotificationsResource {
   /** Get All Notifications */
   async get_notifications(init?: OperationInit<"get_notifications">): Promise<OperationData<"get_notifications">> {
     return this.client.requestOperation("get_notifications", "get", "/notifications", init);
+  }
+
+  /** Get Unread Count */
+  async get_unread_count(init?: OperationInit<"get_unread_count">): Promise<OperationData<"get_unread_count">> {
+    return this.client.requestOperation("get_unread_count", "get", "/notifications/unread-count", init);
   }
 
   /** List Notification Channel Settings */
@@ -110,6 +134,21 @@ export class NotificationsResource {
     return this.client.requestOperation("list_resource_notification_settings", "get", "/notification_settings/{resource_type}/{resource_id}", init);
   }
 
+  /** Mark All As Read */
+  async mark_all_as_read(init?: OperationInit<"mark_all_as_read">): Promise<OperationData<"mark_all_as_read">> {
+    return this.client.requestOperation("mark_all_as_read", "put", "/notifications/read-all", init);
+  }
+
+  /** Mark Single Notification Read */
+  async mark_single_notification_read(init?: OperationInit<"mark_single_notification_read">): Promise<OperationData<"mark_single_notification_read">> {
+    return this.client.requestOperation("mark_single_notification_read", "put", "/notifications/{notification_id}/mark_read", init);
+  }
+
+  /** Mark Single Notification Unread */
+  async mark_single_notification_unread(init?: OperationInit<"mark_single_notification_unread">): Promise<OperationData<"mark_single_notification_unread">> {
+    return this.client.requestOperation("mark_single_notification_unread", "put", "/notifications/{notification_id}/mark_unread", init);
+  }
+
   /** Mark Notification Read */
   async notifications_mark_read(init?: OperationInit<"notifications_mark_read">): Promise<OperationData<"notifications_mark_read">> {
     return this.client.requestOperation("notifications_mark_read", "put", "/notifications/mark_read", init);
@@ -118,6 +157,16 @@ export class NotificationsResource {
   /** Mark Notification Unread */
   async notifications_mark_unread(init?: OperationInit<"notifications_mark_unread">): Promise<OperationData<"notifications_mark_unread">> {
     return this.client.requestOperation("notifications_mark_unread", "put", "/notifications/mark_unread", init);
+  }
+
+  /** Update Notification */
+  async notifications_update_notification(init?: OperationInit<"notifications_update_notification">): Promise<OperationData<"notifications_update_notification">> {
+    return this.client.requestOperation("notifications_update_notification", "patch", "/notifications/{notification_id}", init);
+  }
+
+  /** Update Notification */
+  async notifications_update_notification_put(init?: OperationInit<"notifications_update_notification_put">): Promise<OperationData<"notifications_update_notification_put">> {
+    return this.client.requestOperation("notifications_update_notification_put", "put", "/notifications/{notification_id}", init);
   }
 
   /** Update a Notification Channel Setting */
