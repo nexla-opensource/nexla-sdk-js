@@ -11829,7 +11829,7 @@ export interface components {
     };
   };
   parameters: {
-    access_roles?: "collaborator" | "operator" | "admin" | "owner";
+    access_roles?: "admin" | "admin_only" | "all" | "collaborator" | "collaborator_only" | "member" | "operator" | "owner" | "owner_only" | "sharer" | "sharer_only";
     accept?: "application/vnd.nexla.api.v1+json" | "application/json";
     expand?: 1;
     page?: number;

@@ -18,6 +18,13 @@ const withQuery = (init: RequestOptions | undefined, query: Record<string, unkno
   params: { ...init?.params, query: { ...init?.params?.query, ...query } }
 });
 
+/** The backend reads tags as one comma-separated value, not as repeated parameters. */
+const joinTagsQuery = (init: RequestOptions | undefined): RequestOptions | undefined => {
+  const tags = init?.params?.query?.["tags"];
+  if (!Array.isArray(tags)) return init;
+  return withQuery(init, { tags: tags.join(",") });
+};
+
 export interface NexlaClientOptions {
   /** Service key, sent as `Basic <serviceKey>` on POST /token. Env: NEXLA_SERVICE_KEY. */
   serviceKey?: string;
@@ -131,8 +138,9 @@ export class NexlaClient {
     path: Path,
     init?: RequestOptions
   ): Promise<{ data: unknown; headers: Headers }> {
+    const prepared = joinTagsQuery(init);
     const execute = async (): Promise<{ data: unknown; headers: Headers }> => {
-      const result = await this.invoke(method, path, init);
+      const result = await this.invoke(method, path, prepared);
       const { data, error, response } = result as { data?: unknown; error?: unknown; response?: Response };
       // openapi-fetch returns an empty string as `error` for an empty error body,
       // so decide on the HTTP status, not on the error value.

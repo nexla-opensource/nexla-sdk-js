@@ -8826,10 +8826,17 @@ components:
       schema:
         type: string
         enum:
-          - collaborator
-          - operator
           - admin
+          - admin_only
+          - all
+          - collaborator
+          - collaborator_only
+          - member
+          - operator
           - owner
+          - owner_only
+          - sharer
+          - sharer_only
         description: >
           Add this query parameter to a request to view resources for which the
           authenticated user has permission. 
