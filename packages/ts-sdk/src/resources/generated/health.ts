@@ -9,11 +9,6 @@ export class HealthResource {
     this.client = client;
   }
 
-  /** Health */
-  async health(init?: OperationInit<"health">): Promise<OperationData<"health">> {
-    return this.client.requestOperation("health", "get", "/health", init);
-  }
-
   /** Health Flow */
   async health_flow(init?: OperationInit<"health_flow">): Promise<OperationData<"health_flow">> {
     return this.client.requestOperation("health_flow", "get", "/health/flow/{flow_id}", init);

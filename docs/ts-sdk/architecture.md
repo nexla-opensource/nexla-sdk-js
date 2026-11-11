@@ -52,7 +52,7 @@ packages/ts-sdk/
 
 ## Backend OpenAPI Spec (Public)
 
-`openapi/nexla-api.public.json` is generator input. It describes the public Nexla backend API: 1,254 operations and 227 component schemas.
+`openapi/nexla-api.public.json` is generator input. It describes the public Nexla backend API: 1,249 operations and 227 component schemas.
 
 Provenance:
 

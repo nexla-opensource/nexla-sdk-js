@@ -44,16 +44,6 @@ export class GenaiResource {
     return this.client.requestOperation("gen_ai_org_settings_show_active", "get", "/gen_ai_org_settings/active_config", init);
   }
 
-  /** Update Setting Dead Route */
-  async gen_ai_org_settings_update_setting_dead_route(init?: OperationInit<"gen_ai_org_settings_update_setting_dead_route">): Promise<OperationData<"gen_ai_org_settings_update_setting_dead_route">> {
-    return this.client.requestOperation("gen_ai_org_settings_update_setting_dead_route", "patch", "/gen_ai_org_settings/{setting_id}", init);
-  }
-
-  /** Update Setting Dead Route */
-  async gen_ai_org_settings_update_setting_dead_route_put(init?: OperationInit<"gen_ai_org_settings_update_setting_dead_route_put">): Promise<OperationData<"gen_ai_org_settings_update_setting_dead_route_put">> {
-    return this.client.requestOperation("gen_ai_org_settings_update_setting_dead_route_put", "put", "/gen_ai_org_settings/{setting_id}", init);
-  }
-
   /** Get all GenAI configs in org */
   async get_gen_ai_configs(init?: OperationInit<"get_gen_ai_configs">): Promise<OperationData<"get_gen_ai_configs">> {
     return this.client.requestOperation("get_gen_ai_configs", "get", "/gen_ai_integration_configs", init);

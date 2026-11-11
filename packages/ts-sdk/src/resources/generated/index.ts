@@ -35,7 +35,6 @@ import { MarketplaceResource } from "./marketplace.js";
 import { McpSessionsResource } from "./mcp_sessions.js";
 import { MetadataResource } from "./metadata.js";
 import { MetricsResource } from "./metrics.js";
-import { MockCatalogAddResource } from "./mock_catalog_add.js";
 import { NexsetsResource } from "./nexsets.js";
 import { NotificationChannelSettingsResource } from "./notification_channel_settings.js";
 import { NotificationSettingsResource } from "./notification_settings.js";
@@ -48,7 +47,6 @@ import { ProjectsResource } from "./projects.js";
 import { QuarantineSettingsResource } from "./quarantine_settings.js";
 import { ResetPasswordResource } from "./reset_password.js";
 import { ResourceParametersResource } from "./resource_parameters.js";
-import { RootResource } from "./root.js";
 import { RuntimesResource } from "./runtimes.js";
 import { SdkApplicationsResource } from "./sdk_applications.js";
 import { SelfSignupResource } from "./self_signup.js";
@@ -106,7 +104,6 @@ export { MarketplaceResource };
 export { McpSessionsResource };
 export { MetadataResource };
 export { MetricsResource };
-export { MockCatalogAddResource };
 export { NexsetsResource };
 export { NotificationChannelSettingsResource };
 export { NotificationSettingsResource };
@@ -119,7 +116,6 @@ export { ProjectsResource };
 export { QuarantineSettingsResource };
 export { ResetPasswordResource };
 export { ResourceParametersResource };
-export { RootResource };
 export { RuntimesResource };
 export { SdkApplicationsResource };
 export { SelfSignupResource };
@@ -178,7 +174,6 @@ export interface GeneratedResourceClients {
   mcp_sessions: McpSessionsResource;
   metadata: MetadataResource;
   metrics: MetricsResource;
-  mock_catalog_add: MockCatalogAddResource;
   nexsets: NexsetsResource;
   notification_channel_settings: NotificationChannelSettingsResource;
   notification_settings: NotificationSettingsResource;
@@ -191,7 +186,6 @@ export interface GeneratedResourceClients {
   quarantine_settings: QuarantineSettingsResource;
   reset_password: ResetPasswordResource;
   resource_parameters: ResourceParametersResource;
-  root: RootResource;
   runtimes: RuntimesResource;
   sdk_applications: SdkApplicationsResource;
   self_signup: SelfSignupResource;
@@ -251,7 +245,6 @@ export const createGeneratedResources = (client: NexlaClient): GeneratedResource
     mcp_sessions: new McpSessionsResource(client),
     metadata: new MetadataResource(client),
     metrics: new MetricsResource(client),
-    mock_catalog_add: new MockCatalogAddResource(client),
     nexsets: new NexsetsResource(client),
     notification_channel_settings: new NotificationChannelSettingsResource(client),
     notification_settings: new NotificationSettingsResource(client),
@@ -264,7 +257,6 @@ export const createGeneratedResources = (client: NexlaClient): GeneratedResource
     quarantine_settings: new QuarantineSettingsResource(client),
     reset_password: new ResetPasswordResource(client),
     resource_parameters: new ResourceParametersResource(client),
-    root: new RootResource(client),
     runtimes: new RuntimesResource(client),
     sdk_applications: new SdkApplicationsResource(client),
     self_signup: new SelfSignupResource(client),
