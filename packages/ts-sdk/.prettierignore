@@ -5,3 +5,4 @@ node_modules
 CHANGELOG.md
 src/generated
 src/resources/generated
+tests/contract/fixtures
