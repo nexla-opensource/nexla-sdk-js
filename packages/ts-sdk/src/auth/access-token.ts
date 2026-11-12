@@ -1,4 +1,4 @@
-import { AuthenticationError } from "../errors.js";
+import { AuthenticationError, NexlaError } from "../errors.js";
 import type { AuthProvider } from "./types.js";
 
 export class AccessTokenAuthProvider implements AuthProvider {
@@ -18,6 +18,10 @@ export class AccessTokenAuthProvider implements AuthProvider {
 
   async refreshAccessToken(): Promise<void> {
     throw new AuthenticationError("Direct access tokens cannot be refreshed");
+  }
+
+  async switchOrg(): Promise<void> {
+    throw new NexlaError("switchOrg needs a credential that exchanges for tokens (apiKey, serviceKey, or email and password).");
   }
 
   async logout(): Promise<void> {

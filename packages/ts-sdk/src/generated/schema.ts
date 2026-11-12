@@ -620,6 +620,7 @@ export interface paths {
   "/projects/{project_id}/data_flows": {
     /**
      * Get Project Flows (Deprecated)
+     * @deprecated
      * @description Returns a list of flows belonging to a project.
      *
      * > **Note**: This version of the endpoint has been deprecated. The returned flow response does not reference the new unique flow ids, instead references composite data flow ids of the type `{resource_type}/{resource_id}`. See get_project_flows for a new version of this endpoint that references unique `flow_id`.
@@ -627,6 +628,7 @@ export interface paths {
     get: operations["get_project_flows_(deprecated)"];
     /**
      * Add Flows to Project (Deprecated)
+     * @deprecated
      * @description Adds a list of flows to a project. The existing flow list is retained and merged with the new flow list.
      *
      * > **Note**: This version of the endpoint has been deprecated. The request body and response does not reference flows with new unique flow_ids, instead references composite data flow ids of the type `{resource_type}/{resource_id}`. See add_project_flows for a new version of this endpoint that references unique `flow_id`.
@@ -634,6 +636,7 @@ export interface paths {
     put: operations["add_project_flows_(deprecated)"];
     /**
      * Replace Project Flows List (Deprecated)
+     * @deprecated
      * @description Replaces the list of flows belonging to a project. Existing flows are removed from the project.
      *
      * > **Note**: This version of the endpoint has been deprecated. The request body and response does not reference flows with new unique flow_ids, instead references composite data flow ids of the type `{resource_type}/{resource_id}`. See replace_project_flows for a new version of this endpoint that references unique `flow_id`.
@@ -641,6 +644,7 @@ export interface paths {
     post: operations["replace_project_flows_(deprecated)"];
     /**
      * Remove Flows From A Project (Deprecated)
+     * @deprecated
      * @description Removes data flows from a project. If no request body is provided, all flows belonging to the project will be removed. The flows themselves will not be deleted, but they will no longer belong to the project.
      *
      * > **Note**: This version of the endpoint has been deprecated. The request body and response does not reference flows with new unique flow_ids, instead references composite data flow ids of the type `{resource_type}/{resource_id}`. See remove_project_flows for a new version of this endpoint that references unique `flow_id`.
@@ -812,6 +816,7 @@ export interface paths {
   "/notifications/all": {
     /**
      * Delete All Notifications
+     * @deprecated
      * @description Deletes all notifications belonging to the authenticated user. Note that this is only the list of notifications generated to be displayed in the Nexla UI.
      */
     delete: operations["delete_all_notifications"];
@@ -989,6 +994,7 @@ export interface paths {
   "/data_flows/{resource_type}/{resource_id}/metrics": {
     /**
      * Get Metrics for a Flow
+     * @deprecated
      * @description Retrieves data processing metrics of a flow. Metrics are aggregated for each node of the flow for the specified time range. They can be be further grouped by run id to indicate the number of records processed during each ingestion cycle of this flow.
      *
      * > Note: This is a variant of flow endpoints where the flow node can referenced not by its own ID, but by the ID of the unique resource that is linked to that flow node.
@@ -998,6 +1004,7 @@ export interface paths {
   "/data_flows/{resource_type}/{resource_id}/logs": {
     /**
      * Get Flow Execution Logs for Run ID of a Flow
+     * @deprecated
      * @description Retrieves flow execution logs for a specific run id of a flow.
      *
      * > Note: This is a variant of flow endpoints where the flow node can referenced not by its own ID, but by the ID of the unique resource that is linked to that flow node.
@@ -1140,7 +1147,7 @@ export interface paths {
      * Reject pending approval requests
      * @description Use this endpoint to reject pending approval requests that are assigned to user or it's unassigned.
      */
-    delete: operations["reject_approval_request"];
+    put: operations["reject_approval_request"];
   };
   "/data_sources/{data_source_id}/accessors": {
     /**
@@ -1299,6 +1306,7 @@ export interface paths {
   "/data_flows/{data_flow_id}/accessors": {
     /**
      * Get Access Rules on Flow (Deprecated)
+     * @deprecated
      * @description Returns a list of the access-control rules set for this data flow.
      *
      * > **Note**: This version of the endpoint has been deprecated. It uses a composite data flow id of the type `{resource_type}/{resource_id}`. See get_flow_accessors for a new version of this endpoint that uses unique `flow_id`.
@@ -1306,6 +1314,7 @@ export interface paths {
     get: operations["get_flow_accessors_(deprecated)"];
     /**
      * Add Access Rules on Flow (Deprecated)
+     * @deprecated
      * @description Add new access-control rules to this data flow. This version uses a composite data flow id of the type `{resource_type}/{resource_id}`.
      *
      * > **Note**: This version of the endpoint has been deprecated. It uses a composite data flow id of the type `{resource_type}/{resource_id}`. See add_flow_accessors for a new version of this endpoint that uses unique `flow_id`.
@@ -1313,6 +1322,7 @@ export interface paths {
     put: operations["add_flow_accessors_(deprecated)"];
     /**
      * Replace Access Rules on Flow (Deprecated)
+     * @deprecated
      * @description Replace the list of access-control rules set for this data flow. Existing rules will be removed from the data flow, and only these new rules will be applied. This version uses a composite data flow id of the type `{resource_type}/{resource_id}`.
      *
      * > **Note**: This version of the endpoint has been deprecated. It uses a composite data flow id of the type `{resource_type}/{resource_id}`. See replace_flow_accessors for a new version of this endpoint that uses unique `flow_id`.
@@ -1320,6 +1330,7 @@ export interface paths {
     post: operations["replace_flow_accessors_(deprecated)"];
     /**
      * Delete Access Rules on Flow (Deprecated)
+     * @deprecated
      * @description Remove access-control rules from a data flow. If no request body is provided, all rules associated with the data flow will be removed. This version uses a composite data flow id of the type `{resource_type}/{resource_id}`.
      *
      * > **Note**: This version of the endpoint has been deprecated. It uses a composite data flow id of the type `{resource_type}/{resource_id}`. See delete_flow_accessors for a new version of this endpoint that uses unique `flow_id`.
@@ -1445,11 +1456,6 @@ export interface paths {
      */
     put: operations["update_domain"];
     /**
-     * Create a single marketplace domain.
-     * @description Use this endpoint to create a marketplace domain. You need a manage permission for the org.
-     */
-    post: operations["create_domain"];
-    /**
      * Delete a single marketplace domain.
      * @description Use this endpoint to delete a marketplace domain. You need a manage permission for the domain to delete it.
      */
@@ -1474,15 +1480,15 @@ export interface paths {
      */
     get: operations["get_domain_custodians"];
     /**
-     * Update custodians for a marketplace domain.
-     * @description Use this endpoint to update custodians for a marketplace domain. You need a manage permission for the domain.
-     */
-    put: operations["update_domain_custodians"];
-    /**
      * Add custodians to a marketplace domain.
      * @description Use this endpoint to add custodians to a marketplace domain. You need a manage permission for the domain.
      */
-    post: operations["add_domain_custodians"];
+    put: operations["add_domain_custodians"];
+    /**
+     * Reset custodians of a marketplace domain.
+     * @description Use this endpoint to replace all custodians of a marketplace domain. You need a manage permission for the domain.
+     */
+    post: operations["reset_domain_custodians"];
     /**
      * Remove custodians from a marketplace domain.
      * @description Use this endpoint to remove custodians from a marketplace domain. You need a manage permission for the domain.
@@ -1496,15 +1502,15 @@ export interface paths {
      */
     get: operations["get_org_custodians"];
     /**
-     * Update organization custodians.
-     * @description Users listed within the request body will be updated as custodians for the organization. Users can be identified by their email or id.
-     */
-    put: operations["update_org_custodians"];
-    /**
      * Add organization custodians.
-     * @description Users listed within the request body will be added as custodians to the organization. Users can be identified by their email or id.
+     * @description Users listed within the request body will be added as custodians for the organization. Users can be identified by their email or id.
      */
-    post: operations["add_org_custodians"];
+    put: operations["add_org_custodians"];
+    /**
+     * Reset organization custodians.
+     * @description Users listed within the request body will replace all custodians of the organization. Users can be identified by their email or id.
+     */
+    post: operations["reset_org_custodians"];
     /**
      * Remove organization custodians.
      * @description Users listed within the request body will be deleted as custodians from the organization. Users can be identified by their email or id.
@@ -1551,6 +1557,7 @@ export interface paths {
   "/api_auth_configs/all": {
     /**
      * Get all auth configs.
+     * @deprecated
      * @description Get the authentication configurations for the API. This will return all auth configs. Super-admin privilege is required.
      */
     get: operations["get_all_api_auth_configs"];
@@ -1604,7 +1611,7 @@ export interface paths {
      * @description This endpoint is used to approve a self sign up request. System admin access required.
      * The user will be able to set a password and login to the system after the request is approved.
      */
-    put: operations["approve_self_sign_up_request"];
+    post: operations["approve_self_sign_up_request"];
   };
   "/self_signup_blocked_domains": {
     /**
@@ -1633,6 +1640,7 @@ export interface paths {
   "/orgs/{org_id}/auth_settings": {
     /**
      * Get auth settings for org.
+     * @deprecated
      * @description Get the authentication settings for the given org. This allows to enable or disable specific auth configs for the org.
      */
     get: operations["get_api_auth_settings"];
@@ -9231,6 +9239,9 @@ export interface components {
         id?: number;
         email?: string;
       }[];
+    CustodiansRequest: {
+      custodians: components["schemas"]["CustodiansPayload"];
+    };
     OrgsUpdate: {
       name?: string;
       owner_id?: number;
@@ -11818,7 +11829,7 @@ export interface components {
     };
   };
   parameters: {
-    access_roles?: "collaborator" | "operator" | "admin" | "owner";
+    access_roles?: "admin" | "admin_only" | "all" | "collaborator" | "collaborator_only" | "member" | "operator" | "owner" | "owner_only" | "sharer" | "sharer_only";
     accept?: "application/vnd.nexla.api.v1+json" | "application/json";
     expand?: 1;
     page?: number;
@@ -14498,6 +14509,7 @@ export interface operations {
   };
   /**
    * Get Project Flows (Deprecated)
+   * @deprecated
    * @description Returns a list of flows belonging to a project.
    *
    * > **Note**: This version of the endpoint has been deprecated. The returned flow response does not reference the new unique flow ids, instead references composite data flow ids of the type `{resource_type}/{resource_id}`. See get_project_flows for a new version of this endpoint that references unique `flow_id`.
@@ -14527,6 +14539,7 @@ export interface operations {
   };
   /**
    * Add Flows to Project (Deprecated)
+   * @deprecated
    * @description Adds a list of flows to a project. The existing flow list is retained and merged with the new flow list.
    *
    * > **Note**: This version of the endpoint has been deprecated. The request body and response does not reference flows with new unique flow_ids, instead references composite data flow ids of the type `{resource_type}/{resource_id}`. See add_project_flows for a new version of this endpoint that references unique `flow_id`.
@@ -14561,6 +14574,7 @@ export interface operations {
   };
   /**
    * Replace Project Flows List (Deprecated)
+   * @deprecated
    * @description Replaces the list of flows belonging to a project. Existing flows are removed from the project.
    *
    * > **Note**: This version of the endpoint has been deprecated. The request body and response does not reference flows with new unique flow_ids, instead references composite data flow ids of the type `{resource_type}/{resource_id}`. See replace_project_flows for a new version of this endpoint that references unique `flow_id`.
@@ -14595,6 +14609,7 @@ export interface operations {
   };
   /**
    * Remove Flows From A Project (Deprecated)
+   * @deprecated
    * @description Removes data flows from a project. If no request body is provided, all flows belonging to the project will be removed. The flows themselves will not be deleted, but they will no longer belong to the project.
    *
    * > **Note**: This version of the endpoint has been deprecated. The request body and response does not reference flows with new unique flow_ids, instead references composite data flow ids of the type `{resource_type}/{resource_id}`. See remove_project_flows for a new version of this endpoint that references unique `flow_id`.
@@ -15285,6 +15300,7 @@ export interface operations {
   };
   /**
    * Delete All Notifications
+   * @deprecated
    * @description Deletes all notifications belonging to the authenticated user. Note that this is only the list of notifications generated to be displayed in the Nexla UI.
    */
   delete_all_notifications: {
@@ -15969,6 +15985,7 @@ export interface operations {
   };
   /**
    * Get Metrics for a Flow
+   * @deprecated
    * @description Retrieves data processing metrics of a flow. Metrics are aggregated for each node of the flow for the specified time range. They can be be further grouped by run id to indicate the number of records processed during each ingestion cycle of this flow.
    *
    * > Note: This is a variant of flow endpoints where the flow node can referenced not by its own ID, but by the ID of the unique resource that is linked to that flow node.
@@ -16012,6 +16029,7 @@ export interface operations {
   };
   /**
    * Get Flow Execution Logs for Run ID of a Flow
+   * @deprecated
    * @description Retrieves flow execution logs for a specific run id of a flow.
    *
    * > Note: This is a variant of flow endpoints where the flow node can referenced not by its own ID, but by the ID of the unique resource that is linked to that flow node.
@@ -17603,6 +17621,7 @@ export interface operations {
   };
   /**
    * Get Access Rules on Flow (Deprecated)
+   * @deprecated
    * @description Returns a list of the access-control rules set for this data flow.
    *
    * > **Note**: This version of the endpoint has been deprecated. It uses a composite data flow id of the type `{resource_type}/{resource_id}`. See get_flow_accessors for a new version of this endpoint that uses unique `flow_id`.
@@ -17632,6 +17651,7 @@ export interface operations {
   };
   /**
    * Add Access Rules on Flow (Deprecated)
+   * @deprecated
    * @description Add new access-control rules to this data flow. This version uses a composite data flow id of the type `{resource_type}/{resource_id}`.
    *
    * > **Note**: This version of the endpoint has been deprecated. It uses a composite data flow id of the type `{resource_type}/{resource_id}`. See add_flow_accessors for a new version of this endpoint that uses unique `flow_id`.
@@ -17666,6 +17686,7 @@ export interface operations {
   };
   /**
    * Replace Access Rules on Flow (Deprecated)
+   * @deprecated
    * @description Replace the list of access-control rules set for this data flow. Existing rules will be removed from the data flow, and only these new rules will be applied. This version uses a composite data flow id of the type `{resource_type}/{resource_id}`.
    *
    * > **Note**: This version of the endpoint has been deprecated. It uses a composite data flow id of the type `{resource_type}/{resource_id}`. See replace_flow_accessors for a new version of this endpoint that uses unique `flow_id`.
@@ -17700,6 +17721,7 @@ export interface operations {
   };
   /**
    * Delete Access Rules on Flow (Deprecated)
+   * @deprecated
    * @description Remove access-control rules from a data flow. If no request body is provided, all rules associated with the data flow will be removed. This version uses a composite data flow id of the type `{resource_type}/{resource_id}`.
    *
    * > **Note**: This version of the endpoint has been deprecated. It uses a composite data flow id of the type `{resource_type}/{resource_id}`. See delete_flow_accessors for a new version of this endpoint that uses unique `flow_id`.
@@ -18350,33 +18372,6 @@ export interface operations {
     };
   };
   /**
-   * Create a single marketplace domain.
-   * @description Use this endpoint to create a marketplace domain. You need a manage permission for the org.
-   */
-  create_domain: {
-    parameters: {
-      header?: {
-        Accept?: components["parameters"]["accept"];
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/vnd.nexla.api.v1+json": components["schemas"]["MarketplaceDomainCreate"];
-      };
-    };
-    responses: {
-      200: components["responses"]["domains_one"];
-      /** @description Unauthorized */
-      401: {
-        content: never;
-      };
-      /** @description Forbidden */
-      403: {
-        content: never;
-      };
-    };
-  };
-  /**
    * Delete a single marketplace domain.
    * @description Use this endpoint to delete a marketplace domain. You need a manage permission for the domain to delete it.
    */
@@ -18485,37 +18480,6 @@ export interface operations {
     };
   };
   /**
-   * Update custodians for a marketplace domain.
-   * @description Use this endpoint to update custodians for a marketplace domain. You need a manage permission for the domain.
-   */
-  update_domain_custodians: {
-    parameters: {
-      header?: {
-        Accept?: components["parameters"]["accept"];
-      };
-      path: {
-        /** @description The unique ID of the domain. */
-        domain_id: number;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansPayload"];
-      };
-    };
-    responses: {
-      200: components["responses"]["custodians_many"];
-      /** @description Unauthorized */
-      401: {
-        content: never;
-      };
-      /** @description Forbidden */
-      403: {
-        content: never;
-      };
-    };
-  };
-  /**
    * Add custodians to a marketplace domain.
    * @description Use this endpoint to add custodians to a marketplace domain. You need a manage permission for the domain.
    */
@@ -18531,7 +18495,38 @@ export interface operations {
     };
     requestBody?: {
       content: {
-        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansPayload"];
+        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansRequest"];
+      };
+    };
+    responses: {
+      200: components["responses"]["custodians_many"];
+      /** @description Unauthorized */
+      401: {
+        content: never;
+      };
+      /** @description Forbidden */
+      403: {
+        content: never;
+      };
+    };
+  };
+  /**
+   * Reset custodians of a marketplace domain.
+   * @description Use this endpoint to replace all custodians of a marketplace domain. You need a manage permission for the domain.
+   */
+  reset_domain_custodians: {
+    parameters: {
+      header?: {
+        Accept?: components["parameters"]["accept"];
+      };
+      path: {
+        /** @description The unique ID of the domain. */
+        domain_id: number;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansRequest"];
       };
     };
     responses: {
@@ -18562,7 +18557,7 @@ export interface operations {
     };
     requestBody?: {
       content: {
-        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansPayload"];
+        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansRequest"];
       };
     };
     responses: {
@@ -18603,10 +18598,10 @@ export interface operations {
     };
   };
   /**
-   * Update organization custodians.
-   * @description Users listed within the request body will be updated as custodians for the organization. Users can be identified by their email or id.
+   * Add organization custodians.
+   * @description Users listed within the request body will be added as custodians for the organization. Users can be identified by their email or id.
    */
-  update_org_custodians: {
+  add_org_custodians: {
     parameters: {
       header?: {
         Accept?: components["parameters"]["accept"];
@@ -18618,7 +18613,7 @@ export interface operations {
     };
     requestBody?: {
       content: {
-        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansPayload"];
+        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansRequest"];
       };
     };
     responses: {
@@ -18634,10 +18629,10 @@ export interface operations {
     };
   };
   /**
-   * Add organization custodians.
-   * @description Users listed within the request body will be added as custodians to the organization. Users can be identified by their email or id.
+   * Reset organization custodians.
+   * @description Users listed within the request body will replace all custodians of the organization. Users can be identified by their email or id.
    */
-  add_org_custodians: {
+  reset_org_custodians: {
     parameters: {
       header?: {
         Accept?: components["parameters"]["accept"];
@@ -18649,7 +18644,7 @@ export interface operations {
     };
     requestBody?: {
       content: {
-        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansPayload"];
+        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansRequest"];
       };
     };
     responses: {
@@ -18680,7 +18675,7 @@ export interface operations {
     };
     requestBody?: {
       content: {
-        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansPayload"];
+        "application/vnd.nexla.api.v1+json": components["schemas"]["CustodiansRequest"];
       };
     };
     responses: {
@@ -18836,6 +18831,7 @@ export interface operations {
   };
   /**
    * Get all auth configs.
+   * @deprecated
    * @description Get the authentication configurations for the API. This will return all auth configs. Super-admin privilege is required.
    */
   get_all_api_auth_configs: {
@@ -19108,6 +19104,7 @@ export interface operations {
   };
   /**
    * Get auth settings for org.
+   * @deprecated
    * @description Get the authentication settings for the given org. This allows to enable or disable specific auth configs for the org.
    */
   get_api_auth_settings: {

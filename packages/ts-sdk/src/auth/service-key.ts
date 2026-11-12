@@ -1,41 +1,45 @@
-import { AuthenticationError, NexlaError, isRecord } from "../errors.js";
-import type { AuthProvider } from "./types.js";
+import { AuthenticationError, NexlaError, errorFromResponse, isRecord, readErrorBody } from "../errors.js";
+import type { AuthProvider, TokenResponse } from "./types.js";
 
 export interface ServiceKeyAuthOptions {
-  serviceKey: string;
+  /** Sent as `Authorization: Basic <value>` on POST /token. Already encoded for email and password login. */
+  basicCredential: string;
   baseUrl: string;
-  apiVersion: string;
   tokenRefreshMargin: number;
   fetchFn: typeof fetch;
   userAgent?: string;
+  /** Sent as X-Nexla-Dataplane on POST /token only. */
+  dataplane?: string;
 }
 
+const DEFAULT_TOKEN_LIFETIME_SECONDS = 86400;
+
+/** Exchanges a Basic credential (service key, API key, or email and password) for a session token. */
 export class ServiceKeyAuthProvider implements AuthProvider {
   readonly isRefreshable = true;
 
-  private readonly serviceKey: string;
+  private readonly basicCredential: string;
   private readonly baseUrl: string;
-  private readonly apiVersion: string;
   private readonly tokenRefreshMargin: number;
   private readonly fetchFn: typeof fetch;
   private readonly userAgent: string | undefined;
+  private readonly dataplane: string | undefined;
 
   private accessToken: string | undefined;
   private tokenExpiry = 0;
+  private pendingToken: Promise<void> | undefined;
 
   constructor(options: ServiceKeyAuthOptions) {
-    this.serviceKey = options.serviceKey;
+    this.basicCredential = options.basicCredential;
     this.baseUrl = options.baseUrl.replace(/\/$/, "");
-    this.apiVersion = options.apiVersion;
     this.tokenRefreshMargin = options.tokenRefreshMargin;
     this.fetchFn = options.fetchFn;
     this.userAgent = options.userAgent;
+    this.dataplane = options.dataplane;
   }
 
   async getAccessToken(): Promise<string> {
-    if (!this.accessToken) {
-      await this.obtainSessionToken();
-    } else if (this.isTokenNearExpiry()) {
+    if (!this.accessToken || this.isTokenNearExpiry()) {
       await this.obtainSessionToken();
     }
 
@@ -50,19 +54,28 @@ export class ServiceKeyAuthProvider implements AuthProvider {
     await this.obtainSessionToken();
   }
 
+  async switchOrg(orgId: number): Promise<void> {
+    const token = await this.getAccessToken();
+    const url = `${this.baseUrl}/token/refresh?org_id=${encodeURIComponent(String(orgId))}`;
+    const response = await this.fetchFn(url, {
+      method: "POST",
+      headers: this.headers({ Authorization: `Bearer ${token}` })
+    });
+
+    if (!response.ok) {
+      throw errorFromResponse(response, await readErrorBody(response), { method: "POST", path: "/token/refresh", url });
+    }
+
+    this.applyToken(await parseTokenResponse(response));
+  }
+
   async logout(): Promise<void> {
     if (!this.accessToken) return;
-
-    const headers: Record<string, string> = {
-      Accept: `application/vnd.nexla.api.${this.apiVersion}+json`,
-      Authorization: `Bearer ${this.accessToken}`
-    };
-    if (this.userAgent) headers["User-Agent"] = this.userAgent;
 
     try {
       await this.fetchFn(`${this.baseUrl}/token/logout`, {
         method: "POST",
-        headers
+        headers: this.headers({ Authorization: `Bearer ${this.accessToken}` })
       });
     } catch {
       // Best-effort logout; ignore errors.
@@ -78,47 +91,58 @@ export class ServiceKeyAuthProvider implements AuthProvider {
     return this.tokenExpiry - now < this.tokenRefreshMargin;
   }
 
-  private async obtainSessionToken(): Promise<void> {
-    const headers: Record<string, string> = {
-      Authorization: `Basic ${this.serviceKey}`,
-      Accept: `application/vnd.nexla.api.${this.apiVersion}+json`,
-      "Content-Length": "0"
-    };
-    if (this.userAgent) headers["User-Agent"] = this.userAgent;
+  /** Concurrent callers share one in-flight /token request. */
+  private obtainSessionToken(): Promise<void> {
+    if (!this.pendingToken) {
+      this.pendingToken = this.requestSessionToken().finally(() => {
+        this.pendingToken = undefined;
+      });
+    }
+    return this.pendingToken;
+  }
 
-    const response = await this.fetchFn(`${this.baseUrl}/token`, {
-      method: "POST",
-      headers
-    });
+  private async requestSessionToken(): Promise<void> {
+    const headers = this.headers({ Authorization: `Basic ${this.basicCredential}`, "Content-Length": "0" });
+    if (this.dataplane) headers["X-Nexla-Dataplane"] = this.dataplane;
+
+    const response = await this.fetchFn(`${this.baseUrl}/token`, { method: "POST", headers });
 
     if (!response.ok) {
-      const errorBody = await safeParseJson(response);
-      const message = extractErrorMessage(errorBody, response) ?? "Authentication failed";
-
-      if (response.status === 401) {
-        throw new AuthenticationError(message, { statusCode: response.status, response: errorBody });
-      }
-
-      throw new NexlaError(message, { statusCode: response.status, response: errorBody });
+      throw errorFromResponse(response, await readErrorBody(response), {
+        method: "POST",
+        path: "/token",
+        url: `${this.baseUrl}/token`
+      });
     }
 
-    const data = await safeParseJson(response);
-    if (!isRecord(data)) {
-      throw new NexlaError("Invalid token response format", { response: data });
-    }
+    this.applyToken(await parseTokenResponse(response));
+  }
 
-    const accessToken = data["access_token"];
-    const expiresIn = data["expires_in"];
+  private applyToken(token: TokenResponse): void {
+    this.accessToken = token.access_token;
+    this.tokenExpiry = Date.now() / 1000 + (token.expires_in ?? DEFAULT_TOKEN_LIFETIME_SECONDS);
+  }
 
-    if (typeof accessToken !== "string") {
-      throw new NexlaError("Missing access token in response", { response: data });
-    }
-
-    const expiresInSeconds = typeof expiresIn === "number" ? expiresIn : 86400;
-    this.accessToken = accessToken;
-    this.tokenExpiry = Date.now() / 1000 + expiresInSeconds;
+  private headers(extra: Record<string, string>): Record<string, string> {
+    const headers: Record<string, string> = { Accept: "application/json", ...extra };
+    if (this.userAgent) headers["User-Agent"] = this.userAgent;
+    return headers;
   }
 }
+
+const parseTokenResponse = async (response: Response): Promise<TokenResponse> => {
+  const data = await safeParseJson(response);
+  if (!isRecord(data)) {
+    throw new NexlaError("Invalid token response format", { response: data });
+  }
+
+  const accessToken = data["access_token"];
+  if (typeof accessToken !== "string") {
+    throw new NexlaError("Missing access token in response", { response: data });
+  }
+
+  return { ...data, access_token: accessToken } as TokenResponse;
+};
 
 const safeParseJson = async (response: Response): Promise<unknown> => {
   const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
@@ -130,15 +154,4 @@ const safeParseJson = async (response: Response): Promise<unknown> => {
   } catch {
     return undefined;
   }
-};
-
-const extractErrorMessage = (body: unknown, response: Response): string | undefined => {
-  if (isRecord(body)) {
-    const message = body["message"];
-    if (typeof message === "string") return message;
-    const error = body["error"];
-    if (typeof error === "string") return error;
-  }
-  if (response.statusText) return response.statusText;
-  return undefined;
 };

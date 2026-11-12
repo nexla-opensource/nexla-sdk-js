@@ -9,6 +9,8 @@ export interface RequestOptions {
   };
   headers?: Record<string, string>;
   body?: unknown;
+  /** Cancels the call. Aborting throws the signal's reason and is not retried. */
+  signal?: AbortSignal;
 }
 
 export type NexlaPaths = paths;

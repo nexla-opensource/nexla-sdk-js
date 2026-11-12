@@ -11,12 +11,7 @@ export class MarketplaceResource {
 
   /** Add custodians to a marketplace domain. */
   async add_domain_custodians(init?: OperationInit<"add_domain_custodians">): Promise<OperationData<"add_domain_custodians">> {
-    return this.client.requestOperation("add_domain_custodians", "post", "/marketplace/domains/{domain_id}/custodians", init);
-  }
-
-  /** Create a single marketplace domain. */
-  async create_domain(init?: OperationInit<"create_domain">): Promise<OperationData<"create_domain">> {
-    return this.client.requestOperation("create_domain", "post", "/marketplace/domains/{domain_id}", init);
+    return this.client.requestOperation("add_domain_custodians", "put", "/marketplace/domains/{domain_id}/custodians", init);
   }
 
   /** Create a marketplace item for a domain. */
@@ -64,13 +59,27 @@ export class MarketplaceResource {
     return this.client.requestOperation("remove_domain_custodians", "delete", "/marketplace/domains/{domain_id}/custodians", init);
   }
 
+  /** Reset custodians of a marketplace domain. */
+  async reset_domain_custodians(init?: OperationInit<"reset_domain_custodians">): Promise<OperationData<"reset_domain_custodians">> {
+    return this.client.requestOperation("reset_domain_custodians", "post", "/marketplace/domains/{domain_id}/custodians", init);
+  }
+
   /** Update a single marketplace domain. */
   async update_domain(init?: OperationInit<"update_domain">): Promise<OperationData<"update_domain">> {
     return this.client.requestOperation("update_domain", "put", "/marketplace/domains/{domain_id}", init);
   }
 
-  /** Update custodians for a marketplace domain. */
-  async update_domain_custodians(init?: OperationInit<"update_domain_custodians">): Promise<OperationData<"update_domain_custodians">> {
-    return this.client.requestOperation("update_domain_custodians", "put", "/marketplace/domains/{domain_id}/custodians", init);
+  /** Create a marketplace domain. Same route as create_domains (POST /marketplace/domains). */
+  async create_domain(init?: OperationInit<"create_domains">): Promise<OperationData<"create_domains">> {
+    return this.client.requestOperation("create_domains", "post", "/marketplace/domains", init);
+  }
+
+  /**
+   * Update custodians for a marketplace domain.
+   *
+   * @deprecated Use add_domain_custodians (PUT) to add, or reset_domain_custodians (POST) to replace all custodians.
+   */
+  async update_domain_custodians(init?: OperationInit<"add_domain_custodians">): Promise<OperationData<"add_domain_custodians">> {
+    return this.client.requestOperation("add_domain_custodians", "put", "/marketplace/domains/{domain_id}/custodians", init);
   }
 }

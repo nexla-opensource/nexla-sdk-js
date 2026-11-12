@@ -33,7 +33,7 @@ describe("NexlaClient", () => {
     const request = calls[0];
     if (!request) throw new Error("No request captured");
     expect(request.headers.get("Authorization")).toBe("Bearer access-token");
-    expect(request.headers.get("Accept")).toBe("application/vnd.nexla.api.v1+json");
+    expect(request.headers.get("Accept")).toBe("application/json");
     expect(request.headers.get("User-Agent")).toBe("nexla-sdk-test");
   });
 });

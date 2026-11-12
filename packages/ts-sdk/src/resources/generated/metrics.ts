@@ -9,12 +9,20 @@ export class MetricsResource {
     this.client = client;
   }
 
-  /** Get Flow Execution Logs for Run ID of a Flow */
+  /**
+   * Get Flow Execution Logs for Run ID of a Flow
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async get_flow_logs_for_run_id(init?: OperationInit<"get_flow_logs_for_run_id">): Promise<OperationData<"get_flow_logs_for_run_id">> {
     return this.client.requestOperation("get_flow_logs_for_run_id", "get", "/data_flows/{resource_type}/{resource_id}/logs", init);
   }
 
-  /** Get Metrics for a Flow */
+  /**
+   * Get Metrics for a Flow
+   *
+   * @deprecated No backend route exists for this path. Calls fail.
+   */
   async get_flow_metrics(init?: OperationInit<"get_flow_metrics">): Promise<OperationData<"get_flow_metrics">> {
     return this.client.requestOperation("get_flow_metrics", "get", "/data_flows/{resource_type}/{resource_id}/metrics", init);
   }

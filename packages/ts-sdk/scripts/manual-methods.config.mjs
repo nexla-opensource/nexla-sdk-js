@@ -116,9 +116,40 @@ const flowsCopyAndReplaceCredentials = `
     );
   }`;
 
+/*
+ * Compatibility aliases. The backend route for each name is the same as the
+ * operation named in the call, so these names keep working after the spec
+ * operations were renamed.
+ */
+const organizationsUpdateCustodians = `
+  /**
+   * Update organization custodians.
+   *
+   * @deprecated Use add_org_custodians (PUT) to add, or reset_org_custodians (POST) to replace all custodians.
+   */
+  async update_org_custodians(init?: OperationInit<"add_org_custodians">): Promise<OperationData<"add_org_custodians">> {
+    return this.client.requestOperation("add_org_custodians", "put", "/orgs/{org_id}/custodians", init);
+  }`;
+
+const marketplaceCompat = `
+  /** Create a marketplace domain. Same route as create_domains (POST /marketplace/domains). */
+  async create_domain(init?: OperationInit<"create_domains">): Promise<OperationData<"create_domains">> {
+    return this.client.requestOperation("create_domains", "post", "/marketplace/domains", init);
+  }
+
+  /**
+   * Update custodians for a marketplace domain.
+   *
+   * @deprecated Use add_domain_custodians (PUT) to add, or reset_domain_custodians (POST) to replace all custodians.
+   */
+  async update_domain_custodians(init?: OperationInit<"add_domain_custodians">): Promise<OperationData<"add_domain_custodians">> {
+    return this.client.requestOperation("add_domain_custodians", "put", "/marketplace/domains/{domain_id}/custodians", init);
+  }`;
+
 export const manualMethods = {
   users: [usersAuditLog],
-  organizations: [organizationsAuditLog],
+  organizations: [organizationsAuditLog, organizationsUpdateCustodians],
+  marketplace: [marketplaceCompat],
   flows: [flowsCopyAndReplaceCredentials],
 };
 
