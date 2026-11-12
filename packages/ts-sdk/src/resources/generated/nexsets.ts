@@ -204,11 +204,6 @@ export class NexsetsResource {
     return this.client.requestOperation("data_sets_reset_resource_docs", "post", "/data_sets/{resource_id}/docs", init);
   }
 
-  /** Show Control Event */
-  async data_sets_show_control_event(init?: OperationInit<"data_sets_show_control_event">): Promise<OperationData<"data_sets_show_control_event">> {
-    return this.client.requestOperation("data_sets_show_control_event", "get", "/data_sets/{resource_id}/control/{event}", init);
-  }
-
   /** Show Dashboard Transform */
   async data_sets_show_dashboard_transform(init?: OperationInit<"data_sets_show_dashboard_transform">): Promise<OperationData<"data_sets_show_dashboard_transform">> {
     return this.client.requestOperation("data_sets_show_dashboard_transform", "get", "/data_sets/{data_set_id}/dashboard_transforms", init);
@@ -404,19 +399,9 @@ export class NexsetsResource {
     return this.client.requestOperation("list_all_data_set_ids", "get", "/data_sets/all/ids", init);
   }
 
-  /** List All Data Sets */
-  async list_all_data_sets(init?: OperationInit<"list_all_data_sets">): Promise<OperationData<"list_all_data_sets">> {
-    return this.client.requestOperation("list_all_data_sets", "get", "/data_sets/all", init);
-  }
-
   /** List All Data Sets Condensed */
   async list_all_data_sets_condensed(init?: OperationInit<"list_all_data_sets_condensed">): Promise<OperationData<"list_all_data_sets_condensed">> {
     return this.client.requestOperation("list_all_data_sets_condensed", "get", "/data_sets/all/condensed", init);
-  }
-
-  /** List Catalog Refs */
-  async list_catalog_refs(init?: OperationInit<"list_catalog_refs">): Promise<OperationData<"list_catalog_refs">> {
-    return this.client.requestOperation("list_catalog_refs", "get", "/data_sets/{data_set_id}/catalog_refs", init);
   }
 
   /** List Catalog Refs Collection */
@@ -592,11 +577,6 @@ export class NexsetsResource {
   /** Update Data Set Quarantine Setting */
   async update_data_set_quarantine_setting(init?: OperationInit<"update_data_set_quarantine_setting">): Promise<OperationData<"update_data_set_quarantine_setting">> {
     return this.client.requestOperation("update_data_set_quarantine_setting", "put", "/data_sets/{data_set_id}/quarantine_settings", init);
-  }
-
-  /** Update Data Set Runtime Status */
-  async update_data_set_runtime_status(init?: OperationInit<"update_data_set_runtime_status">): Promise<OperationData<"update_data_set_runtime_status">> {
-    return this.client.requestOperation("update_data_set_runtime_status", "put", "/data_sets/{data_set_id}/runtime_status/{runtime_status}", init);
   }
 
   /** Update Data Set Samples */

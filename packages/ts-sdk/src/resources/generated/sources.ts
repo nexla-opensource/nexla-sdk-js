@@ -304,11 +304,6 @@ export class SourcesResource {
     return this.client.requestOperation("data_sources_run_data_source_now_post", "post", "/data_sources/{data_source_id}/run_now", init);
   }
 
-  /** Show Control Event */
-  async data_sources_show_control_event(init?: OperationInit<"data_sources_show_control_event">): Promise<OperationData<"data_sources_show_control_event">> {
-    return this.client.requestOperation("data_sources_show_control_event", "get", "/data_sources/{resource_id}/control/{event}", init);
-  }
-
   /** Show Dashboard Transform */
   async data_sources_show_dashboard_transform(init?: OperationInit<"data_sources_show_dashboard_transform">): Promise<OperationData<"data_sources_show_dashboard_transform">> {
     return this.client.requestOperation("data_sources_show_dashboard_transform", "get", "/data_sources/{data_source_id}/dashboard_transforms", init);
@@ -612,11 +607,6 @@ export class SourcesResource {
   /** Update Data Source Quarantine Setting */
   async update_data_source_quarantine_setting(init?: OperationInit<"update_data_source_quarantine_setting">): Promise<OperationData<"update_data_source_quarantine_setting">> {
     return this.client.requestOperation("update_data_source_quarantine_setting", "put", "/data_sources/{data_source_id}/quarantine_settings", init);
-  }
-
-  /** Update Data Source Runtime Status */
-  async update_data_source_runtime_status(init?: OperationInit<"update_data_source_runtime_status">): Promise<OperationData<"update_data_source_runtime_status">> {
-    return this.client.requestOperation("update_data_source_runtime_status", "put", "/data_sources/{data_source_id}/runtime_status/{runtime_status}", init);
   }
 
   /** Update Flow Via Data Source */

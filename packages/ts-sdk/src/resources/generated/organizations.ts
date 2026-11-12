@@ -21,15 +21,6 @@ export class OrganizationsResource {
     return this.client.requestOperation("update_org", "put", "/orgs/{org_id}", init);
   }
 
-  async delete(init?: OperationInit<"destroy_org">): Promise<OperationData<"destroy_org">> {
-    return this.client.requestOperation("destroy_org", "delete", "/orgs/{org_id}", init);
-  }
-
-  /** Activate Org Cluster */
-  async activate_org_cluster(init?: OperationInit<"activate_org_cluster">): Promise<OperationData<"activate_org_cluster">> {
-    return this.client.requestOperation("activate_org_cluster", "put", "/orgs/{org_id}/cluster/activate", init);
-  }
-
   /** Activate Org Members */
   async activate_org_members(init?: OperationInit<"activate_org_members">): Promise<OperationData<"activate_org_members">> {
     return this.client.requestOperation("activate_org_members", "put", "/orgs/{org_id}/members/activate", init);
@@ -58,11 +49,6 @@ export class OrganizationsResource {
   /** Delete Org Quarantine Setting */
   async delete_org_quarantine_setting(init?: OperationInit<"delete_org_quarantine_setting">): Promise<OperationData<"delete_org_quarantine_setting">> {
     return this.client.requestOperation("delete_org_quarantine_setting", "delete", "/orgs/{org_id}/quarantine_settings", init);
-  }
-
-  /** Destroy Org */
-  async destroy_org(init?: OperationInit<"destroy_org">): Promise<OperationData<"destroy_org">> {
-    return this.client.requestOperation("destroy_org", "delete", "/orgs/{org_id}", init);
   }
 
   /** Disable Org Feature */
@@ -160,11 +146,6 @@ export class OrganizationsResource {
     return this.client.requestOperation("index_data_sets_catalog_configs", "get", "/orgs/{org_id}/data_sets_catalog_configs", init);
   }
 
-  /** List All Orgs */
-  async list_all_orgs(init?: OperationInit<"list_all_orgs">): Promise<OperationData<"list_all_orgs">> {
-    return this.client.requestOperation("list_all_orgs", "get", "/orgs/all", init);
-  }
-
   /** Org Create */
   async org_create(init?: OperationInit<"org_create">): Promise<OperationData<"org_create">> {
     return this.client.requestOperation("org_create", "post", "/orgs/{org_id}/notification_settings", init);
@@ -240,11 +221,6 @@ export class OrganizationsResource {
     return this.client.requestOperation("orgs_reset_resource_docs", "post", "/orgs/{resource_id}/docs", init);
   }
 
-  /** Show Control Event */
-  async orgs_show_control_event(init?: OperationInit<"orgs_show_control_event">): Promise<OperationData<"orgs_show_control_event">> {
-    return this.client.requestOperation("orgs_show_control_event", "get", "/orgs/{resource_id}/control/{event}", init);
-  }
-
   /** Show Dashboard Transform */
   async orgs_show_dashboard_transform(init?: OperationInit<"orgs_show_dashboard_transform">): Promise<OperationData<"orgs_show_dashboard_transform">> {
     return this.client.requestOperation("orgs_show_dashboard_transform", "get", "/orgs/{org_id}/dashboard_transforms", init);
@@ -270,39 +246,9 @@ export class OrganizationsResource {
     return this.client.requestOperation("reset_org_custodians", "post", "/orgs/{org_id}/custodians", init);
   }
 
-  /** Revert Org Cluster */
-  async revert_org_cluster(init?: OperationInit<"revert_org_cluster">): Promise<OperationData<"revert_org_cluster">> {
-    return this.client.requestOperation("revert_org_cluster", "put", "/orgs/{org_id}/cluster/revert", init);
-  }
-
-  /** Set Rate Limits */
-  async set_rate_limits(init?: OperationInit<"set_rate_limits">): Promise<OperationData<"set_rate_limits">> {
-    return this.client.requestOperation("set_rate_limits", "put", "/orgs/{org_id}/rate_limits", init);
-  }
-
-  /** Show Catalog Config Data Set */
-  async show_data_sets_catalog_config(init?: OperationInit<"show_data_sets_catalog_config">): Promise<OperationData<"show_data_sets_catalog_config">> {
-    return this.client.requestOperation("show_data_sets_catalog_config", "get", "/orgs/data_sets_catalog_configs/{data_set_id}", init);
-  }
-
-  /** Throttle Organization */
-  async throttle_org(init?: OperationInit<"throttle_org">): Promise<OperationData<"throttle_org">> {
-    return this.client.requestOperation("throttle_org", "put", "/orgs/{org_id}/throttle", init);
-  }
-
-  /** Update Allowed Clusters */
-  async update_allowed_clusters(init?: OperationInit<"update_allowed_clusters">): Promise<OperationData<"update_allowed_clusters">> {
-    return this.client.requestOperation("update_allowed_clusters", "put", "/orgs/{org_id}/allowed_clusters", init);
-  }
-
   /** Update an Organization */
   async update_org(init?: OperationInit<"update_org">): Promise<OperationData<"update_org">> {
     return this.client.requestOperation("update_org", "put", "/orgs/{org_id}", init);
-  }
-
-  /** Update Org Cluster */
-  async update_org_cluster(init?: OperationInit<"update_org_cluster">): Promise<OperationData<"update_org_cluster">> {
-    return this.client.requestOperation("update_org_cluster", "put", "/orgs/{org_id}/cluster", init);
   }
 
   /** Update Organization Members */

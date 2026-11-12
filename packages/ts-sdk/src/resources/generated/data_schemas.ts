@@ -116,11 +116,6 @@ export class DataSchemasResource {
     return this.client.requestOperation("get_schema", "get", "/data_schemas/{schema_id}", init);
   }
 
-  /** List All Schemas */
-  async list_all_schemas(init?: OperationInit<"list_all_schemas">): Promise<OperationData<"list_all_schemas">> {
-    return this.client.requestOperation("list_all_schemas", "get", "/data_schemas/all", init);
-  }
-
   /** List Public Schemas */
   async list_public_schemas(init?: OperationInit<"list_public_schemas">): Promise<OperationData<"list_public_schemas">> {
     return this.client.requestOperation("list_public_schemas", "get", "/data_schemas/public", init);

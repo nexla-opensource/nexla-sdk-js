@@ -13,10 +13,6 @@ export class DocContainersResource {
     return this.client.requestOperation("show_doc_container", "get", "/doc_containers/{doc_container_id}", init);
   }
 
-  async update(init?: OperationInit<"doc_containers_update_doc_container_put">): Promise<OperationData<"doc_containers_update_doc_container_put">> {
-    return this.client.requestOperation("doc_containers_update_doc_container_put", "put", "/doc_containers/{doc_container_id}", init);
-  }
-
   async delete(init?: OperationInit<"destroy_doc_container">): Promise<OperationData<"destroy_doc_container">> {
     return this.client.requestOperation("destroy_doc_container", "delete", "/doc_containers/{doc_container_id}", init);
   }
@@ -59,16 +55,6 @@ export class DocContainersResource {
   /** Get Doc container Tags */
   async doc_containers_get_resource_tags(init?: OperationInit<"doc_containers_get_resource_tags">): Promise<OperationData<"doc_containers_get_resource_tags">> {
     return this.client.requestOperation("doc_containers_get_resource_tags", "get", "/doc_containers/{resource_id}/tags", init);
-  }
-
-  /** Update Doc Container */
-  async doc_containers_update_doc_container(init?: OperationInit<"doc_containers_update_doc_container">): Promise<OperationData<"doc_containers_update_doc_container">> {
-    return this.client.requestOperation("doc_containers_update_doc_container", "patch", "/doc_containers/{doc_container_id}", init);
-  }
-
-  /** Update Doc Container */
-  async doc_containers_update_doc_container_put(init?: OperationInit<"doc_containers_update_doc_container_put">): Promise<OperationData<"doc_containers_update_doc_container_put">> {
-    return this.client.requestOperation("doc_containers_update_doc_container_put", "put", "/doc_containers/{doc_container_id}", init);
   }
 
   /** Update Doc container Tags */
