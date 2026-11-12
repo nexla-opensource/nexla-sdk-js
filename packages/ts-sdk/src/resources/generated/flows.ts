@@ -132,32 +132,32 @@ export class FlowsResource {
 
   /** Insert Flow Node Endpoint */
   async flows_insert_flow_node_endpoint(init?: OperationInit<"flows_insert_flow_node_endpoint">): Promise<OperationData<"flows_insert_flow_node_endpoint">> {
-    return this.client.requestOperation("flows_insert_flow_node_endpoint", "put", "/flows/{flow_id}/insert_flow_node", init);
+    return this.client.requestOperation("flows_insert_flow_node_endpoint", "post", "/flows/{flow_id}/insert_flow_node", init);
   }
 
   /** Insert Flow Node Endpoint */
-  async flows_insert_flow_node_endpoint_post(init?: OperationInit<"flows_insert_flow_node_endpoint_post">): Promise<OperationData<"flows_insert_flow_node_endpoint_post">> {
-    return this.client.requestOperation("flows_insert_flow_node_endpoint_post", "post", "/flows/{flow_id}/insert_flow_node", init);
+  async flows_insert_flow_node_endpoint_put(init?: OperationInit<"flows_insert_flow_node_endpoint_put">): Promise<OperationData<"flows_insert_flow_node_endpoint_put">> {
+    return this.client.requestOperation("flows_insert_flow_node_endpoint_put", "put", "/flows/{flow_id}/insert_flow_node", init);
   }
 
   /** Remove Flow Node Endpoint */
   async flows_remove_flow_node_endpoint(init?: OperationInit<"flows_remove_flow_node_endpoint">): Promise<OperationData<"flows_remove_flow_node_endpoint">> {
-    return this.client.requestOperation("flows_remove_flow_node_endpoint", "put", "/flows/{flow_id}/remove_flow_node", init);
+    return this.client.requestOperation("flows_remove_flow_node_endpoint", "post", "/flows/{flow_id}/remove_flow_node", init);
   }
 
   /** Remove Flow Node Endpoint */
-  async flows_remove_flow_node_endpoint_post(init?: OperationInit<"flows_remove_flow_node_endpoint_post">): Promise<OperationData<"flows_remove_flow_node_endpoint_post">> {
-    return this.client.requestOperation("flows_remove_flow_node_endpoint_post", "post", "/flows/{flow_id}/remove_flow_node", init);
+  async flows_remove_flow_node_endpoint_put(init?: OperationInit<"flows_remove_flow_node_endpoint_put">): Promise<OperationData<"flows_remove_flow_node_endpoint_put">> {
+    return this.client.requestOperation("flows_remove_flow_node_endpoint_put", "put", "/flows/{flow_id}/remove_flow_node", init);
   }
 
   /** Run Flow Now */
   async flows_run_flow_now(init?: OperationInit<"flows_run_flow_now">): Promise<OperationData<"flows_run_flow_now">> {
-    return this.client.requestOperation("flows_run_flow_now", "put", "/flows/{flow_id}/run_now", init);
+    return this.client.requestOperation("flows_run_flow_now", "post", "/flows/{flow_id}/run_now", init);
   }
 
   /** Run Flow Now */
-  async flows_run_flow_now_post(init?: OperationInit<"flows_run_flow_now_post">): Promise<OperationData<"flows_run_flow_now_post">> {
-    return this.client.requestOperation("flows_run_flow_now_post", "post", "/flows/{flow_id}/run_now", init);
+  async flows_run_flow_now_put(init?: OperationInit<"flows_run_flow_now_put">): Promise<OperationData<"flows_run_flow_now_put">> {
+    return this.client.requestOperation("flows_run_flow_now_put", "put", "/flows/{flow_id}/run_now", init);
   }
 
   /** Update Flow */

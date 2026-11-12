@@ -12537,33 +12537,6 @@
         }
       }
     },
-    "/api_auth_configs/info": {
-      "get": {
-        "tags": [
-          "org_auth_configs"
-        ],
-        "summary": "Info",
-        "description": "Debug endpoint showing base URL, request info and the process environment.\n\nRails (api_auth_configs_controller.rb:27-39)::\n\n    def info\n      head :not_found and return if !current_user.super_user?\n      re = Hash.new\n      request.env.each do |k, v|\n        re[k] = v if v.is_a?(String)\n      end\n      render json: {\n        :base_url => ApiAuthConfig.generate_base_url(request),\n        :request_ip => request.remote_ip,\n        :reqest_env => re,\n        :env => ENV\n      }\n    end\n\n``ENV`` extends ``Enumerable``, so ActiveSupport serializes it through\n``Enumerable#as_json`` -> ``to_a.as_json`` -- an **array of ``[key, value]``\npairs**, not an object. That is the bulk of the response, and the port had\nbeen sending ``\"env\": {}``.\n\nThis deliberately exposes the full process environment, secrets included\n(DB password, ACCESS_TOKEN_SECRET_KEY, CREDENTIALS_ENC_KEY,\nAUTH_CONFIG_ENC_KEY), because that is what the Rails endpoint does and this\nport follows Rails.\n\nThree things stand between that payload and a caller, because the action\nbody above is not the whole story — the controller also carries::\n\n    before_action :validate_api_user,\n                  except: [:index_client_config, :index_sign_on_options]\n\n    def validate_api_user\n      raise Api::V1::ApiError.new(:method_not_allowed) if current_org.nil?\n      authorize! :manage, current_org\n    end\n\n``info`` is not in that ``except`` list, so those two run *before* the\n``head :not_found`` — the same pair the five CRUD actions in ``_crud.py``\nget. They are therefore checked here first, in that order; putting them\nafter the super-user check would collapse all three answers back into 404.\n\nThe no-org case reached 404 rather than 405 before those guards existed:\n``populate_super_user_flags`` returns without setting\n``_super_user_override`` when ``org_id`` is None, so ``is_super_user_async``\nfell through to its own ``if not org_id: return False``. That failed closed\n— the secrets below were never reachable without an org — but 404 is not the\nstatus Rails answers with, and the org-admin case was 404 where Rails says\n403.",
-        "operationId": "info",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Info Api V1 Api Auth Configs Info Get"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "NexlaSessionToken": []
-          }
-        ]
-      }
-    },
     "/api_auth_configs/{id_or_uid}": {
       "patch": {
         "tags": [
@@ -14867,7 +14840,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Aws Marketplace Token Api V1 Aws Marketplace Token Put"
+                  "title": "Response Aws Marketplace Token Api V1 Aws Marketplace Token Post"
                 }
               }
             }
@@ -14891,7 +14864,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Aws Marketplace Token Api V1 Aws Marketplace Token Put"
+                  "title": "Response Aws Marketplace Token Api V1 Aws Marketplace Token Post"
                 }
               }
             }
@@ -47668,7 +47641,7 @@
         ],
         "summary": "Run Data Source Now",
         "description": "Trigger immediate run of data source.\n\nMatches Rails DataSourcesController#run_now (data_sources_controller.rb:231):\n- authorize! :operate\n- Check source_records_count_capped?\n- data_source.run_now!\n- render \"show\"",
-        "operationId": "data_sources_run_data_source_now_post",
+        "operationId": "data_sources_run_data_source_now",
         "security": [
           {
             "NexlaSessionToken": []
@@ -47714,7 +47687,7 @@
         ],
         "summary": "Run Data Source Now",
         "description": "Trigger immediate run of data source.\n\nMatches Rails DataSourcesController#run_now (data_sources_controller.rb:231):\n- authorize! :operate\n- Check source_records_count_capped?\n- data_source.run_now!\n- render \"show\"",
-        "operationId": "data_sources_run_data_source_now",
+        "operationId": "data_sources_run_data_source_now_put",
         "security": [
           {
             "NexlaSessionToken": []
@@ -50817,6 +50790,122 @@
           }
         }
       },
+      "put": {
+        "tags": [
+          "doc_containers"
+        ],
+        "summary": "Update Doc Container",
+        "description": "Update a doc container.\n\nMatches Rails DocContainersController#update via update_mutable!",
+        "operationId": "doc_containers_update_doc_container_put",
+        "security": [
+          {
+            "NexlaSessionToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "doc_container_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Doc Container Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Update Doc Container Api V1 Doc Containers  Doc Container Id  Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackendHTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "doc_containers"
+        ],
+        "summary": "Update Doc Container",
+        "description": "Update a doc container.\n\nMatches Rails DocContainersController#update via update_mutable!",
+        "operationId": "doc_containers_update_doc_container",
+        "security": [
+          {
+            "NexlaSessionToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "doc_container_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Doc Container Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Update Doc Container Api V1 Doc Containers  Doc Container Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackendHTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "tags": [
           "doc_containers"
@@ -53180,7 +53269,7 @@
         ],
         "summary": "Insert Flow Node Endpoint",
         "description": "Insert a new node into a flow.\n\nBody: {\"data_set_id\": X} or {\"data_set\": {\"name\": \"...\"}}",
-        "operationId": "flows_insert_flow_node_endpoint_post",
+        "operationId": "flows_insert_flow_node_endpoint",
         "security": [
           {
             "NexlaSessionToken": []
@@ -53238,7 +53327,7 @@
         ],
         "summary": "Insert Flow Node Endpoint",
         "description": "Insert a new node into a flow.\n\nBody: {\"data_set_id\": X} or {\"data_set\": {\"name\": \"...\"}}",
-        "operationId": "flows_insert_flow_node_endpoint",
+        "operationId": "flows_insert_flow_node_endpoint_put",
         "security": [
           {
             "NexlaSessionToken": []
@@ -54230,7 +54319,7 @@
         ],
         "summary": "Remove Flow Node Endpoint",
         "description": "Remove a node from a flow.\n\nBody: {\"delete_resource\": bool} or query param delete_resource=true",
-        "operationId": "flows_remove_flow_node_endpoint_post",
+        "operationId": "flows_remove_flow_node_endpoint",
         "security": [
           {
             "NexlaSessionToken": []
@@ -54304,7 +54393,7 @@
         ],
         "summary": "Remove Flow Node Endpoint",
         "description": "Remove a node from a flow.\n\nBody: {\"delete_resource\": bool} or query param delete_resource=true",
-        "operationId": "flows_remove_flow_node_endpoint",
+        "operationId": "flows_remove_flow_node_endpoint_put",
         "security": [
           {
             "NexlaSessionToken": []
@@ -54466,7 +54555,7 @@
         ],
         "summary": "Run Flow Now",
         "description": "Trigger immediate run of a flow's data source.\n\nMatches Rails FlowsController#run_now (flows_controller.rb:305):\n- Find origin_node from flow_node\n- authorize! :operate on origin_node\n- Get data_source from origin_node\n- Validate both origin_node and data_source are ACTIVE\n- Call data_source.run_now!\n- `render :json => ds_result, :status => ds_result[:status]` (flows_controller.rb:325)\n\nThat last line forwards the Control Service result verbatim — body AND HTTP\nstatus. A backend failure (`internal_server_error`, `service_unavailable`,\nan upstream code) is deliberately surfaced to the client, so this endpoint\nmust never synthesize a success response.",
-        "operationId": "flows_run_flow_now_post",
+        "operationId": "flows_run_flow_now",
         "security": [
           {
             "NexlaSessionToken": []
@@ -54510,7 +54599,7 @@
         ],
         "summary": "Run Flow Now",
         "description": "Trigger immediate run of a flow's data source.\n\nMatches Rails FlowsController#run_now (flows_controller.rb:305):\n- Find origin_node from flow_node\n- authorize! :operate on origin_node\n- Get data_source from origin_node\n- Validate both origin_node and data_source are ACTIVE\n- Call data_source.run_now!\n- `render :json => ds_result, :status => ds_result[:status]` (flows_controller.rb:325)\n\nThat last line forwards the Control Service result verbatim — body AND HTTP\nstatus. A backend failure (`internal_server_error`, `service_unavailable`,\nan upstream code) is deliberately surfaced to the client, so this endpoint\nmust never synthesize a success response.",
-        "operationId": "flows_run_flow_now",
+        "operationId": "flows_run_flow_now_put",
         "security": [
           {
             "NexlaSessionToken": []
@@ -64066,7 +64155,7 @@
         ],
         "summary": "IDP Token",
         "description": "Generate token from IDP provider.\n\nReplicates Rails: TokenController#create_idp\n\nSupported protocols:\n- password: Uses same Basic auth flow as POST /token\n- saml: SAML assertion (not yet implemented)\n- oidc: OIDC token (not yet implemented)\n\nArgs:\n    uid: The API auth config UID\n\nReturns:\n    TokenResponseSchema: Access token with user and org info",
-        "operationId": "token_create_idp_token_post",
+        "operationId": "token_create_idp_token",
         "parameters": [
           {
             "name": "uid",
@@ -64107,7 +64196,7 @@
         ],
         "summary": "IDP Token",
         "description": "Generate token from IDP provider.\n\nReplicates Rails: TokenController#create_idp\n\nSupported protocols:\n- password: Uses same Basic auth flow as POST /token\n- saml: SAML assertion (not yet implemented)\n- oidc: OIDC token (not yet implemented)\n\nArgs:\n    uid: The API auth config UID\n\nReturns:\n    TokenResponseSchema: Access token with user and org info",
-        "operationId": "token_create_idp_token",
+        "operationId": "token_create_idp_token_put",
         "parameters": [
           {
             "name": "uid",
@@ -69313,116 +69402,6 @@
         ],
         "summary": "Search User Settings",
         "description": "Search user settings across users.\nMatches Rails UserSettingsController#index with all=1.\n\nACL: org.has_admin_access?(user) OR super_user\nRequires user_settings_type in body (admin branch only), optional\nprimary_key_value.\n\nThe body is OPTIONAL. Rails' ``search`` guards on\n``request.raw_post.blank?`` (user_settings_controller.rb:52) and simply\nsearches with an empty condition hash when no body is sent, while a\nnon-admin caller never reaches ``search`` at all and gets their own\nsettings with the body untouched. Requiring a body here turned both of\nthose 200s into a 400.",
-        "operationId": "user_settings_search_user_settings_post",
-        "security": [
-          {
-            "NexlaSessionToken": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Page number",
-              "title": "Page"
-            },
-            "description": "Page number"
-          },
-          {
-            "name": "per_page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Items per page",
-              "title": "Per Page"
-            },
-            "description": "Items per page"
-          },
-          {
-            "name": "org_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Org Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/BackendUserSettingSearchSchema"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Body"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BackendUserSettingResponseSchema"
-                  },
-                  "title": "Response Search User Settings Api V1 User Settings Search Put"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BackendHTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "user_settings"
-        ],
-        "summary": "Search User Settings",
-        "description": "Search user settings across users.\nMatches Rails UserSettingsController#index with all=1.\n\nACL: org.has_admin_access?(user) OR super_user\nRequires user_settings_type in body (admin branch only), optional\nprimary_key_value.\n\nThe body is OPTIONAL. Rails' ``search`` guards on\n``request.raw_post.blank?`` (user_settings_controller.rb:52) and simply\nsearches with an empty condition hash when no body is sent, while a\nnon-admin caller never reaches ``search`` at all and gets their own\nsettings with the body untouched. Requiring a body here turned both of\nthose 200s into a 400.",
         "operationId": "user_settings_search_user_settings",
         "security": [
           {
@@ -69510,7 +69489,117 @@
                   "items": {
                     "$ref": "#/components/schemas/BackendUserSettingResponseSchema"
                   },
-                  "title": "Response Search User Settings Api V1 User Settings Search Put"
+                  "title": "Response Search User Settings Api V1 User Settings Search Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackendHTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "user_settings"
+        ],
+        "summary": "Search User Settings",
+        "description": "Search user settings across users.\nMatches Rails UserSettingsController#index with all=1.\n\nACL: org.has_admin_access?(user) OR super_user\nRequires user_settings_type in body (admin branch only), optional\nprimary_key_value.\n\nThe body is OPTIONAL. Rails' ``search`` guards on\n``request.raw_post.blank?`` (user_settings_controller.rb:52) and simply\nsearches with an empty condition hash when no body is sent, while a\nnon-admin caller never reaches ``search`` at all and gets their own\nsettings with the body untouched. Requiring a body here turned both of\nthose 200s into a 400.",
+        "operationId": "user_settings_search_user_settings_put",
+        "security": [
+          {
+            "NexlaSessionToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Page number",
+              "title": "Page"
+            },
+            "description": "Page number"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Items per page",
+              "title": "Per Page"
+            },
+            "description": "Items per page"
+          },
+          {
+            "name": "org_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Org Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/BackendUserSettingSearchSchema"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BackendUserSettingResponseSchema"
+                  },
+                  "title": "Response Search User Settings Api V1 User Settings Search Post"
                 }
               }
             }

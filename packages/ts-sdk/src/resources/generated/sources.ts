@@ -296,12 +296,12 @@ export class SourcesResource {
 
   /** Run Data Source Now */
   async data_sources_run_data_source_now(init?: OperationInit<"data_sources_run_data_source_now">): Promise<OperationData<"data_sources_run_data_source_now">> {
-    return this.client.requestOperation("data_sources_run_data_source_now", "put", "/data_sources/{data_source_id}/run_now", init);
+    return this.client.requestOperation("data_sources_run_data_source_now", "post", "/data_sources/{data_source_id}/run_now", init);
   }
 
   /** Run Data Source Now */
-  async data_sources_run_data_source_now_post(init?: OperationInit<"data_sources_run_data_source_now_post">): Promise<OperationData<"data_sources_run_data_source_now_post">> {
-    return this.client.requestOperation("data_sources_run_data_source_now_post", "post", "/data_sources/{data_source_id}/run_now", init);
+  async data_sources_run_data_source_now_put(init?: OperationInit<"data_sources_run_data_source_now_put">): Promise<OperationData<"data_sources_run_data_source_now_put">> {
+    return this.client.requestOperation("data_sources_run_data_source_now_put", "put", "/data_sources/{data_source_id}/run_now", init);
   }
 
   /** Show Dashboard Transform */

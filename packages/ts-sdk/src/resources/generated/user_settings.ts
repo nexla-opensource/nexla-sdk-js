@@ -51,12 +51,12 @@ export class UserSettingsResource {
 
   /** Search User Settings */
   async user_settings_search_user_settings(init?: OperationInit<"user_settings_search_user_settings">): Promise<OperationData<"user_settings_search_user_settings">> {
-    return this.client.requestOperation("user_settings_search_user_settings", "put", "/user_settings/search", init);
+    return this.client.requestOperation("user_settings_search_user_settings", "post", "/user_settings/search", init);
   }
 
   /** Search User Settings */
-  async user_settings_search_user_settings_post(init?: OperationInit<"user_settings_search_user_settings_post">): Promise<OperationData<"user_settings_search_user_settings_post">> {
-    return this.client.requestOperation("user_settings_search_user_settings_post", "post", "/user_settings/search", init);
+  async user_settings_search_user_settings_put(init?: OperationInit<"user_settings_search_user_settings_put">): Promise<OperationData<"user_settings_search_user_settings_put">> {
+    return this.client.requestOperation("user_settings_search_user_settings_put", "put", "/user_settings/search", init);
   }
 
   /** Update User Setting */

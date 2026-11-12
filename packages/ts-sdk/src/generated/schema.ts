@@ -2082,63 +2082,6 @@ export interface paths {
      */
     get: operations["index_client_config"];
   };
-  "/api_auth_configs/info": {
-    /**
-     * Info
-     * @description Debug endpoint showing base URL, request info and the process environment.
-     *
-     * Rails (api_auth_configs_controller.rb:27-39)::
-     *
-     *     def info
-     *       head :not_found and return if !current_user.super_user?
-     *       re = Hash.new
-     *       request.env.each do |k, v|
-     *         re[k] = v if v.is_a?(String)
-     *       end
-     *       render json: {
-     *         :base_url => ApiAuthConfig.generate_base_url(request),
-     *         :request_ip => request.remote_ip,
-     *         :reqest_env => re,
-     *         :env => ENV
-     *       }
-     *     end
-     *
-     * ``ENV`` extends ``Enumerable``, so ActiveSupport serializes it through
-     * ``Enumerable#as_json`` -> ``to_a.as_json`` -- an **array of ``[key, value]``
-     * pairs**, not an object. That is the bulk of the response, and the port had
-     * been sending ``"env": {}``.
-     *
-     * This deliberately exposes the full process environment, secrets included
-     * (DB password, ACCESS_TOKEN_SECRET_KEY, CREDENTIALS_ENC_KEY,
-     * AUTH_CONFIG_ENC_KEY), because that is what the Rails endpoint does and this
-     * port follows Rails.
-     *
-     * Three things stand between that payload and a caller, because the action
-     * body above is not the whole story — the controller also carries::
-     *
-     *     before_action :validate_api_user,
-     *                   except: [:index_client_config, :index_sign_on_options]
-     *
-     *     def validate_api_user
-     *       raise Api::V1::ApiError.new(:method_not_allowed) if current_org.nil?
-     *       authorize! :manage, current_org
-     *     end
-     *
-     * ``info`` is not in that ``except`` list, so those two run *before* the
-     * ``head :not_found`` — the same pair the five CRUD actions in ``_crud.py``
-     * get. They are therefore checked here first, in that order; putting them
-     * after the super-user check would collapse all three answers back into 404.
-     *
-     * The no-org case reached 404 rather than 405 before those guards existed:
-     * ``populate_super_user_flags`` returns without setting
-     * ``_super_user_override`` when ``org_id`` is None, so ``is_super_user_async``
-     * fell through to its own ``if not org_id: return False``. That failed closed
-     * — the secrets below were never reachable without an org — but 404 is not the
-     * status Rails answers with, and the org-admin case was 404 where Rails says
-     * 403.
-     */
-    get: operations["info"];
-  };
   "/api_auth_configs/{id_or_uid}": {
     /**
      * Update Api Auth Config
@@ -6271,7 +6214,7 @@ export interface paths {
      * - data_source.run_now!
      * - render "show"
      */
-    put: operations["data_sources_run_data_source_now"];
+    put: operations["data_sources_run_data_source_now_put"];
     /**
      * Run Data Source Now
      * @description Trigger immediate run of data source.
@@ -6282,7 +6225,7 @@ export interface paths {
      * - data_source.run_now!
      * - render "show"
      */
-    post: operations["data_sources_run_data_source_now_post"];
+    post: operations["data_sources_run_data_source_now"];
   };
   "/data_sources/{data_source_id}/runs": {
     /**
@@ -6497,12 +6440,26 @@ export interface paths {
      */
     get: operations["show_doc_container"];
     /**
+     * Update Doc Container
+     * @description Update a doc container.
+     *
+     * Matches Rails DocContainersController#update via update_mutable!
+     */
+    put: operations["doc_containers_update_doc_container_put"];
+    /**
      * Destroy Doc Container
      * @description Delete a doc container.
      *
      * Matches Rails DocContainersController#destroy.
      */
     delete: operations["destroy_doc_container"];
+    /**
+     * Update Doc Container
+     * @description Update a doc container.
+     *
+     * Matches Rails DocContainersController#update via update_mutable!
+     */
+    patch: operations["doc_containers_update_doc_container"];
   };
   "/doc_containers/{doc_container_id}/copy": {
     /**
@@ -6840,14 +6797,14 @@ export interface paths {
      *
      * Body: {"data_set_id": X} or {"data_set": {"name": "..."}}
      */
-    put: operations["flows_insert_flow_node_endpoint"];
+    put: operations["flows_insert_flow_node_endpoint_put"];
     /**
      * Insert Flow Node Endpoint
      * @description Insert a new node into a flow.
      *
      * Body: {"data_set_id": X} or {"data_set": {"name": "..."}}
      */
-    post: operations["flows_insert_flow_node_endpoint_post"];
+    post: operations["flows_insert_flow_node_endpoint"];
   };
   "/flows/{flow_id}/links": {
     /**
@@ -6929,14 +6886,14 @@ export interface paths {
      *
      * Body: {"delete_resource": bool} or query param delete_resource=true
      */
-    put: operations["flows_remove_flow_node_endpoint"];
+    put: operations["flows_remove_flow_node_endpoint_put"];
     /**
      * Remove Flow Node Endpoint
      * @description Remove a node from a flow.
      *
      * Body: {"delete_resource": bool} or query param delete_resource=true
      */
-    post: operations["flows_remove_flow_node_endpoint_post"];
+    post: operations["flows_remove_flow_node_endpoint"];
   };
   "/flows/{flow_id}/resources_access": {
     /**
@@ -6966,7 +6923,7 @@ export interface paths {
      * an upstream code) is deliberately surfaced to the client, so this endpoint
      * must never synthesize a success response.
      */
-    put: operations["flows_run_flow_now"];
+    put: operations["flows_run_flow_now_put"];
     /**
      * Run Flow Now
      * @description Trigger immediate run of a flow's data source.
@@ -6984,7 +6941,7 @@ export interface paths {
      * an upstream code) is deliberately surfaced to the client, so this endpoint
      * must never synthesize a success response.
      */
-    post: operations["flows_run_flow_now_post"];
+    post: operations["flows_run_flow_now"];
   };
   "/flows/{flow_id}/run_status": {
     /**
@@ -8244,7 +8201,7 @@ export interface paths {
      * Returns:
      *     TokenResponseSchema: Access token with user and org info
      */
-    put: operations["token_create_idp_token"];
+    put: operations["token_create_idp_token_put"];
     /**
      * IDP Token
      * @description Generate token from IDP provider.
@@ -8262,7 +8219,7 @@ export interface paths {
      * Returns:
      *     TokenResponseSchema: Access token with user and org info
      */
-    post: operations["token_create_idp_token_post"];
+    post: operations["token_create_idp_token"];
   };
   "/tool_sets": {
     /** Index Tool Sets */
@@ -8670,7 +8627,7 @@ export interface paths {
      * settings with the body untouched. Requiring a body here turned both of
      * those 200s into a 400.
      */
-    put: operations["user_settings_search_user_settings"];
+    put: operations["user_settings_search_user_settings_put"];
     /**
      * Search User Settings
      * @description Search user settings across users.
@@ -8687,7 +8644,7 @@ export interface paths {
      * settings with the body untouched. Requiring a body here turned both of
      * those 200s into a 400.
      */
-    post: operations["user_settings_search_user_settings_post"];
+    post: operations["user_settings_search_user_settings"];
   };
   "/user_settings/{setting_id}": {
     /**
@@ -32472,70 +32429,6 @@ export interface operations {
     };
   };
   /**
-   * Info
-   * @description Debug endpoint showing base URL, request info and the process environment.
-   *
-   * Rails (api_auth_configs_controller.rb:27-39)::
-   *
-   *     def info
-   *       head :not_found and return if !current_user.super_user?
-   *       re = Hash.new
-   *       request.env.each do |k, v|
-   *         re[k] = v if v.is_a?(String)
-   *       end
-   *       render json: {
-   *         :base_url => ApiAuthConfig.generate_base_url(request),
-   *         :request_ip => request.remote_ip,
-   *         :reqest_env => re,
-   *         :env => ENV
-   *       }
-   *     end
-   *
-   * ``ENV`` extends ``Enumerable``, so ActiveSupport serializes it through
-   * ``Enumerable#as_json`` -> ``to_a.as_json`` -- an **array of ``[key, value]``
-   * pairs**, not an object. That is the bulk of the response, and the port had
-   * been sending ``"env": {}``.
-   *
-   * This deliberately exposes the full process environment, secrets included
-   * (DB password, ACCESS_TOKEN_SECRET_KEY, CREDENTIALS_ENC_KEY,
-   * AUTH_CONFIG_ENC_KEY), because that is what the Rails endpoint does and this
-   * port follows Rails.
-   *
-   * Three things stand between that payload and a caller, because the action
-   * body above is not the whole story — the controller also carries::
-   *
-   *     before_action :validate_api_user,
-   *                   except: [:index_client_config, :index_sign_on_options]
-   *
-   *     def validate_api_user
-   *       raise Api::V1::ApiError.new(:method_not_allowed) if current_org.nil?
-   *       authorize! :manage, current_org
-   *     end
-   *
-   * ``info`` is not in that ``except`` list, so those two run *before* the
-   * ``head :not_found`` — the same pair the five CRUD actions in ``_crud.py``
-   * get. They are therefore checked here first, in that order; putting them
-   * after the super-user check would collapse all three answers back into 404.
-   *
-   * The no-org case reached 404 rather than 405 before those guards existed:
-   * ``populate_super_user_flags`` returns without setting
-   * ``_super_user_override`` when ``org_id`` is None, so ``is_super_user_async``
-   * fell through to its own ``if not org_id: return False``. That failed closed
-   * — the secrets below were never reachable without an org — but 404 is not the
-   * status Rails answers with, and the org-admin case was 404 where Rails says
-   * 403.
-   */
-  info: {
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-    };
-  };
-  /**
    * Update Api Auth Config
    * @description Update an auth config.
    */
@@ -48666,7 +48559,7 @@ export interface operations {
    * - data_source.run_now!
    * - render "show"
    */
-  data_sources_run_data_source_now: {
+  data_sources_run_data_source_now_put: {
     parameters: {
       path: {
         data_source_id: number;
@@ -48697,7 +48590,7 @@ export interface operations {
    * - data_source.run_now!
    * - render "show"
    */
-  data_sources_run_data_source_now_post: {
+  data_sources_run_data_source_now: {
     parameters: {
       path: {
         data_source_id: number;
@@ -49908,6 +49801,40 @@ export interface operations {
     };
   };
   /**
+   * Update Doc Container
+   * @description Update a doc container.
+   *
+   * Matches Rails DocContainersController#update via update_mutable!
+   */
+  doc_containers_update_doc_container_put: {
+    parameters: {
+      path: {
+        doc_container_id: number;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          [key: string]: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["BackendHTTPValidationError"];
+        };
+      };
+    };
+  };
+  /**
    * Destroy Doc Container
    * @description Delete a doc container.
    *
@@ -49917,6 +49844,40 @@ export interface operations {
     parameters: {
       path: {
         doc_container_id: number;
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["BackendHTTPValidationError"];
+        };
+      };
+    };
+  };
+  /**
+   * Update Doc Container
+   * @description Update a doc container.
+   *
+   * Matches Rails DocContainersController#update via update_mutable!
+   */
+  doc_containers_update_doc_container: {
+    parameters: {
+      path: {
+        doc_container_id: number;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          [key: string]: unknown;
+        };
       };
     };
     responses: {
@@ -51129,7 +51090,7 @@ export interface operations {
    *
    * Body: {"data_set_id": X} or {"data_set": {"name": "..."}}
    */
-  flows_insert_flow_node_endpoint: {
+  flows_insert_flow_node_endpoint_put: {
     parameters: {
       path: {
         flow_id: number;
@@ -51163,7 +51124,7 @@ export interface operations {
    *
    * Body: {"data_set_id": X} or {"data_set": {"name": "..."}}
    */
-  flows_insert_flow_node_endpoint_post: {
+  flows_insert_flow_node_endpoint: {
     parameters: {
       path: {
         flow_id: number;
@@ -51510,7 +51471,7 @@ export interface operations {
    *
    * Body: {"delete_resource": bool} or query param delete_resource=true
    */
-  flows_remove_flow_node_endpoint: {
+  flows_remove_flow_node_endpoint_put: {
     parameters: {
       query?: {
         delete_resource?: boolean;
@@ -51547,7 +51508,7 @@ export interface operations {
    *
    * Body: {"delete_resource": bool} or query param delete_resource=true
    */
-  flows_remove_flow_node_endpoint_post: {
+  flows_remove_flow_node_endpoint: {
     parameters: {
       query?: {
         delete_resource?: boolean;
@@ -51631,7 +51592,7 @@ export interface operations {
    * an upstream code) is deliberately surfaced to the client, so this endpoint
    * must never synthesize a success response.
    */
-  flows_run_flow_now: {
+  flows_run_flow_now_put: {
     parameters: {
       path: {
         flow_id: number;
@@ -51669,7 +51630,7 @@ export interface operations {
    * an upstream code) is deliberately surfaced to the client, so this endpoint
    * must never synthesize a success response.
    */
-  flows_run_flow_now_post: {
+  flows_run_flow_now: {
     parameters: {
       path: {
         flow_id: number;
@@ -55940,7 +55901,7 @@ export interface operations {
    * Returns:
    *     TokenResponseSchema: Access token with user and org info
    */
-  token_create_idp_token: {
+  token_create_idp_token_put: {
     parameters: {
       path: {
         uid: string;
@@ -55978,7 +55939,7 @@ export interface operations {
    * Returns:
    *     TokenResponseSchema: Access token with user and org info
    */
-  token_create_idp_token_post: {
+  token_create_idp_token: {
     parameters: {
       path: {
         uid: string;
@@ -58355,7 +58316,7 @@ export interface operations {
    * settings with the body untouched. Requiring a body here turned both of
    * those 200s into a 400.
    */
-  user_settings_search_user_settings: {
+  user_settings_search_user_settings_put: {
     parameters: {
       query?: {
         /** @description Page number */
@@ -58401,7 +58362,7 @@ export interface operations {
    * settings with the body untouched. Requiring a body here turned both of
    * those 200s into a 400.
    */
-  user_settings_search_user_settings_post: {
+  user_settings_search_user_settings: {
     parameters: {
       query?: {
         /** @description Page number */

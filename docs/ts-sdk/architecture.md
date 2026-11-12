@@ -52,23 +52,28 @@ packages/ts-sdk/
 
 ## Backend OpenAPI Spec (Public)
 
-`openapi/nexla-api.public.json` is generator input. It describes the public Nexla backend API: 1,249 operations and 227 component schemas.
+`openapi/nexla-api.public.json` is generator input. It describes the public Nexla backend API: 1,188 operations and 227 component schemas.
 
 Provenance:
 
 - The backend FastAPI app exports the document with `app.openapi()`.
-- The `/api/v1` prefix is removed from every path.
-- Admin-only routes are removed. The exclusion list is kept with the backend tooling.
+- The `/api/v1` prefix is removed from every path. Root and `/api/v1` twins are merged.
 - Each `operationId` is the name of the backend route function. When two routes share a name, the builder adds the resource name or the HTTP method to make it unique.
+- Routes that are not public API are removed:
+  - Admin-only routes. A route is admin-only when a dependency's name contains `super_user`, `nexla_admin`, `infra`, or `require_*admin`; when the handler calls `require_nexla_admin`, an infrastructure-user check, or `super_user_read_only`; or when a top-level `if not ...super_user...:` in the handler rejects the request. A super-user check nested in a branch (for example, only for the `public` field) does not make the route admin-only.
+  - Non-API routes: `GET /`, `GET /health`, `POST /mock_catalog_add`, `/internal/*`, and handlers named `*_dead_route`.
 
-How to rebuild:
+How to rebuild (needs a checkout of the private backend):
 
-1. Export the OpenAPI document and the route list from the backend.
-2. Run the public spec builder. The builder is maintained with the backend tooling and is not in this repository.
-3. Copy the output to `openapi/nexla-api.public.json`.
-4. Run `pnpm -C packages/ts-sdk gen`.
+```bash
+cd "$NEXLA_ADMIN_API_PATH"
+ENVIRONMENT=test ACCESS_TOKEN_SECRET_KEY=ci uv run --frozen python \
+  /path/to/nexla-sdk-js/scripts/backend-spec/build_public_spec.py \
+  --out /path/to/nexla-sdk-js/openapi/nexla-api.public.json
+pnpm -C packages/ts-sdk gen
+```
 
-CI does not rebuild this file. The builder needs the private backend source.
+`ENVIRONMENT=test` skips the backend startup checks. Importing the app opens no database. CI does not rebuild this file, because the builder needs the private backend source.
 
 ## Backend Drift Check
 

@@ -301,6 +301,10 @@ export const resourceMap = {
       "path": "/doc_containers/{doc_container_id}",
       "method": "get"
     },
+    "update": {
+      "path": "/doc_containers/{doc_container_id}",
+      "method": "put"
+    },
     "delete": {
       "path": "/doc_containers/{doc_container_id}",
       "method": "delete"
