@@ -37,11 +37,6 @@ export class QuarantineSettingsResource {
     return this.client.requestOperation("quarantine_settings_index", "get", "/quarantine_settings", init);
   }
 
-  /** Index All */
-  async quarantine_settings_index_all(init?: OperationInit<"quarantine_settings_index_all">): Promise<OperationData<"quarantine_settings_index_all">> {
-    return this.client.requestOperation("quarantine_settings_index_all", "get", "/quarantine_settings/all", init);
-  }
-
   /** Show */
   async quarantine_settings_show(init?: OperationInit<"quarantine_settings_show">): Promise<OperationData<"quarantine_settings_show">> {
     return this.client.requestOperation("quarantine_settings_show", "get", "/quarantine_settings/{quarantine_setting_id}", init);

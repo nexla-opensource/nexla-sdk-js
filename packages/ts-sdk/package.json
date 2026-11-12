@@ -1,6 +1,6 @@
 {
   "name": "@nexla/sdk",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "TypeScript SDK for Nexla",
   "author": "Nexla, Inc.",
   "sideEffects": false,
@@ -32,9 +32,14 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
@@ -54,7 +59,14 @@
     "gen:spec-metadata": "node ./scripts/generate-spec-metadata.mjs",
     "gen": "pnpm run gen:merged-spec && pnpm run gen:types && pnpm run gen:resources && pnpm run gen:spec-metadata",
     "check:generated": "node ./scripts/check-generated-coverage.mjs",
-    "lint": "eslint src tests --ext .ts",
+    "check:backend-drift": "node ./scripts/check-backend-drift.mjs",
+    "publint": "publint --strict",
+    "attw": "attw --pack .",
+    "size": "size-limit",
+    "smoke:consumer": "node ./scripts/consumer-smoke.mjs",
+    "lint": "eslint src tests",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "test": "vitest run",
     "test:integration": "vitest run tests/integration --passWithNoTests",
@@ -66,16 +78,33 @@
     "openapi-fetch": "^0.10.2"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@size-limit/file": "^14.3.0",
     "@types/node": "^20.11.30",
-    "@typescript-eslint/eslint-plugin": "^8.25.0",
-    "@typescript-eslint/parser": "^8.25.0",
     "@vitest/coverage-v8": "^2.1.8",
     "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.1.8",
     "openapi-typescript": "^6.7.6",
     "openapi-typescript-helpers": "^0.0.11",
+    "prettier": "^3.10.0",
+    "publint": "^0.3.25",
+    "size-limit": "^14.3.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.3",
+    "typescript-eslint": "^8.72.2",
     "vitest": "^2.1.8",
     "yaml": "^2.4.5"
-  }
+  },
+  "size-limit": [
+    {
+      "name": "ESM entry (dist/index.js, brotli)",
+      "path": "dist/index.js",
+      "limit": "35 kB"
+    },
+    {
+      "name": "CJS entry (dist/index.cjs, brotli)",
+      "path": "dist/index.cjs",
+      "limit": "36 kB"
+    }
+  ]
 }

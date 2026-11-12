@@ -9,14 +9,6 @@ export class ClusterEndpointsResource {
     this.client = client;
   }
 
-  async get(init?: OperationInit<"get_cluster_endpoint">): Promise<OperationData<"get_cluster_endpoint">> {
-    return this.client.requestOperation("get_cluster_endpoint", "get", "/cluster_endpoints/{endpoint_id}", init);
-  }
-
-  async update(init?: OperationInit<"cluster_endpoints_update_cluster_endpoint_put">): Promise<OperationData<"cluster_endpoints_update_cluster_endpoint_put">> {
-    return this.client.requestOperation("cluster_endpoints_update_cluster_endpoint_put", "put", "/cluster_endpoints/{endpoint_id}", init);
-  }
-
   async delete(init?: OperationInit<"cluster_endpoints_delete_cluster_endpoint">): Promise<OperationData<"cluster_endpoints_delete_cluster_endpoint">> {
     return this.client.requestOperation("cluster_endpoints_delete_cluster_endpoint", "delete", "/cluster_endpoints/{endpoint_id}", init);
   }
@@ -24,26 +16,6 @@ export class ClusterEndpointsResource {
   /** Delete Cluster Endpoint */
   async cluster_endpoints_delete_cluster_endpoint(init?: OperationInit<"cluster_endpoints_delete_cluster_endpoint">): Promise<OperationData<"cluster_endpoints_delete_cluster_endpoint">> {
     return this.client.requestOperation("cluster_endpoints_delete_cluster_endpoint", "delete", "/cluster_endpoints/{endpoint_id}", init);
-  }
-
-  /** Update Cluster Endpoint */
-  async cluster_endpoints_update_cluster_endpoint(init?: OperationInit<"cluster_endpoints_update_cluster_endpoint">): Promise<OperationData<"cluster_endpoints_update_cluster_endpoint">> {
-    return this.client.requestOperation("cluster_endpoints_update_cluster_endpoint", "patch", "/cluster_endpoints/{endpoint_id}", init);
-  }
-
-  /** Update Cluster Endpoint */
-  async cluster_endpoints_update_cluster_endpoint_put(init?: OperationInit<"cluster_endpoints_update_cluster_endpoint_put">): Promise<OperationData<"cluster_endpoints_update_cluster_endpoint_put">> {
-    return this.client.requestOperation("cluster_endpoints_update_cluster_endpoint_put", "put", "/cluster_endpoints/{endpoint_id}", init);
-  }
-
-  /** Create Cluster Endpoint */
-  async create_cluster_endpoint(init?: OperationInit<"create_cluster_endpoint">): Promise<OperationData<"create_cluster_endpoint">> {
-    return this.client.requestOperation("create_cluster_endpoint", "post", "/cluster_endpoints/", init);
-  }
-
-  /** Get Cluster Endpoint */
-  async get_cluster_endpoint(init?: OperationInit<"get_cluster_endpoint">): Promise<OperationData<"get_cluster_endpoint">> {
-    return this.client.requestOperation("get_cluster_endpoint", "get", "/cluster_endpoints/{endpoint_id}", init);
   }
 
   /** Get Cluster Endpoint Audit Log */
@@ -54,10 +26,5 @@ export class ClusterEndpointsResource {
   /** Get Cluster Endpoint Schema */
   async get_cluster_endpoint_schema(init?: OperationInit<"get_cluster_endpoint_schema">): Promise<OperationData<"get_cluster_endpoint_schema">> {
     return this.client.requestOperation("get_cluster_endpoint_schema", "get", "/cluster_endpoints/schema", init);
-  }
-
-  /** List Cluster Endpoints */
-  async list_cluster_endpoints(init?: OperationInit<"list_cluster_endpoints">): Promise<OperationData<"list_cluster_endpoints">> {
-    return this.client.requestOperation("list_cluster_endpoints", "get", "/cluster_endpoints/", init);
   }
 }

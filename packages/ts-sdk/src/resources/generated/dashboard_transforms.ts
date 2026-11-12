@@ -54,11 +54,6 @@ export class DashboardTransformsResource {
     return this.client.requestOperation("destroy_dashboard_transform", "delete", "/dashboard_transforms/{transform_id}", init);
   }
 
-  /** Index All Dashboard Transforms */
-  async index_all_dashboard_transforms(init?: OperationInit<"index_all_dashboard_transforms">): Promise<OperationData<"index_all_dashboard_transforms">> {
-    return this.client.requestOperation("index_all_dashboard_transforms", "get", "/dashboard_transforms/all", init);
-  }
-
   /** Index Dashboard Transforms */
   async index_dashboard_transforms(init?: OperationInit<"index_dashboard_transforms">): Promise<OperationData<"index_dashboard_transforms">> {
     return this.client.requestOperation("index_dashboard_transforms", "get", "/dashboard_transforms", init);

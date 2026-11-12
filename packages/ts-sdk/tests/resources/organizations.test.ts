@@ -103,9 +103,7 @@ describe("OrganizationsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.organizations.get({ params: { path: { org_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.organizations.get({ params: { path: { org_id: 99999 } } })).rejects.toThrow();
     });
   });
 

@@ -29,7 +29,7 @@ describe("AccessRole", () => {
       "owner",
       "owner_only",
       "sharer",
-      "sharer_only"
+      "sharer_only",
     ];
     expect(roles).toHaveLength(11);
 
@@ -53,7 +53,7 @@ describe("ListParams on request", () => {
       to: "2026-02-01",
       org_id: 3,
       page: 2,
-      per_page: 25
+      per_page: 25,
     };
 
     await client.request("get", "/data_sources", { params: { query: params } });
@@ -70,7 +70,7 @@ describe("ListParams on request", () => {
       to: "2026-02-01",
       org_id: "3",
       page: "2",
-      per_page: "25"
+      per_page: "25",
     });
   });
 

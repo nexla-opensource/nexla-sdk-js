@@ -13,45 +13,8 @@ export class AuthTemplatesResource {
     return this.client.requestOperation("list_auth_templates", "get", "/auth_templates", init);
   }
 
-  async create(init?: OperationInit<"create_auth_template">): Promise<OperationData<"create_auth_template">> {
-    return this.client.requestOperation("create_auth_template", "post", "/auth_templates", init);
-  }
-
   async get(init?: OperationInit<"get_auth_template">): Promise<OperationData<"get_auth_template">> {
     return this.client.requestOperation("get_auth_template", "get", "/auth_templates/{auth_template_id}", init);
-  }
-
-  async update(init?: OperationInit<"auth_templates_update_auth_template_put">): Promise<OperationData<"auth_templates_update_auth_template_put">> {
-    return this.client.requestOperation("auth_templates_update_auth_template_put", "put", "/auth_templates/{auth_template_id}", init);
-  }
-
-  async delete(init?: OperationInit<"delete_auth_template_endpoint">): Promise<OperationData<"delete_auth_template_endpoint">> {
-    return this.client.requestOperation("delete_auth_template_endpoint", "delete", "/auth_templates/{auth_template_id}", init);
-  }
-
-  /** Update Auth Template */
-  async auth_templates_update_auth_template(init?: OperationInit<"auth_templates_update_auth_template">): Promise<OperationData<"auth_templates_update_auth_template">> {
-    return this.client.requestOperation("auth_templates_update_auth_template", "patch", "/auth_templates/{auth_template_id}", init);
-  }
-
-  /** Update Auth Template */
-  async auth_templates_update_auth_template_put(init?: OperationInit<"auth_templates_update_auth_template_put">): Promise<OperationData<"auth_templates_update_auth_template_put">> {
-    return this.client.requestOperation("auth_templates_update_auth_template_put", "put", "/auth_templates/{auth_template_id}", init);
-  }
-
-  /** Create Auth Template */
-  async create_auth_template(init?: OperationInit<"create_auth_template">): Promise<OperationData<"create_auth_template">> {
-    return this.client.requestOperation("create_auth_template", "post", "/auth_templates", init);
-  }
-
-  /** Delete Auth Template By Name */
-  async delete_auth_template_by_name(init?: OperationInit<"delete_auth_template_by_name">): Promise<OperationData<"delete_auth_template_by_name">> {
-    return this.client.requestOperation("delete_auth_template_by_name", "delete", "/auth_templates", init);
-  }
-
-  /** Delete Auth Template Endpoint */
-  async delete_auth_template_endpoint(init?: OperationInit<"delete_auth_template_endpoint">): Promise<OperationData<"delete_auth_template_endpoint">> {
-    return this.client.requestOperation("delete_auth_template_endpoint", "delete", "/auth_templates/{auth_template_id}", init);
   }
 
   /** Get Auth Template */
@@ -67,10 +30,5 @@ export class AuthTemplatesResource {
   /** List Auth Templates */
   async list_auth_templates(init?: OperationInit<"list_auth_templates">): Promise<OperationData<"list_auth_templates">> {
     return this.client.requestOperation("list_auth_templates", "get", "/auth_templates", init);
-  }
-
-  /** Update Auth Template By Name */
-  async update_auth_template_by_name(init?: OperationInit<"update_auth_template_by_name">): Promise<OperationData<"update_auth_template_by_name">> {
-    return this.client.requestOperation("update_auth_template_by_name", "put", "/auth_templates", init);
   }
 }

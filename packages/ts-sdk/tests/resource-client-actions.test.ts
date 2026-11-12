@@ -5,9 +5,9 @@ import type { NexlaClient } from "../src/client/nexla-client.js";
 class FakeClient {
   public calls: Array<{ method: string; path: string }> = [];
 
-  async request(method: string, path: string): Promise<unknown> {
+  request(method: string, path: string): Promise<unknown> {
     this.calls.push({ method, path });
-    return { ok: true };
+    return Promise.resolve({ ok: true });
   }
 }
 

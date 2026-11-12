@@ -65,21 +65,9 @@ export const resourceMap = {
       "path": "/auth_parameters",
       "method": "get"
     },
-    "create": {
-      "path": "/auth_parameters",
-      "method": "post"
-    },
     "get": {
       "path": "/auth_parameters/{auth_parameter_id}",
       "method": "get"
-    },
-    "update": {
-      "path": "/auth_parameters/{auth_parameter_id}",
-      "method": "put"
-    },
-    "delete": {
-      "path": "/auth_parameters/{auth_parameter_id}",
-      "method": "delete"
     }
   },
   "auth_templates": {
@@ -87,21 +75,9 @@ export const resourceMap = {
       "path": "/auth_templates",
       "method": "get"
     },
-    "create": {
-      "path": "/auth_templates",
-      "method": "post"
-    },
     "get": {
       "path": "/auth_templates/{auth_template_id}",
       "method": "get"
-    },
-    "update": {
-      "path": "/auth_templates/{auth_template_id}",
-      "method": "put"
-    },
-    "delete": {
-      "path": "/auth_templates/{auth_template_id}",
-      "method": "delete"
     }
   },
   "catalog_configs": {
@@ -127,14 +103,6 @@ export const resourceMap = {
     }
   },
   "cluster_endpoints": {
-    "get": {
-      "path": "/cluster_endpoints/{endpoint_id}",
-      "method": "get"
-    },
-    "update": {
-      "path": "/cluster_endpoints/{endpoint_id}",
-      "method": "put"
-    },
     "delete": {
       "path": "/cluster_endpoints/{endpoint_id}",
       "method": "delete"
@@ -192,10 +160,6 @@ export const resourceMap = {
     "get": {
       "path": "/connectors/{connector_id}",
       "method": "get"
-    },
-    "update": {
-      "path": "/connectors/{connector_id}",
-      "method": "put"
     }
   },
   "credentials": {
@@ -553,25 +517,9 @@ export const resourceMap = {
     }
   },
   "org_tiers": {
-    "list": {
-      "path": "/org_tiers",
-      "method": "get"
-    },
-    "create": {
-      "path": "/org_tiers",
-      "method": "post"
-    },
     "get": {
       "path": "/org_tiers/{tier_id}",
       "method": "get"
-    },
-    "update": {
-      "path": "/org_tiers/{tier_id}",
-      "method": "put"
-    },
-    "delete": {
-      "path": "/org_tiers/{tier_id}",
-      "method": "delete"
     }
   },
   "organizations": {
@@ -586,10 +534,6 @@ export const resourceMap = {
     "update": {
       "path": "/orgs/{org_id}",
       "method": "put"
-    },
-    "delete": {
-      "path": "/orgs/{org_id}",
-      "method": "delete"
     }
   },
   "projects": {
@@ -829,25 +773,9 @@ export const resourceMap = {
     }
   },
   "user_tiers": {
-    "list": {
-      "path": "/user_tiers",
-      "method": "get"
-    },
-    "create": {
-      "path": "/user_tiers",
-      "method": "post"
-    },
     "get": {
       "path": "/user_tiers/{tier_id}",
       "method": "get"
-    },
-    "update": {
-      "path": "/user_tiers/{tier_id}",
-      "method": "put"
-    },
-    "delete": {
-      "path": "/user_tiers/{tier_id}",
-      "method": "delete"
     }
   },
   "users": {

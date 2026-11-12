@@ -63,43 +63,43 @@ const basePaths = {
   users: "/users",
   validators: "/validators",
   vendor_endpoints: "/vendor_endpoints",
-  vendors: "/vendors"
+  vendors: "/vendors",
 };
 
 const tagToResource = {
   "Session Management": "tokens",
-  "Flows": "flows",
-  "Sources": "sources",
+  Flows: "flows",
+  Sources: "sources",
   "Destinations (Data Sinks)": "destinations",
   "Nexsets (Data Sets)": "nexsets",
   "Custom Data Flows": "custom_data_flows",
-  "Credentials": "credentials",
+  Credentials: "credentials",
   "Lookups (Data Maps)": "lookups",
   "Data Maps": "lookups",
-  "Organizations": "organizations",
-  "Users": "users",
-  "Teams": "teams",
-  "Projects": "projects",
-  "Transforms": "transforms",
+  Organizations: "organizations",
+  Users: "users",
+  Teams: "teams",
+  Projects: "projects",
+  Transforms: "transforms",
   "Attribute Transforms": "attribute_transforms",
   "Code Containers": "code_containers",
   "Doc Containers": "doc_containers",
-  "Notifications": "notifications",
+  Notifications: "notifications",
   "Notification Settings": "notification_settings",
   "Notification Types": "notification_types",
   "Notification Channel Settings": "notification_channel_settings",
-  "Metrics": "metrics",
+  Metrics: "metrics",
   "Audit Logs": "audit_logs",
   "Access Control": "access_control",
   "Quarantine Settings": "quarantine_settings",
   "Gen AI Recommendations": "genai",
   "Approval Requests": "approval_requests",
-  "Limits": "limits",
+  Limits: "limits",
   "Env: Org Management": "env_org_management",
   "Env: Vendor Management": "env_vendor_management",
   "Env: General Settings": "env_general_settings",
   "Org authentication configs": "org_auth_configs",
-  "Marketplace": "marketplace",
+  Marketplace: "marketplace",
   "Self Sign-Up": "self_signup",
   "Self Sign-Up Admin": "self_signup_admin",
   "Async Tasks": "async_tasks",
@@ -109,15 +109,15 @@ const tagToResource = {
   "GenAI Configuration": "genai",
   "API Keys": "api_keys",
   "Tool Sets": "tool_sets",
-  "Tools": "tools",
+  Tools: "tools",
   "Service Keys": "service_keys",
   "User Settings": "user_settings",
   "User Tiers": "user_tiers",
   "Org Tiers": "org_tiers",
   "Catalog Configs": "catalog_configs",
-  "Clusters": "clusters",
+  Clusters: "clusters",
   "Cluster Endpoints": "cluster_endpoints",
-  "Connectors": "connectors",
+  Connectors: "connectors",
   "Data Schemas": "data_schemas",
   "Data Flows": "data_flows",
   "Data Credentials Groups": "data_credentials_groups",
@@ -128,10 +128,10 @@ const tagToResource = {
   "MCP Sessions": "mcp_sessions",
   "Flow Nodes": "flow_nodes",
   "Flow Triggers": "flow_triggers",
-  "Vendors": "vendors",
+  Vendors: "vendors",
   "Vendor Endpoints": "vendor_endpoints",
   "Dashboard Transforms": "dashboard_transforms",
-  "CubeJS": "cubejs"
+  CubeJS: "cubejs",
 };
 
 const rawSpec = fs.readFileSync(MERGED_SPEC_PATH, "utf8");
@@ -199,7 +199,7 @@ for (const [apiPath, pathItem] of Object.entries(paths)) {
       summary: operation.summary ?? "",
       skipAuth: !requiresSessionToken(operation.security),
       deprecated: operation.deprecated === true,
-      deprecationMessage: operation["x-deprecation-message"] ?? "Do not use."
+      deprecationMessage: operation["x-deprecation-message"] ?? "Do not use.",
     };
 
     if (!operationsByResource.has(resourceKey)) {
@@ -270,30 +270,40 @@ for (const resourceKey of resourceKeys) {
   const aliasEntries = [];
   const resourceMapEntry = resourceMap[resourceKey];
   if (resourceMapEntry?.list) {
-    const listOp = operations.find((op) => op.path === resourceMapEntry.list.path && op.method === resourceMapEntry.list.method);
+    const listOp = operations.find(
+      (op) => op.path === resourceMapEntry.list.path && op.method === resourceMapEntry.list.method,
+    );
     if (listOp) aliasEntries.push({ name: "list", op: listOp });
   }
   if (resourceMapEntry?.create) {
-    const createOp = operations.find((op) => op.path === resourceMapEntry.create.path && op.method === resourceMapEntry.create.method);
+    const createOp = operations.find(
+      (op) => op.path === resourceMapEntry.create.path && op.method === resourceMapEntry.create.method,
+    );
     if (createOp) aliasEntries.push({ name: "create", op: createOp });
   }
   if (resourceMapEntry?.get) {
-    const getOp = operations.find((op) => op.path === resourceMapEntry.get.path && op.method === resourceMapEntry.get.method);
+    const getOp = operations.find(
+      (op) => op.path === resourceMapEntry.get.path && op.method === resourceMapEntry.get.method,
+    );
     if (getOp) aliasEntries.push({ name: "get", op: getOp });
   }
   if (resourceMapEntry?.update) {
-    const updateOp = operations.find((op) => op.path === resourceMapEntry.update.path && op.method === resourceMapEntry.update.method);
+    const updateOp = operations.find(
+      (op) => op.path === resourceMapEntry.update.path && op.method === resourceMapEntry.update.method,
+    );
     if (updateOp) aliasEntries.push({ name: "update", op: updateOp });
   }
   if (resourceMapEntry?.delete) {
-    const deleteOp = operations.find((op) => op.path === resourceMapEntry.delete.path && op.method === resourceMapEntry.delete.method);
+    const deleteOp = operations.find(
+      (op) => op.path === resourceMapEntry.delete.path && op.method === resourceMapEntry.delete.method,
+    );
     if (deleteOp) aliasEntries.push({ name: "delete", op: deleteOp });
   }
 
   const lines = [];
-  lines.push("import type { NexlaClient } from \"../../client/nexla-client.js\";");
-  lines.push("import type { OperationData, OperationInit } from \"../../client/operation-types.js\";");
-  lines.push("import { withSkipAuth } from \"./utils.js\";");
+  lines.push('import type { NexlaClient } from "../../client/nexla-client.js";');
+  lines.push('import type { OperationData, OperationInit } from "../../client/operation-types.js";');
+  lines.push('import { withSkipAuth } from "./utils.js";');
   lines.push("");
   lines.push(`export class ${className} {`);
   lines.push("  private readonly client: NexlaClient;");
@@ -309,8 +319,12 @@ for (const resourceKey of resourceKeys) {
     const methodName = isValidIdentifier(alias.name) ? alias.name : `[\"${alias.name}\"]`;
     const maybeSkip = alias.op.skipAuth;
     const initVar = maybeSkip ? "withSkipAuth(init)" : "init";
-    lines.push(`  async ${methodName}(init?: OperationInit<\"${alias.op.operationId}\">): Promise<OperationData<\"${alias.op.operationId}\">> {`);
-    lines.push(`    return this.client.requestOperation(\"${alias.op.operationId}\", \"${alias.op.method}\", \"${alias.op.path}\", ${initVar});`);
+    lines.push(
+      `  async ${methodName}(init?: OperationInit<\"${alias.op.operationId}\">): Promise<OperationData<\"${alias.op.operationId}\">> {`,
+    );
+    lines.push(
+      `    return this.client.requestOperation(\"${alias.op.operationId}\", \"${alias.op.method}\", \"${alias.op.path}\", ${initVar});`,
+    );
     lines.push("  }");
   }
 
@@ -327,7 +341,7 @@ for (const resourceKey of resourceKeys) {
     } else if (summaryText) {
       lines.push(`  /** ${summaryText} */`);
     }
-    const methodName = isValidIdentifier(opId) ? opId : `[\"${opId.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"")}\"]`;
+    const methodName = isValidIdentifier(opId) ? opId : `[\"${opId.replace(/\\/g, "\\\\").replace(/\"/g, '\\"')}\"]`;
     const initVar = op.skipAuth ? "withSkipAuth(init)" : "init";
     lines.push(`  async ${methodName}(init?: OperationInit<\"${opId}\">): Promise<OperationData<\"${opId}\">> {`);
     lines.push(`    return this.client.requestOperation(\"${opId}\", \"${op.method}\", \"${op.path}\", ${initVar});`);
@@ -346,7 +360,7 @@ for (const resourceKey of resourceKeys) {
 }
 
 const indexLines = [];
-indexLines.push("import type { NexlaClient } from \"../../client/nexla-client.js\";");
+indexLines.push('import type { NexlaClient } from "../../client/nexla-client.js";');
 for (const resourceKey of resourceKeys) {
   const className = `${toPascalCase(resourceKey)}Resource`;
   indexLines.push(`import { ${className} } from \"./${resourceKey}.js\";`);

@@ -35,12 +35,12 @@ describe("client.paginate", () => {
       "X-Current-Page": String(current),
       "X-Page-Count": "2",
       "X-Total-Count": "5",
-      "X-Total-Page-Count": "3"
+      "X-Total-Page-Count": "3",
     });
     const { client, calls } = clientFor([
       { status: 200, body: rows(1, 2), headers: pageHeaders(1) },
       { status: 200, body: rows(3, 2), headers: pageHeaders(2) },
-      { status: 200, body: rows(5, 1), headers: pageHeaders(3) }
+      { status: 200, body: rows(5, 1), headers: pageHeaders(3) },
     ]);
 
     const pages = [];
@@ -51,16 +51,20 @@ describe("client.paginate", () => {
     expect(calls.map((call) => queryOf(call))).toEqual([
       { page: "1", perPage: "2" },
       { page: "2", perPage: "2" },
-      { page: "3", perPage: "2" }
+      { page: "3", perPage: "2" },
     ]);
     expect(pages.map((page) => page.items.length)).toEqual([2, 2, 1]);
     expect(pages[0]).toMatchObject({ page: 1, perPage: 2, totalCount: 5, totalPages: 3 });
   });
 
-  it("continues while Link has rel=\"Next\" and ignores rel=\"Previous\"", async () => {
+  it('continues while Link has rel="Next" and ignores rel="Previous"', async () => {
     const { client, calls } = clientFor([
       { status: 200, body: rows(1, 2), headers: { Link: '<https://x/data_sources?page=2&per_page=2>; rel="Next"' } },
-      { status: 200, body: rows(3, 2), headers: { Link: '<https://x/data_sources?page=1&per_page=2>; rel="Previous"' } }
+      {
+        status: 200,
+        body: rows(3, 2),
+        headers: { Link: '<https://x/data_sources?page=1&per_page=2>; rel="Previous"' },
+      },
     ]);
 
     const items = [];
@@ -72,10 +76,10 @@ describe("client.paginate", () => {
     expect(calls).toHaveLength(2);
   });
 
-  it("treats rel=\"next\" in lower case as a next link", async () => {
+  it('treats rel="next" in lower case as a next link', async () => {
     const { client, calls } = clientFor([
       { status: 200, body: rows(1, 1), headers: { Link: '<https://x/data_sources?page=2>; rel="next"' } },
-      { status: 200, body: rows(2, 1) }
+      { status: 200, body: rows(2, 1) },
     ]);
 
     const pages = [];
@@ -89,8 +93,12 @@ describe("client.paginate", () => {
 
   it("does not follow the Link URL. It increments page on the configured base URL", async () => {
     const { client, calls } = clientFor([
-      { status: 200, body: rows(1, 2), headers: { Link: '<https://other-host/api/v1/data_sources?page=2>; rel="Next"' } },
-      { status: 200, body: rows(3, 1) }
+      {
+        status: 200,
+        body: rows(1, 2),
+        headers: { Link: '<https://other-host/api/v1/data_sources?page=2>; rel="Next"' },
+      },
+      { status: 200, body: rows(3, 1) },
     ]);
 
     await drain(client.paginate("get", "/data_sources", { params: { query: { per_page: 2 } } }));
@@ -114,7 +122,7 @@ describe("client.paginate", () => {
   it("stops on an empty page and does not yield it", async () => {
     const { client, calls } = clientFor([
       { status: 200, body: rows(1, 2), headers: { Link: '<x>; rel="Next"' } },
-      { status: 200, body: [], headers: { Link: '<x>; rel="Next"' } }
+      { status: 200, body: [], headers: { Link: '<x>; rel="Next"' } },
     ]);
 
     const pages = [];

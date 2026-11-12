@@ -17,20 +17,6 @@ export class ConnectorsResource {
     return this.client.requestOperation("show_connector", "get", "/connectors/{connector_id}", init);
   }
 
-  async update(init?: OperationInit<"connectors_update_connector_put">): Promise<OperationData<"connectors_update_connector_put">> {
-    return this.client.requestOperation("connectors_update_connector_put", "put", "/connectors/{connector_id}", init);
-  }
-
-  /** Update Connector */
-  async connectors_update_connector(init?: OperationInit<"connectors_update_connector">): Promise<OperationData<"connectors_update_connector">> {
-    return this.client.requestOperation("connectors_update_connector", "patch", "/connectors/{connector_id}", init);
-  }
-
-  /** Update Connector */
-  async connectors_update_connector_put(init?: OperationInit<"connectors_update_connector_put">): Promise<OperationData<"connectors_update_connector_put">> {
-    return this.client.requestOperation("connectors_update_connector_put", "put", "/connectors/{connector_id}", init);
-  }
-
   /** Index Connectors */
   async index_connectors(init?: OperationInit<"index_connectors">): Promise<OperationData<"index_connectors">> {
     return this.client.requestOperation("index_connectors", "get", "/connectors", init);

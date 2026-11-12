@@ -103,9 +103,7 @@ describe("SourcesResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.sources.get({ params: { path: { source_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.sources.get({ params: { path: { source_id: 99999 } } })).rejects.toThrow();
     });
   });
 

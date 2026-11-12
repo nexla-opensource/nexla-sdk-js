@@ -3,14 +3,16 @@ import { WebhooksClient } from "../src/webhooks/index.js";
 
 const createMockFetch = (status: number, body?: unknown) => {
   const calls: Request[] = [];
-  const fetchFn: typeof fetch = async (input, init) => {
+  const fetchFn: typeof fetch = (input, init) => {
     const request = input instanceof Request ? input : new Request(input, init);
     calls.push(request);
 
-    return new Response(JSON.stringify(body ?? {}), {
-      status,
-      headers: { "content-type": "application/json" }
-    });
+    return Promise.resolve(
+      new Response(JSON.stringify(body ?? {}), {
+        status,
+        headers: { "content-type": "application/json" },
+      }),
+    );
   };
   return { fetchFn, calls };
 };

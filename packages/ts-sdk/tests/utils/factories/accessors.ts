@@ -68,11 +68,11 @@ export function createAccessorList(count: number, options?: AccessorFactoryOptio
 /**
  * Create accessor request payload for adding/updating accessors.
  */
-export function createAccessorRequest(options: {
+export function createAccessorRequest(options: { id: number; type: "USER" | "TEAM"; access_roles?: string[] }): {
   id: number;
-  type: "USER" | "TEAM";
-  access_roles?: string[];
-}): { id: number; type: string; access_roles: string[] } {
+  type: string;
+  access_roles: string[];
+} {
   return {
     id: options.id,
     type: options.type,

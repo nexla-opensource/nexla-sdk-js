@@ -12,16 +12,20 @@ export class AccessTokenAuthProvider implements AuthProvider {
     this.accessToken = accessToken;
   }
 
-  async getAccessToken(): Promise<string> {
-    return this.accessToken;
+  getAccessToken(): Promise<string> {
+    return Promise.resolve(this.accessToken);
   }
 
-  async refreshAccessToken(): Promise<void> {
-    throw new AuthenticationError("Direct access tokens cannot be refreshed");
+  refreshAccessToken(): Promise<void> {
+    return Promise.reject(new AuthenticationError("Direct access tokens cannot be refreshed"));
   }
 
-  async switchOrg(): Promise<void> {
-    throw new NexlaError("switchOrg needs a credential that exchanges for tokens (apiKey, serviceKey, or email and password).");
+  switchOrg(): Promise<void> {
+    return Promise.reject(
+      new NexlaError(
+        "switchOrg needs a credential that exchanges for tokens (apiKey, serviceKey, or email and password).",
+      ),
+    );
   }
 
   async logout(): Promise<void> {

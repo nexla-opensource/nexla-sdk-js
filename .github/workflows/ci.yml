@@ -40,7 +40,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22  # size-limit 14 needs fs/promises.glob (Node >= 22)
           cache: pnpm
 
       - name: Install dependencies
@@ -58,6 +58,13 @@ jobs:
       - name: Validate generated coverage and spec metadata
         run: pnpm -C packages/ts-sdk check:generated
 
+      # NEXLA_BACKEND_OPENAPI is a repository variable: the path to a fresh public backend spec on the runner.
+      # Public CI does not set it, so the step prints a skip notice and passes.
+      - name: Backend drift check
+        env:
+          NEXLA_BACKEND_OPENAPI: ${{ vars.NEXLA_BACKEND_OPENAPI }}
+        run: pnpm -C packages/ts-sdk check:backend-drift
+
       - name: Generate SDK artifacts
         run: |
           pnpm -C packages/ts-sdk gen
@@ -65,6 +72,9 @@ jobs:
 
       - name: Lint
         run: pnpm -C packages/ts-sdk lint
+
+      - name: Format check
+        run: pnpm -C packages/ts-sdk format:check
 
       - name: Typecheck
         run: pnpm -C packages/ts-sdk typecheck
@@ -74,3 +84,40 @@ jobs:
 
       - name: Build
         run: pnpm -C packages/ts-sdk build
+
+      - name: Package metadata (publint)
+        run: pnpm -C packages/ts-sdk publint
+
+      - name: Package types (attw)
+        run: pnpm -C packages/ts-sdk attw
+
+      - name: Bundle size
+        run: pnpm -C packages/ts-sdk size
+
+  consumer-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -C packages/ts-sdk build
+
+      # Packs the tarball, installs it in a fresh project, and checks ESM, CJS and types.
+      - name: Consumer smoke test
+        run: pnpm -C packages/ts-sdk smoke:consumer

@@ -29,7 +29,7 @@ const CONNECT_ERROR_CODES = new Set(["ECONNREFUSED", "ENOTFOUND", "EAI_AGAIN", "
 
 export const createFetchWithRetry = (
   baseFetch: typeof fetch,
-  options: HttpOptions = {}
+  options: HttpOptions = {},
 ): ((input: Request) => Promise<Response>) => {
   const maxRetries = options.maxRetries ?? 3;
   const backoffMs = options.backoffMs ?? 500;
@@ -62,7 +62,7 @@ export const createFetchWithRetry = (
             throw new NexlaConnectionError(`Connection failed: ${messageOf(error)}`, {
               method: original.method,
               url: original.url,
-              ...(error instanceof Error ? { originalError: error } : {})
+              ...(error instanceof Error ? { originalError: error } : {}),
             });
           }
         }
@@ -109,7 +109,7 @@ const sendOnce = async (baseFetch: typeof fetch, original: Request, timeoutMs: n
       throw new NexlaTimeoutError(`Request timed out after ${timeoutMs} ms`, {
         method: original.method,
         url: original.url,
-        ...(error instanceof Error ? { originalError: error } : {})
+        ...(error instanceof Error ? { originalError: error } : {}),
       });
     }
     throw error;
@@ -121,7 +121,10 @@ const sendOnce = async (baseFetch: typeof fetch, original: Request, timeoutMs: n
 
 /** Wait time from a 429: body error.retry_after, then Retry-After (seconds or HTTP date). */
 const retryAfterSeconds = async (response: Response): Promise<number | undefined> => {
-  const text = await response.clone().text().catch(() => "");
+  const text = await response
+    .clone()
+    .text()
+    .catch(() => "");
   try {
     const parsed: unknown = JSON.parse(text);
     if (isRecord(parsed) && isRecord(parsed["error"])) {
@@ -149,12 +152,12 @@ const messageOf = (error: unknown): string => (error instanceof Error ? error.me
 const defaultSleep = (ms: number, signal?: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
     if (signal?.aborted) {
-      reject(signal.reason);
+      reject(signal.reason as Error);
       return;
     }
     const onAbort = () => {
       clearTimeout(timer);
-      reject(signal?.reason);
+      reject(signal?.reason as Error);
     };
     const timer = setTimeout(() => {
       signal?.removeEventListener("abort", onAbort);

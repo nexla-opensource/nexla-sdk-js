@@ -132,42 +132,32 @@ export class FlowsResource {
 
   /** Insert Flow Node Endpoint */
   async flows_insert_flow_node_endpoint(init?: OperationInit<"flows_insert_flow_node_endpoint">): Promise<OperationData<"flows_insert_flow_node_endpoint">> {
-    return this.client.requestOperation("flows_insert_flow_node_endpoint", "put", "/flows/{flow_id}/insert_flow_node", init);
+    return this.client.requestOperation("flows_insert_flow_node_endpoint", "post", "/flows/{flow_id}/insert_flow_node", init);
   }
 
   /** Insert Flow Node Endpoint */
-  async flows_insert_flow_node_endpoint_post(init?: OperationInit<"flows_insert_flow_node_endpoint_post">): Promise<OperationData<"flows_insert_flow_node_endpoint_post">> {
-    return this.client.requestOperation("flows_insert_flow_node_endpoint_post", "post", "/flows/{flow_id}/insert_flow_node", init);
-  }
-
-  /** Flows Minimal */
-  async flows_minimal(init?: OperationInit<"flows_minimal">): Promise<OperationData<"flows_minimal">> {
-    return this.client.requestOperation("flows_minimal", "get", "/flows/all/minimal", init);
+  async flows_insert_flow_node_endpoint_put(init?: OperationInit<"flows_insert_flow_node_endpoint_put">): Promise<OperationData<"flows_insert_flow_node_endpoint_put">> {
+    return this.client.requestOperation("flows_insert_flow_node_endpoint_put", "put", "/flows/{flow_id}/insert_flow_node", init);
   }
 
   /** Remove Flow Node Endpoint */
   async flows_remove_flow_node_endpoint(init?: OperationInit<"flows_remove_flow_node_endpoint">): Promise<OperationData<"flows_remove_flow_node_endpoint">> {
-    return this.client.requestOperation("flows_remove_flow_node_endpoint", "put", "/flows/{flow_id}/remove_flow_node", init);
+    return this.client.requestOperation("flows_remove_flow_node_endpoint", "post", "/flows/{flow_id}/remove_flow_node", init);
   }
 
   /** Remove Flow Node Endpoint */
-  async flows_remove_flow_node_endpoint_post(init?: OperationInit<"flows_remove_flow_node_endpoint_post">): Promise<OperationData<"flows_remove_flow_node_endpoint_post">> {
-    return this.client.requestOperation("flows_remove_flow_node_endpoint_post", "post", "/flows/{flow_id}/remove_flow_node", init);
+  async flows_remove_flow_node_endpoint_put(init?: OperationInit<"flows_remove_flow_node_endpoint_put">): Promise<OperationData<"flows_remove_flow_node_endpoint_put">> {
+    return this.client.requestOperation("flows_remove_flow_node_endpoint_put", "put", "/flows/{flow_id}/remove_flow_node", init);
   }
 
   /** Run Flow Now */
   async flows_run_flow_now(init?: OperationInit<"flows_run_flow_now">): Promise<OperationData<"flows_run_flow_now">> {
-    return this.client.requestOperation("flows_run_flow_now", "put", "/flows/{flow_id}/run_now", init);
+    return this.client.requestOperation("flows_run_flow_now", "post", "/flows/{flow_id}/run_now", init);
   }
 
   /** Run Flow Now */
-  async flows_run_flow_now_post(init?: OperationInit<"flows_run_flow_now_post">): Promise<OperationData<"flows_run_flow_now_post">> {
-    return this.client.requestOperation("flows_run_flow_now_post", "post", "/flows/{flow_id}/run_now", init);
-  }
-
-  /** Show Control Event */
-  async flows_show_control_event(init?: OperationInit<"flows_show_control_event">): Promise<OperationData<"flows_show_control_event">> {
-    return this.client.requestOperation("flows_show_control_event", "get", "/flows/{resource_id}/control/{event}", init);
+  async flows_run_flow_now_put(init?: OperationInit<"flows_run_flow_now_put">): Promise<OperationData<"flows_run_flow_now_put">> {
+    return this.client.requestOperation("flows_run_flow_now_put", "put", "/flows/{flow_id}/run_now", init);
   }
 
   /** Update Flow */
@@ -250,11 +240,6 @@ export class FlowsResource {
     return this.client.requestOperation("list_linked_flows", "get", "/flows/{flow_id}/links", init);
   }
 
-  /** Origin Nodes Condensed */
-  async origin_nodes_condensed(init?: OperationInit<"origin_nodes_condensed">): Promise<OperationData<"origin_nodes_condensed">> {
-    return this.client.requestOperation("origin_nodes_condensed", "get", "/flows/all/condensed", init);
-  }
-
   /** Plan Flow */
   async plan_flow(init?: OperationInit<"plan_flow">): Promise<OperationData<"plan_flow">> {
     return this.client.requestOperation("plan_flow", "post", "/flows/plan", init);
@@ -263,11 +248,6 @@ export class FlowsResource {
   /** Publish Rag */
   async publish_rag(init?: OperationInit<"publish_rag">): Promise<OperationData<"publish_rag">> {
     return this.client.requestOperation("publish_rag", "put", "/flows/{flow_id}/rag/publish", init);
-  }
-
-  /** Publish Raw Flow Event */
-  async publish_raw_flow_event(init?: OperationInit<"publish_raw_flow_event">): Promise<OperationData<"publish_raw_flow_event">> {
-    return this.client.requestOperation("publish_raw_flow_event", "post", "/flows/raw", init);
   }
 
   /** Remove Flow Docs */

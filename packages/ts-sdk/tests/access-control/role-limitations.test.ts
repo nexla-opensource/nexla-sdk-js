@@ -204,7 +204,7 @@ describe("AccessRoleLimitations", () => {
         client.access_control.add_data_source_accessors({
           params: { path: { data_source_id: 123 } },
           body: { accessors: [{ id: 456, type: "user", access_role: "sharer" }] },
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -224,7 +224,7 @@ describe("AccessRoleLimitations", () => {
         client.access_control.add_team_accessors({
           params: { path: { team_id: 123 } },
           body: { accessors: [{ id: 456, type: "user", access_role: "sharer" }] },
-        })
+        }),
       ).rejects.toThrow();
     });
   });
@@ -246,7 +246,7 @@ describe("AccessRoleLimitations", () => {
         client.access_control.add_data_source_accessors({
           params: { path: { data_source_id: 123 } },
           body: { accessors: [{ id: 456, type: "user", access_role: "unknown_role" }] },
-        })
+        }),
       ).rejects.toThrow();
     });
   });

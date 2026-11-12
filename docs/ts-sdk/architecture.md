@@ -52,23 +52,51 @@ packages/ts-sdk/
 
 ## Backend OpenAPI Spec (Public)
 
-`openapi/nexla-api.public.json` is generator input. It describes the public Nexla backend API: 1,249 operations and 227 component schemas.
+`openapi/nexla-api.public.json` is generator input. It describes the public Nexla backend API: 1,188 operations and 227 component schemas.
 
 Provenance:
 
 - The backend FastAPI app exports the document with `app.openapi()`.
-- The `/api/v1` prefix is removed from every path.
-- Admin-only routes are removed. The exclusion list is kept with the backend tooling.
+- The `/api/v1` prefix is removed from every path. Root and `/api/v1` twins are merged.
 - Each `operationId` is the name of the backend route function. When two routes share a name, the builder adds the resource name or the HTTP method to make it unique.
+- Routes that are not public API are removed:
+  - Admin-only routes. A route is admin-only when a dependency's name contains `super_user`, `nexla_admin`, `infra`, or `require_*admin`; when the handler calls `require_nexla_admin`, an infrastructure-user check, or `super_user_read_only`; or when a top-level `if not ...super_user...:` in the handler rejects the request. A super-user check nested in a branch (for example, only for the `public` field) does not make the route admin-only.
+  - Non-API routes: `GET /`, `GET /health`, `POST /mock_catalog_add`, `/internal/*`, and handlers named `*_dead_route`.
 
-How to rebuild:
+How to rebuild (needs a checkout of the private backend):
 
-1. Export the OpenAPI document and the route list from the backend.
-2. Run the public spec builder. The builder is maintained with the backend tooling and is not in this repository.
-3. Copy the output to `openapi/nexla-api.public.json`.
-4. Run `pnpm -C packages/ts-sdk gen`.
+```bash
+cd "$NEXLA_ADMIN_API_PATH"
+ENVIRONMENT=test ACCESS_TOKEN_SECRET_KEY=ci uv run --frozen python \
+  /path/to/nexla-sdk-js/scripts/backend-spec/build_public_spec.py \
+  --out /path/to/nexla-sdk-js/openapi/nexla-api.public.json
+pnpm -C packages/ts-sdk gen
+```
 
-CI does not rebuild this file. The builder needs the private backend source.
+`ENVIRONMENT=test` skips the backend startup checks. Importing the app opens no database. CI does not rebuild this file, because the builder needs the private backend source.
+
+## Backend Drift Check
+
+`packages/ts-sdk/scripts/check-backend-drift.mjs` compares the committed `openapi/nexla-api.public.json` with a fresh public backend spec. It compares (method, normalized path) pairs, so a renamed placeholder is not drift. Operations that share a normalized key count once. A change to only one of them is not reported.
+
+- Input: `NEXLA_BACKEND_OPENAPI`, the path to the fresh spec JSON.
+- Unset or empty: the check prints a skip notice and exits 0.
+- Drift: the check prints the added (`+`) and removed (`-`) operations and exits 1.
+
+Run it locally:
+
+```bash
+NEXLA_BACKEND_OPENAPI=/path/to/nexla-api.public.json pnpm -C packages/ts-sdk check:backend-drift
+```
+
+Produce the fresh spec with these steps. The builders are maintained with the backend tooling, not in this repository.
+
+1. In `admin-api-python`, export the FastAPI document with `app.openapi()`. Also export the route list (route name, method, path) and the admin-dependency metadata of each route.
+2. Clean the document. Strip the `/api/v1` prefix, merge duplicate paths, and give each operation a readable, unique `operationId`.
+3. Filter to the public API. Remove admin-only routes, `GET /`, `GET /health`, `POST /mock_catalog_add`, routes under `/internal`, and `*_dead_route` operations.
+4. Save the result as the public spec, then set `NEXLA_BACKEND_OPENAPI` to its path.
+
+CI runs the check in the `Backend drift check` step of `ci.yml`. The step passes the repository variable `vars.NEXLA_BACKEND_OPENAPI`. Public CI does not set the variable, so the step skips. To enforce the check, set the variable to a path that exists on the runner, for example on a self-hosted runner, or in a job that first creates the file.
 
 ## OpenAPI Generation Pipeline
 
@@ -107,11 +135,17 @@ Coverage is enforced by `check-generated-coverage.mjs`, which compares generated
 
 Blocking TypeScript checks are in `.github/workflows/ci.yml`:
 
-- artifact generation + clean diff
-- lint
+- changeset check (no unversioned `.changeset/*.md`)
+- artifact generation + clean diff, and `check:generated`
+- lint and format check
 - typecheck
 - tests/coverage
 - build
+- package checks: publint, attw, and size-limit (budgets in `packages/ts-sdk/package.json`)
+- consumer smoke test on Node 18, 20, and 22 (`scripts/consumer-smoke.mjs`, a separate job)
+- backend drift check (skips unless `vars.NEXLA_BACKEND_OPENAPI` is set; see below)
+
+The package floor is Node.js 18, from `engines` in `packages/ts-sdk/package.json`. The main job runs on Node 22, because `size-limit` 14 needs Node 22.
 
 Integration tests are intentionally documented as non-blocking relative to publish/release gating:
 
@@ -121,3 +155,4 @@ Integration tests are intentionally documented as non-blocking relative to publi
 
 - [Coverage process](./api-coverage.md)
 - [Integration test policy](./integration-tests.md)
+- [Behavior spec](./behavior-spec.md)

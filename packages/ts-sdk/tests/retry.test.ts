@@ -9,10 +9,10 @@ const noSleep = async () => {};
 describe("createFetchWithRetry", () => {
   it("retries GET on 503", async () => {
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      if (calls < 3) return createResponse(503);
-      return createResponse(200);
+      if (calls < 3) return Promise.resolve(createResponse(503));
+      return Promise.resolve(createResponse(200));
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 3, sleep: noSleep });
@@ -24,9 +24,9 @@ describe("createFetchWithRetry", () => {
 
   it("does not retry POST on 503 because it could duplicate a create", async () => {
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      return createResponse(503, { message: "unavailable" });
+      return Promise.resolve(createResponse(503, { message: "unavailable" }));
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 3, sleep: noSleep });
@@ -39,7 +39,7 @@ describe("createFetchWithRetry", () => {
   it("retries PUT on 502 and 504 but not on 500", async () => {
     const statuses = [502, 504, 500];
     let calls = 0;
-    const baseFetch: typeof fetch = async () => createResponse(statuses[calls++] ?? 200);
+    const baseFetch: typeof fetch = () => Promise.resolve(createResponse(statuses[calls++] ?? 200));
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 3, sleep: noSleep });
     const response = await fetchWithRetry(new Request("https://example.com", { method: "PUT", body: "{}" }));
@@ -54,7 +54,8 @@ describe("createFetchWithRetry", () => {
     const baseFetch: typeof fetch = async (input: RequestInfo | URL) => {
       calls += 1;
       bodies.push(await (input as Request).text());
-      if (calls === 1) return createResponse(429, { error: { detail: "slow down", retry_after: 1, type: "RateLimitExceeded" } });
+      if (calls === 1)
+        return createResponse(429, { error: { detail: "slow down", retry_after: 1, type: "RateLimitExceeded" } });
       return createResponse(201, { id: 9 });
     };
 

@@ -104,9 +104,7 @@ describe("CredentialsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.credentials.get({ params: { path: { credential_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.credentials.get({ params: { path: { credential_id: 99999 } } })).rejects.toThrow();
     });
   });
 

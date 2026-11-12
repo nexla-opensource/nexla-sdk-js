@@ -82,8 +82,8 @@ describe("backend spec coverage", () => {
         }
         const call = owner[operationId] as OperationCall;
 
-        const pathValues = Object.fromEntries(
-          Array.from(template.matchAll(/\{([^}]+)\}/g), (match) => [match[1], "1"])
+        const pathValues: Record<string, string> = Object.fromEntries(
+          Array.from(template.matchAll(/\{([^}]+)\}/g), (match): [string, string] => [match[1] ?? "", "1"]),
         );
         const before = mock.calls.length;
         await call.call(owner, { params: { path: pathValues } });
@@ -94,9 +94,7 @@ describe("backend spec coverage", () => {
           continue;
         }
 
-        const expectedPath = trimTrailingSlash(
-          basePath + apiPath.split("?")[0].replace(/\{[^}]+\}/g, "1")
-        );
+        const expectedPath = trimTrailingSlash(basePath + apiPath.split("?")[0].replace(/\{[^}]+\}/g, "1"));
         const actualPath = trimTrailingSlash(new URL(request.url).pathname);
         if (request.method !== method.toUpperCase() || actualPath !== expectedPath) {
           failures.push(`${key}: ${operationId} sent ${request.method} ${actualPath}`);

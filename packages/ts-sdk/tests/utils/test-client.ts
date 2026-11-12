@@ -21,19 +21,12 @@ export interface TestClientResult {
  * Automatically includes a token response for service key auth.
  */
 export function createTestClient(options: TestClientOptions = {}): TestClientResult {
-  const {
-    mockResponses = [],
-    accessToken,
-    baseUrl = "https://test.nexla.io/nexla-api",
-  } = options;
+  const { mockResponses = [], accessToken, baseUrl = "https://test.nexla.io/nexla-api" } = options;
 
   // If using service key auth, prepend token response
   const allResponses: MockResponse[] = accessToken
     ? [...mockResponses]
-    : [
-        { status: 200, body: { access_token: "test-token", expires_in: 7200 } },
-        ...mockResponses,
-      ];
+    : [{ status: 200, body: { access_token: "test-token", expires_in: 7200 } }, ...mockResponses];
 
   const mockFetch = createMockFetch(allResponses);
 
@@ -55,9 +48,7 @@ export function createTestClient(options: TestClientOptions = {}): TestClientRes
 /**
  * Create a test client for direct token auth (no token refresh).
  */
-export function createDirectTokenClient(
-  mockResponses: MockResponse[] = []
-): TestClientResult {
+export function createDirectTokenClient(mockResponses: MockResponse[] = []): TestClientResult {
   return createTestClient({
     mockResponses,
     accessToken: "direct-test-token",

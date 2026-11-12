@@ -144,11 +144,6 @@ export class CredentialsResource {
     return this.client.requestOperation("data_credentials_referenced_by", "get", "/data_credentials/{resource_id}/referenced_by", init);
   }
 
-  /** Show Control Event */
-  async data_credentials_show_control_event(init?: OperationInit<"data_credentials_show_control_event">): Promise<OperationData<"data_credentials_show_control_event">> {
-    return this.client.requestOperation("data_credentials_show_control_event", "get", "/data_credentials/{resource_id}/control/{event}", init);
-  }
-
   /** Legacy Summary Route */
   async data_credentials_summary_legacy(init?: OperationInit<"data_credentials_summary_legacy">): Promise<OperationData<"data_credentials_summary_legacy">> {
     return this.client.requestOperation("data_credentials_summary_legacy", "get", "/data_credentials/summary", init);
@@ -207,11 +202,6 @@ export class CredentialsResource {
   /** Iceberg Migration Status */
   async iceberg_migration_status(init?: OperationInit<"iceberg_migration_status">): Promise<OperationData<"iceberg_migration_status">> {
     return this.client.requestOperation("iceberg_migration_status", "get", "/data_credentials/{credentials_id}/migrate/iceberg/{run_id}/status", init);
-  }
-
-  /** List All Credentials (Admin) */
-  async list_all_credentials(init?: OperationInit<"list_all_credentials">): Promise<OperationData<"list_all_credentials">> {
-    return this.client.requestOperation("list_all_credentials", "get", "/data_credentials/all", init);
   }
 
   /** List Public Credentials */

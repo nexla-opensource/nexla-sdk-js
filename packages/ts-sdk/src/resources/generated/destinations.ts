@@ -289,11 +289,6 @@ export class DestinationsResource {
     return this.client.requestOperation("data_sinks_reset_resource_docs", "post", "/data_sinks/{resource_id}/docs", init);
   }
 
-  /** Show Control Event */
-  async data_sinks_show_control_event(init?: OperationInit<"data_sinks_show_control_event">): Promise<OperationData<"data_sinks_show_control_event">> {
-    return this.client.requestOperation("data_sinks_show_control_event", "get", "/data_sinks/{resource_id}/control/{event}", init);
-  }
-
   /** Show Dashboard Transform */
   async data_sinks_show_dashboard_transform(init?: OperationInit<"data_sinks_show_dashboard_transform">): Promise<OperationData<"data_sinks_show_dashboard_transform">> {
     return this.client.requestOperation("data_sinks_show_dashboard_transform", "get", "/data_sinks/{data_sink_id}/dashboard_transforms", init);
@@ -567,11 +562,6 @@ export class DestinationsResource {
   /** Update Data Sink Quarantine Setting */
   async update_data_sink_quarantine_setting(init?: OperationInit<"update_data_sink_quarantine_setting">): Promise<OperationData<"update_data_sink_quarantine_setting">> {
     return this.client.requestOperation("update_data_sink_quarantine_setting", "put", "/data_sinks/{data_sink_id}/quarantine_settings", init);
-  }
-
-  /** Update Data Sink Runtime Status */
-  async update_data_sink_runtime_status(init?: OperationInit<"update_data_sink_runtime_status">): Promise<OperationData<"update_data_sink_runtime_status">> {
-    return this.client.requestOperation("update_data_sink_runtime_status", "put", "/data_sinks/{data_sink_id}/runtime_status/{runtime_status}", init);
   }
 
   /** Update Flow Via Data Sink */

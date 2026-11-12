@@ -1,6 +1,6 @@
 /**
  * Each generated operation must send the HTTP method and path that the backend route uses.
- * Source of truth: admin-api-python route decorators (see _work/coverage.json js_wrong).
+ * Source of truth: admin-api-python route decorators (the backend route decorators are the source of truth).
  */
 
 import { describe, expect, it } from "vitest";

@@ -3,13 +3,15 @@ import { NexlaClient } from "../src/client/nexla-client.js";
 
 const createMockFetch = () => {
   const calls: Request[] = [];
-  const fetchFn: typeof fetch = async (input, init) => {
+  const fetchFn: typeof fetch = (input, init) => {
     const request = input instanceof Request ? input : new Request(input, init);
     calls.push(request);
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: { "content-type": "application/json" }
-    });
+    return Promise.resolve(
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
   };
   return { fetchFn, calls };
 };
@@ -20,7 +22,7 @@ describe("NexlaClient auth bypass header", () => {
     const client = new NexlaClient({
       accessToken: "access-token",
       baseUrl: "https://example.com",
-      fetch: fetchFn
+      fetch: fetchFn,
     });
 
     await client.request("get", "/flows", { headers: { "x-nexla-skip-auth": "true" } });

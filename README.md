@@ -29,10 +29,14 @@ See the package README for full usage: [`packages/ts-sdk/README.md`](./packages/
 
 ## Authentication
 
-The SDK supports two authentication modes:
+The SDK supports four authentication modes. Pass one credential. An explicit option takes precedence over the environment variable.
 
-- **Service key** (recommended): pass `serviceKey` or set `NEXLA_SERVICE_KEY`. The client obtains short-lived session tokens via `POST /token` on demand.
-- **Direct access token**: pass `accessToken` or set `NEXLA_ACCESS_TOKEN`. No refresh is performed.
+- **Service key** (recommended): `serviceKey` or `NEXLA_SERVICE_KEY`. The client gets session tokens from `POST /token`.
+- **API key**: `apiKey` or `NEXLA_API_KEY`. The client gets session tokens from `POST /token`.
+- **Email and password**: `email` and `password`, with an optional `orgId`. The client gets session tokens from `POST /token`.
+- **Access token**: `accessToken` or `NEXLA_ACCESS_TOKEN`. The token is sent as is, and the SDK does not refresh it.
+
+The three modes that use `POST /token` refresh the session token when it nears expiry, and retry a 401 once.
 
 Optional: `NEXLA_API_URL` overrides the default API base URL.
 
@@ -41,6 +45,7 @@ Optional: `NEXLA_API_URL` overrides the default API base URL.
 - [Architecture](./docs/ts-sdk/architecture.md)
 - [API coverage process](./docs/ts-sdk/api-coverage.md)
 - [Integration test policy](./docs/ts-sdk/integration-tests.md)
+- [Behavior spec](./docs/ts-sdk/behavior-spec.md)
 
 ## Repository Layout
 
@@ -56,11 +61,12 @@ nexla-sdk-js/
   pnpm-lock.yaml
   turbo.json                # Turborepo pipeline
   plugin-redoc-0.yaml       # OpenAPI spec consumed by ts-sdk codegen
+  openapi/                  # public backend OpenAPI spec consumed by ts-sdk codegen
 ```
 
 ## Development
 
-Requires Node.js >= 20 and pnpm 9.
+Requires Node.js >= 18 and pnpm 9. CI runs the checks on Node 22 and the consumer smoke test on Node 18, 20, and 22.
 
 ```bash
 # Install workspace dependencies
@@ -78,13 +84,18 @@ pnpm -C packages/ts-sdk typecheck
 pnpm -C packages/ts-sdk coverage
 pnpm -C packages/ts-sdk build
 pnpm -C packages/ts-sdk gen           # regenerate OpenAPI artifacts
+pnpm -C packages/ts-sdk format:check
+pnpm -C packages/ts-sdk publint       # package metadata (needs build)
+pnpm -C packages/ts-sdk attw          # type resolution (needs build)
+pnpm -C packages/ts-sdk size          # bundle size budget (needs build)
+pnpm -C packages/ts-sdk smoke:consumer  # pack, install, import, type check (needs build)
 ```
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full contribution guide and [`CLAUDE.md`](./CLAUDE.md) / [`AGENTS.md`](./AGENTS.md) for AI-assistant guidance.
 
 ## Releases
 
-Releases are managed with [Changesets](https://github.com/changesets/changesets). To propose a release, run `pnpm changeset`, commit the generated file, and merge — the `release` workflow handles the npm publish.
+Releases are managed with [Changesets](https://github.com/changesets/changesets). For each user-visible change, run `pnpm changeset`. Before you merge, run `pnpm changeset version` and commit the version bump and `CHANGELOG.md`. A merge that changes `packages/ts-sdk/package.json` on `main` runs the release workflow. It publishes any version that npm does not have yet.
 
 ## License
 

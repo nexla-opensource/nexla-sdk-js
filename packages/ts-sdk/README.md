@@ -8,6 +8,8 @@ TypeScript SDK for interacting with the Nexla API.
 npm install @nexla/sdk
 ```
 
+Requires Node.js 18 or later.
+
 ## Authentication
 
 ### Service key (recommended)
@@ -79,7 +81,7 @@ const client = new NexlaClient({ serviceKey: process.env.NEXLA_SERVICE_KEY });
 
 const flows = await client.flows.list();
 const activated = await client.flows.flow_activate_with_flow_id({
-  params: { path: { flow_id: 123 } }
+  params: { path: { flow_id: 123 } },
 });
 ```
 
@@ -89,7 +91,7 @@ Use the raw client when you need direct path-level access:
 
 ```ts
 const { data } = await client.raw.GET("/flows", {
-  params: { query: { page: 1 } }
+  params: { query: { page: 1 } },
 });
 ```
 
@@ -98,8 +100,15 @@ const { data } = await client.raw.GET("/flows", {
 ```ts
 import { WebhooksClient } from "@nexla/sdk";
 
+// The SDK does not read NEXLA_WEBHOOK_API_KEY. Your application reads it and passes the key.
 const webhooks = new WebhooksClient({ apiKey: process.env.NEXLA_WEBHOOK_API_KEY });
 await webhooks.sendOneRecord("https://api.nexla.com/webhook/abc", { id: 1 });
+```
+
+**Security:** By default (`authMethod: "query"`), the SDK sends the API key as the `api_key` query parameter. Query strings are often written to proxy, load balancer, and server access logs, and to monitoring tools, so the key can leak there. To keep the key out of the URL, pass `authMethod: "header"`. The SDK then sends the key in an `Authorization: Basic` header. The default is unchanged, so existing integrations keep working.
+
+```ts
+await webhooks.sendOneRecord("https://api.nexla.com/webhook/abc", { id: 1 }, { authMethod: "header" });
 ```
 
 ## SDK Configuration
@@ -110,7 +119,7 @@ const client = new NexlaClient({
   baseUrl: "https://dataops.nexla.io/nexla-api",
   apiVersion: "v1",
   retry: { maxRetries: 3 },
-  userAgent: "my-app/1.2.3"
+  userAgent: "my-app/1.2.3",
 });
 ```
 

@@ -13,5 +13,5 @@ export default defineConfig({
   // ESM `default` export at runtime. Without this, esbuild's node-compat
   // wrapping overrides `.default` with the whole module object and the
   // generated `(0, import_openapi_fetch.default)(...)` call throws.
-  noExternal: ["openapi-fetch", "openapi-typescript-helpers"]
+  noExternal: ["openapi-fetch", "openapi-typescript-helpers"],
 });

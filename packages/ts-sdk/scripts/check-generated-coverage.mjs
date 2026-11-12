@@ -83,13 +83,13 @@ const parseSpecMetadata = () => {
 
   if (!hashAlgorithmMatch || !hashMatch) {
     throw new Error(
-      `Unable to parse SPEC_HASH_ALGORITHM and SPEC_HASH from ${specMetadataPath}. Run: pnpm -C packages/ts-sdk gen:spec-metadata`
+      `Unable to parse SPEC_HASH_ALGORITHM and SPEC_HASH from ${specMetadataPath}. Run: pnpm -C packages/ts-sdk gen:spec-metadata`,
     );
   }
 
   return {
     hashAlgorithm: hashAlgorithmMatch[1],
-    hash: hashMatch[1].toLowerCase()
+    hash: hashMatch[1].toLowerCase(),
   };
 };
 
@@ -139,7 +139,7 @@ const checkOperationIntegrity = (spec) => {
       const unused = declared.filter((name) => !templateNames.includes(name));
       if (undeclared.length > 0 || unused.length > 0) {
         problems.push(
-          `${route}: path template {${templateNames.join("}, {")}} does not match path parameters [${declared.join(", ")}]`
+          `${route}: path template {${templateNames.join("}, {")}} does not match path parameters [${declared.join(", ")}]`,
         );
       }
     }
@@ -159,7 +159,7 @@ const specEndpoints = new Set(specOperations.keys());
 const {
   endpoints: generatedEndpoints,
   operationIds: generatedOperationIds,
-  methodNames: generatedMethodNames
+  methodNames: generatedMethodNames,
 } = readGeneratedEndpoints();
 
 const missingEndpoints = [...specEndpoints].filter((key) => !generatedEndpoints.has(key));
@@ -189,8 +189,8 @@ if (operationProblems.length > 0) {
   errors.push(
     [
       `Spec operation integrity failed for ${operationProblems.length} item(s):`,
-      formatEndpointList(operationProblems, 50)
-    ].join("\n")
+      formatEndpointList(operationProblems, 50),
+    ].join("\n"),
   );
 }
 
@@ -198,8 +198,8 @@ if (hardMissingEndpoints.length > 0) {
   errors.push(
     [
       `Missing generated endpoint coverage for ${hardMissingEndpoints.length} spec path/method entries (excluding Webhooks):`,
-      formatEndpointList(hardMissingEndpoints)
-    ].join("\n")
+      formatEndpointList(hardMissingEndpoints),
+    ].join("\n"),
   );
 }
 
@@ -207,8 +207,8 @@ if (extraEndpoints.length > 0) {
   errors.push(
     [
       `Generated resource endpoint coverage includes ${extraEndpoints.length} path/method entries not present in spec:`,
-      formatEndpointList(extraEndpoints)
-    ].join("\n")
+      formatEndpointList(extraEndpoints),
+    ].join("\n"),
   );
 }
 
@@ -218,7 +218,7 @@ try {
   const computedHash = computeSpecHash(metadata.hashAlgorithm);
   if (computedHash !== metadata.hash) {
     errors.push(
-      `Spec hash mismatch: spec-metadata has ${metadata.hashAlgorithm}:${metadata.hash}, expected ${metadata.hashAlgorithm}:${computedHash}. Run: pnpm -C packages/ts-sdk gen:spec-metadata`
+      `Spec hash mismatch: spec-metadata has ${metadata.hashAlgorithm}:${metadata.hash}, expected ${metadata.hashAlgorithm}:${computedHash}. Run: pnpm -C packages/ts-sdk gen:spec-metadata`,
     );
   }
 } catch (error) {
@@ -236,12 +236,12 @@ if (coveredByOperationId.length > 0) {
   console.warn(
     [
       `Coverage note: ${coveredByOperationId.length} spec path/method entries are covered by a generated operation method with the same operationId, not by a route match:`,
-      formatEndpointList(coveredByOperationId)
-    ].join("\n")
+      formatEndpointList(coveredByOperationId),
+    ].join("\n"),
   );
 }
 
 console.log(
-  `Generated endpoint coverage OK: ${generatedEndpoints.size} unique endpoints match ${specEndpoints.size} spec endpoints (excluding Webhooks-tagged operations).`
+  `Generated endpoint coverage OK: ${generatedEndpoints.size} unique endpoints match ${specEndpoints.size} spec endpoints (excluding Webhooks-tagged operations).`,
 );
 console.log(`Spec metadata hash OK: ${metadata.hashAlgorithm}:${metadata.hash}`);

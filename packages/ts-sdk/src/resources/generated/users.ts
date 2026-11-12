@@ -209,19 +209,9 @@ export class UsersResource {
     return this.client.requestOperation("send_user_invitation", "post", "/users/send_invite", init);
   }
 
-  /** Set Rate Limits */
-  async set_user_rate_limits(init?: OperationInit<"set_user_rate_limits">): Promise<OperationData<"set_user_rate_limits">> {
-    return this.client.requestOperation("set_user_rate_limits", "put", "/users/{user_id}/rate_limits", init);
-  }
-
   /** Show user credit */
   async show_credit(init?: OperationInit<"show_credit">): Promise<OperationData<"show_credit">> {
     return this.client.requestOperation("show_credit", "get", "/users/{user_id}/credits/{credit_id}", init);
-  }
-
-  /** Throttle User */
-  async throttle_user(init?: OperationInit<"throttle_user">): Promise<OperationData<"throttle_user">> {
-    return this.client.requestOperation("throttle_user", "put", "/users/{user_id}/throttle", init);
   }
 
   /** Modify a User */

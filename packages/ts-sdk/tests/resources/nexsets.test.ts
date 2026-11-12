@@ -103,9 +103,7 @@ describe("NexsetsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.nexsets.get({ params: { path: { set_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.nexsets.get({ params: { path: { set_id: 99999 } } })).rejects.toThrow();
     });
   });
 

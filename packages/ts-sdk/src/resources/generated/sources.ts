@@ -296,17 +296,12 @@ export class SourcesResource {
 
   /** Run Data Source Now */
   async data_sources_run_data_source_now(init?: OperationInit<"data_sources_run_data_source_now">): Promise<OperationData<"data_sources_run_data_source_now">> {
-    return this.client.requestOperation("data_sources_run_data_source_now", "put", "/data_sources/{data_source_id}/run_now", init);
+    return this.client.requestOperation("data_sources_run_data_source_now", "post", "/data_sources/{data_source_id}/run_now", init);
   }
 
   /** Run Data Source Now */
-  async data_sources_run_data_source_now_post(init?: OperationInit<"data_sources_run_data_source_now_post">): Promise<OperationData<"data_sources_run_data_source_now_post">> {
-    return this.client.requestOperation("data_sources_run_data_source_now_post", "post", "/data_sources/{data_source_id}/run_now", init);
-  }
-
-  /** Show Control Event */
-  async data_sources_show_control_event(init?: OperationInit<"data_sources_show_control_event">): Promise<OperationData<"data_sources_show_control_event">> {
-    return this.client.requestOperation("data_sources_show_control_event", "get", "/data_sources/{resource_id}/control/{event}", init);
+  async data_sources_run_data_source_now_put(init?: OperationInit<"data_sources_run_data_source_now_put">): Promise<OperationData<"data_sources_run_data_source_now_put">> {
+    return this.client.requestOperation("data_sources_run_data_source_now_put", "put", "/data_sources/{data_source_id}/run_now", init);
   }
 
   /** Show Dashboard Transform */
@@ -612,11 +607,6 @@ export class SourcesResource {
   /** Update Data Source Quarantine Setting */
   async update_data_source_quarantine_setting(init?: OperationInit<"update_data_source_quarantine_setting">): Promise<OperationData<"update_data_source_quarantine_setting">> {
     return this.client.requestOperation("update_data_source_quarantine_setting", "put", "/data_sources/{data_source_id}/quarantine_settings", init);
-  }
-
-  /** Update Data Source Runtime Status */
-  async update_data_source_runtime_status(init?: OperationInit<"update_data_source_runtime_status">): Promise<OperationData<"update_data_source_runtime_status">> {
-    return this.client.requestOperation("update_data_source_runtime_status", "put", "/data_sources/{data_source_id}/runtime_status/{runtime_status}", init);
   }
 
   /** Update Flow Via Data Source */

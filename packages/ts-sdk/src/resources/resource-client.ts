@@ -3,7 +3,6 @@ import type { paths } from "../generated/schema.js";
 import { resourceMap } from "../generated/resource-map.js";
 import type { NexlaClient } from "../client/nexla-client.js";
 import { NexlaError } from "../errors.js";
-import type { RequestOptions } from "../client/types.js";
 
 export type ResourceKey = keyof typeof resourceMap;
 
@@ -53,6 +52,6 @@ export class ResourceClient {
     const method = entry.method.toLowerCase() as HttpMethod;
     const path = entry.path as PathsWithMethod<paths, HttpMethod>;
 
-    return this.client.request(method, path, init as RequestOptions);
+    return this.client.request(method, path, init);
   }
 }

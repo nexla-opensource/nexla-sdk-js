@@ -59,7 +59,7 @@ export class ServiceKeyAuthProvider implements AuthProvider {
     const url = `${this.baseUrl}/token/refresh?org_id=${encodeURIComponent(String(orgId))}`;
     const response = await this.fetchFn(url, {
       method: "POST",
-      headers: this.headers({ Authorization: `Bearer ${token}` })
+      headers: this.headers({ Authorization: `Bearer ${token}` }),
     });
 
     if (!response.ok) {
@@ -75,7 +75,7 @@ export class ServiceKeyAuthProvider implements AuthProvider {
     try {
       await this.fetchFn(`${this.baseUrl}/token/logout`, {
         method: "POST",
-        headers: this.headers({ Authorization: `Bearer ${this.accessToken}` })
+        headers: this.headers({ Authorization: `Bearer ${this.accessToken}` }),
       });
     } catch {
       // Best-effort logout; ignore errors.
@@ -111,7 +111,7 @@ export class ServiceKeyAuthProvider implements AuthProvider {
       throw errorFromResponse(response, await readErrorBody(response), {
         method: "POST",
         path: "/token",
-        url: `${this.baseUrl}/token`
+        url: `${this.baseUrl}/token`,
       });
     }
 
@@ -141,7 +141,7 @@ const parseTokenResponse = async (response: Response): Promise<TokenResponse> =>
     throw new NexlaError("Missing access token in response", { response: data });
   }
 
-  return { ...data, access_token: accessToken } as TokenResponse;
+  return { ...data, access_token: accessToken };
 };
 
 const safeParseJson = async (response: Response): Promise<unknown> => {

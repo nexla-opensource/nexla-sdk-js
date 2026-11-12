@@ -3,11 +3,13 @@ import { NexlaClient } from "../src/client/nexla-client.js";
 import { NotFoundError } from "../src/errors.js";
 
 const createMockFetch = (status: number, body: unknown) => {
-  const fetchFn: typeof fetch = async () => {
-    return new Response(JSON.stringify(body), {
-      status,
-      headers: { "content-type": "application/json" }
-    });
+  const fetchFn: typeof fetch = () => {
+    return Promise.resolve(
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { "content-type": "application/json" },
+      }),
+    );
   };
   return fetchFn;
 };
@@ -18,7 +20,7 @@ describe("NexlaClient error mapping", () => {
     const client = new NexlaClient({
       accessToken: "access-token",
       baseUrl: "https://example.com",
-      fetch: fetchFn
+      fetch: fetchFn,
     });
 
     await expect(client.request("get", "/flows")).rejects.toBeInstanceOf(NotFoundError);

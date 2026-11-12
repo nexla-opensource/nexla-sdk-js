@@ -77,11 +77,6 @@ export class OrgAuthConfigsResource {
     return this.client.requestOperation("index_client_config", "get", "/api_auth_configs/client_config", init);
   }
 
-  /** Info */
-  async info(init?: OperationInit<"info">): Promise<OperationData<"info">> {
-    return this.client.requestOperation("info", "get", "/api_auth_configs/info", init);
-  }
-
   /** Update auth config. */
   async update_api_auth_config(init?: OperationInit<"update_api_auth_config">): Promise<OperationData<"update_api_auth_config">> {
     return this.client.requestOperation("update_api_auth_config", "put", "/api_auth_configs/{auth_config_id}", init);

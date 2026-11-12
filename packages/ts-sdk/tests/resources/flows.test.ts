@@ -122,9 +122,7 @@ describe("FlowsResource", () => {
         fetch: fetchFn,
       });
 
-      await expect(
-        client.flows.get_flow_by_id({ params: { path: { flow_id: 99999 } } })
-      ).rejects.toThrow();
+      await expect(client.flows.get_flow_by_id({ params: { path: { flow_id: 99999 } } })).rejects.toThrow();
     });
   });
 
@@ -252,10 +250,10 @@ describe("FlowsResource", () => {
 
       const { fetchFn, calls } = createMockFetch([
         { status: 200, body: { access_token: "token", expires_in: 7200 } },
-        { status: 200, body: copyResponse },      // POST /flows/100/copy
-        { status: 200, body: updatedSource },      // PUT /data_sources/501
-        { status: 200, body: updatedSink },        // PUT /data_sinks/601
-        { status: 200, body: refetchResponse },    // GET /flows/9999
+        { status: 200, body: copyResponse }, // POST /flows/100/copy
+        { status: 200, body: updatedSource }, // PUT /data_sources/501
+        { status: 200, body: updatedSink }, // PUT /data_sinks/601
+        { status: 200, body: refetchResponse }, // GET /flows/9999
       ]);
 
       const client = new NexlaClient({
@@ -264,10 +262,7 @@ describe("FlowsResource", () => {
         fetch: fetchFn,
       });
 
-      const result = await client.flows.copy_and_replace_credentials(
-        100,
-        { 500: 20, 600: 30 },
-      );
+      const result = await client.flows.copy_and_replace_credentials(100, { 500: 20, 600: 30 });
 
       expect(result).toEqual(refetchResponse);
 
@@ -303,9 +298,9 @@ describe("FlowsResource", () => {
 
       const { fetchFn, calls } = createMockFetch([
         { status: 200, body: { access_token: "token", expires_in: 7200 } },
-        { status: 200, body: copyResponse },      // POST /flows/100/copy
-        { status: 200, body: updatedSink },        // PUT /data_sinks/601
-        { status: 200, body: refetchResponse },    // GET /flows/9999
+        { status: 200, body: copyResponse }, // POST /flows/100/copy
+        { status: 200, body: updatedSink }, // PUT /data_sinks/601
+        { status: 200, body: refetchResponse }, // GET /flows/9999
       ]);
 
       const client = new NexlaClient({
@@ -334,9 +329,9 @@ describe("FlowsResource", () => {
 
       const { fetchFn, calls } = createMockFetch([
         { status: 200, body: { access_token: "token", expires_in: 7200 } },
-        { status: 200, body: copyResponse },         // POST /flows/100/copy
-        { status: 200, body: addFlowsResponse },     // PUT /projects/42/flows
-        { status: 200, body: refetchResponse },       // GET /flows/9999
+        { status: 200, body: copyResponse }, // POST /flows/100/copy
+        { status: 200, body: addFlowsResponse }, // PUT /projects/42/flows
+        { status: 200, body: refetchResponse }, // GET /flows/9999
       ]);
 
       const client = new NexlaClient({
@@ -378,7 +373,7 @@ describe("FlowsResource", () => {
       );
 
       // Parse the body sent to the copy endpoint
-      const parsed = await getRequestBody(1) as Record<string, unknown>;
+      const parsed = (await getRequestBody(1)) as Record<string, unknown>;
       expect(parsed.reuse_data_credentials).toBe(true);
       expect(parsed.copy_access_controls).toBe(true);
     });
@@ -403,10 +398,7 @@ describe("FlowsResource", () => {
         fetch: fetchFn,
       });
 
-      const result = await client.flows.copy_and_replace_credentials(
-        100,
-        { 500: 20, 600: 30 },
-      );
+      const result = await client.flows.copy_and_replace_credentials(100, { 500: 20, 600: 30 });
 
       expect(result).toEqual(copyResponse);
       // Only 3 calls: auth + copy + re-fetch (no source/sink updates)
@@ -475,11 +467,11 @@ describe("FlowsResource", () => {
       await client.flows.copy_and_replace_credentials(100, { 500: 20, 600: 30 });
 
       // Verify source update body has correct credential ID
-      const sourceBody = await getRequestBody(2) as Record<string, unknown>;
+      const sourceBody = (await getRequestBody(2)) as Record<string, unknown>;
       expect(sourceBody.data_credentials_id).toBe(20);
 
       // Verify sink update body has correct credential ID
-      const sinkBody = await getRequestBody(3) as Record<string, unknown>;
+      const sinkBody = (await getRequestBody(3)) as Record<string, unknown>;
       expect(sinkBody.data_credentials_id).toBe(30);
     });
   });

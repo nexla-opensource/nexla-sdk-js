@@ -761,17 +761,6 @@ export interface paths {
      */
     put: operations["update_org"];
     /**
-     * Destroy Org
-     * @description Delete an organization (asynchronous).
-     *
-     * Matches Rails OrgsController#destroy:
-     * - Non-super users get 405
-     * - Validates org tier restrictions before creating async task
-     * - Creates DeleteOrg async task and enqueues it
-     * - Returns wrapped async task response
-     */
-    delete: operations["destroy_org"];
-    /**
      * Update Org
      * @description Update an organization.
      *
@@ -2093,63 +2082,6 @@ export interface paths {
      */
     get: operations["index_client_config"];
   };
-  "/api_auth_configs/info": {
-    /**
-     * Info
-     * @description Debug endpoint showing base URL, request info and the process environment.
-     *
-     * Rails (api_auth_configs_controller.rb:27-39)::
-     *
-     *     def info
-     *       head :not_found and return if !current_user.super_user?
-     *       re = Hash.new
-     *       request.env.each do |k, v|
-     *         re[k] = v if v.is_a?(String)
-     *       end
-     *       render json: {
-     *         :base_url => ApiAuthConfig.generate_base_url(request),
-     *         :request_ip => request.remote_ip,
-     *         :reqest_env => re,
-     *         :env => ENV
-     *       }
-     *     end
-     *
-     * ``ENV`` extends ``Enumerable``, so ActiveSupport serializes it through
-     * ``Enumerable#as_json`` -> ``to_a.as_json`` -- an **array of ``[key, value]``
-     * pairs**, not an object. That is the bulk of the response, and the port had
-     * been sending ``"env": {}``.
-     *
-     * This deliberately exposes the full process environment, secrets included
-     * (DB password, ACCESS_TOKEN_SECRET_KEY, CREDENTIALS_ENC_KEY,
-     * AUTH_CONFIG_ENC_KEY), because that is what the Rails endpoint does and this
-     * port follows Rails.
-     *
-     * Three things stand between that payload and a caller, because the action
-     * body above is not the whole story — the controller also carries::
-     *
-     *     before_action :validate_api_user,
-     *                   except: [:index_client_config, :index_sign_on_options]
-     *
-     *     def validate_api_user
-     *       raise Api::V1::ApiError.new(:method_not_allowed) if current_org.nil?
-     *       authorize! :manage, current_org
-     *     end
-     *
-     * ``info`` is not in that ``except`` list, so those two run *before* the
-     * ``head :not_found`` — the same pair the five CRUD actions in ``_crud.py``
-     * get. They are therefore checked here first, in that order; putting them
-     * after the super-user check would collapse all three answers back into 404.
-     *
-     * The no-org case reached 404 rather than 405 before those guards existed:
-     * ``populate_super_user_flags`` returns without setting
-     * ``_super_user_override`` when ``org_id`` is None, so ``is_super_user_async``
-     * fell through to its own ``if not org_id: return False``. That failed closed
-     * — the secrets below were never reachable without an org — but 404 is not the
-     * status Rails answers with, and the org-admin case was 404 where Rails says
-     * 403.
-     */
-    get: operations["info"];
-  };
   "/api_auth_configs/{id_or_uid}": {
     /**
      * Update Api Auth Config
@@ -2365,13 +2297,6 @@ export interface paths {
      * gating based on X-Nexla-Server-OAuth / X-Nexla-Debug headers.
      */
     get: operations["list_auth_parameters"];
-    /**
-     * Create Auth Parameter
-     * @description Create an auth parameter.
-     * Matches Rails AuthParametersController#create.
-     * Requires super_user.
-     */
-    post: operations["create_auth_parameter"];
   };
   "/auth_parameters/{auth_parameter_id}": {
     /**
@@ -2380,27 +2305,6 @@ export interface paths {
      * Matches Rails AuthParametersController#show.
      */
     get: operations["get_auth_parameter"];
-    /**
-     * Update Auth Parameter
-     * @description Update an auth parameter.
-     * Matches Rails AuthParametersController#update.
-     * Requires super_user.
-     */
-    put: operations["auth_parameters_update_auth_parameter_put"];
-    /**
-     * Delete Auth Parameter
-     * @description Delete an auth parameter.
-     * Matches Rails AuthParametersController#destroy.
-     * Requires super_user.
-     */
-    delete: operations["delete_auth_parameter"];
-    /**
-     * Update Auth Parameter
-     * @description Update an auth parameter.
-     * Matches Rails AuthParametersController#update.
-     * Requires super_user.
-     */
-    patch: operations["auth_parameters_update_auth_parameter"];
   };
   "/auth_parameters/{resource_id}/audit_log": {
     /** Get Auth Parameter Audit Log */
@@ -2416,35 +2320,6 @@ export interface paths {
      * If auth_template_name is provided, returns a single template (show action).
      */
     get: operations["list_auth_templates"];
-    /**
-     * Update Auth Template By Name
-     * @description Update an auth template by name.
-     * Matches Rails PUT /auth_templates?auth_template_name=X.
-     * Requires super_user.
-     *
-     * Rails routes this to the same #update action as the resourceful PUT, which
-     * falls back to ``AuthTemplate.find(params[:id])`` when ``auth_template_name``
-     * is absent — on the collection route ``params[:id]`` is always nil, so a
-     * missing name 404s (RecordNotFound) rather than being a required query param.
-     */
-    put: operations["update_auth_template_by_name"];
-    /**
-     * Create Auth Template
-     * @description Create an auth template.
-     * Matches Rails AuthTemplatesController#create.
-     * Requires super_user.
-     */
-    post: operations["create_auth_template"];
-    /**
-     * Delete Auth Template By Name
-     * @description Delete an auth template by name.
-     * Matches Rails DELETE /auth_templates?auth_template_name=X.
-     * Requires super_user.
-     *
-     * Same fallback as the PUT-by-name route above: a missing name maps to
-     * Rails' ``AuthTemplate.find(nil)`` -> RecordNotFound -> 404.
-     */
-    delete: operations["delete_auth_template_by_name"];
   };
   "/auth_templates/{auth_template_id}": {
     /**
@@ -2453,27 +2328,6 @@ export interface paths {
      * Matches Rails AuthTemplatesController#show.
      */
     get: operations["get_auth_template"];
-    /**
-     * Update Auth Template
-     * @description Update an auth template.
-     * Matches Rails AuthTemplatesController#update.
-     * Requires super_user.
-     */
-    put: operations["auth_templates_update_auth_template_put"];
-    /**
-     * Delete Auth Template Endpoint
-     * @description Delete an auth template.
-     * Matches Rails AuthTemplatesController#destroy.
-     * Requires super_user.
-     */
-    delete: operations["delete_auth_template_endpoint"];
-    /**
-     * Update Auth Template
-     * @description Update an auth template.
-     * Matches Rails AuthTemplatesController#update.
-     * Requires super_user.
-     */
-    patch: operations["auth_templates_update_auth_template"];
   };
   "/auth_templates/{resource_id}/audit_log": {
     /** Get Auth Template Audit Log */
@@ -2660,23 +2514,6 @@ export interface paths {
      */
     put: operations["bulk_update_catalog_refs"];
   };
-  "/cluster_endpoints/": {
-    /**
-     * List Cluster Endpoints
-     * @description List all cluster endpoints (super_user only).
-     *
-     * Matches Rails ClusterEndpointsController#index.
-     */
-    get: operations["list_cluster_endpoints"];
-    /**
-     * Create Cluster Endpoint
-     * @description Create a cluster endpoint (super_user only).
-     *
-     * Matches Rails ClusterEndpointsController#create:
-     *   ClusterEndpoint.build_from_input(input)
-     */
-    post: operations["create_cluster_endpoint"];
-  };
   "/cluster_endpoints/schema": {
     /**
      * Get Cluster Endpoint Schema
@@ -2688,22 +2525,6 @@ export interface paths {
   };
   "/cluster_endpoints/{endpoint_id}": {
     /**
-     * Get Cluster Endpoint
-     * @description Get a single cluster endpoint.
-     *
-     * Matches Rails ClusterEndpointsController#show.
-     */
-    get: operations["get_cluster_endpoint"];
-    /**
-     * Update Cluster Endpoint
-     * @description Update a cluster endpoint (super_user only).
-     *
-     * Matches Rails ClusterEndpointsController#update. Rails' `resources
-     * :cluster_endpoints` maps both PUT and PATCH onto #update, so both verbs
-     * are registered here.
-     */
-    put: operations["cluster_endpoints_update_cluster_endpoint_put"];
-    /**
      * Delete Cluster Endpoint
      * @description Delete not allowed for cluster endpoints.
      *
@@ -2712,15 +2533,6 @@ export interface paths {
      * (Rails `head` still sends the negotiated Content-Type with an empty body.)
      */
     delete: operations["cluster_endpoints_delete_cluster_endpoint"];
-    /**
-     * Update Cluster Endpoint
-     * @description Update a cluster endpoint (super_user only).
-     *
-     * Matches Rails ClusterEndpointsController#update. Rails' `resources
-     * :cluster_endpoints` maps both PUT and PATCH onto #update, so both verbs
-     * are registered here.
-     */
-    patch: operations["cluster_endpoints_update_cluster_endpoint"];
   };
   "/cluster_endpoints/{resource_id}/audit_log": {
     /** Get Cluster Endpoint Audit Log */
@@ -2930,38 +2742,6 @@ export interface paths {
      * - Supports lookup by id or by type string
      */
     get: operations["show_connector"];
-    /**
-     * Update Connector
-     * @description Update a connector.
-     *
-     * Matches Rails ConnectorsController#update:
-     * - Requires super_user
-     * - Only ingestion_mode can be updated
-     *
-     * The body is read from the raw request rather than declared as a typed
-     * parameter so the checks run in RAILS' order --
-     * ``head :forbidden`` -> ``Connector.find`` -> ``JSON.parse(raw_post)``
-     * (connectors_controller.rb:31-37). A declared body parameter is validated by
-     * FastAPI *before* the handler runs, which turned a forbidden caller or an
-     * unknown connector into a 400 whenever the body was also malformed.
-     */
-    put: operations["connectors_update_connector_put"];
-    /**
-     * Update Connector
-     * @description Update a connector.
-     *
-     * Matches Rails ConnectorsController#update:
-     * - Requires super_user
-     * - Only ingestion_mode can be updated
-     *
-     * The body is read from the raw request rather than declared as a typed
-     * parameter so the checks run in RAILS' order --
-     * ``head :forbidden`` -> ``Connector.find`` -> ``JSON.parse(raw_post)``
-     * (connectors_controller.rb:31-37). A declared body parameter is validated by
-     * FastAPI *before* the handler runs, which turned a forbidden caller or an
-     * unknown connector into a 400 whenever the body was also malformed.
-     */
-    patch: operations["connectors_update_connector"];
   };
   "/custom_data_flows": {
     /**
@@ -3222,15 +3002,6 @@ export interface paths {
      */
     post: operations["dashboard_transforms_create_dashboard_transform"];
   };
-  "/dashboard_transforms/all": {
-    /**
-     * Index All Dashboard Transforms
-     * @description List all dashboard transforms (superuser only).
-     *
-     * Matches Rails: index_all action
-     */
-    get: operations["index_all_dashboard_transforms"];
-  };
   "/dashboard_transforms/{transform_id}": {
     /**
      * Show Dashboard Transform
@@ -3269,16 +3040,6 @@ export interface paths {
      * Mirrors Rails ``AccessInsightsController#accessible_resources``.
      */
     get: operations["data_credentials_accessible_resources"];
-  };
-  "/data_credentials/all": {
-    /**
-     * List All Credentials (Admin)
-     * @description List all data credentials in optimized format.
-     *
-     * Rails: DataCredentialsController#index_all
-     * Requires infrastructure or super user access.
-     */
-    get: operations["list_all_credentials"];
   };
   "/data_credentials/db_data_types/{source_type}": {
     /**
@@ -3617,13 +3378,6 @@ export interface paths {
      * Matches Rails GET /data_credentials/{id}/usage endpoint.
      */
     get: operations["get_credentials_usage"];
-  };
-  "/data_credentials/{resource_id}/control/{event}": {
-    /**
-     * Show Control Event
-     * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-     */
-    get: operations["data_credentials_show_control_event"];
   };
   "/data_credentials/{resource_id}/referenced_by": {
     /** Referenced By */
@@ -4081,19 +3835,6 @@ export interface paths {
      */
     get: operations["data_schemas_accessible_resources"];
   };
-  "/data_schemas/all": {
-    /**
-     * List All Schemas
-     * @description List all data schemas (nexla admin only).
-     *
-     * Matches Rails DataSchemasController#index_all:
-     *   def index_all
-     *     head :forbidden and return unless nexla_user?
-     *     @data_schemas = DataSchema.all.page(@page).per_page(@per_page)
-     *   end
-     */
-    get: operations["list_all_schemas"];
-  };
   "/data_schemas/public": {
     /**
      * List Public Schemas
@@ -4232,30 +3973,6 @@ export interface paths {
      * Mirrors Rails ``AccessInsightsController#accessible_resources``.
      */
     get: operations["data_sets_accessible_resources"];
-  };
-  "/data_sets/all": {
-    /**
-     * List All Data Sets
-     * @description List all data sets for a data source. Matches Rails GET /data_sets/all.
-     *
-     * BREAKING for existing callers: the port-only ``limit`` query param is gone
-     * (Rails has no such param — REQUEST_FILTERS defines no ``:limit`` key, so
-     * Rails ignores it). FastAPI silently drops unknown query params, so a caller
-     * still sending ``?limit=50`` gets no 422 telling them it moved — they get the
-     * whole set. On a data source with thousands of detected nexsets that is a
-     * large, silent change in response size. The endpoint is
-     * infrastructure/super-user only, so the blast radius is internal tooling.
-     *
-     * Pagination is available instead: ``?page=1&per_page=50`` reproduces the old
-     * bounded behaviour, and Rails' own semantics apply — neither param means the
-     * whole set, ``per_page=0`` likewise.
-     *
-     * Known stricter-than-Rails edge, pre-existing and shared with other listings:
-     * ``?page=abc`` and ``?page=-1`` are rejected with 422 by the ``ge=0``
-     * constraint, where Rails ``params[:page].to_i`` turns both into 0 and serves
-     * unpaginated (api_controller.rb:158-160).
-     */
-    get: operations["list_all_data_sets"];
   };
   "/data_sets/all/condensed": {
     /**
@@ -4577,13 +4294,6 @@ export interface paths {
   };
   "/data_sets/{data_set_id}/catalog_refs": {
     /**
-     * List Catalog Refs
-     * @description List catalog refs for a data set.
-     *
-     * Matches Rails GET /data_sets/:data_set_id/catalog_refs.
-     */
-    get: operations["list_catalog_refs"];
-    /**
      * Create Catalog Ref
      * @description Create a catalog ref for a data set.
      *
@@ -4815,18 +4525,6 @@ export interface paths {
      */
     delete: operations["delete_data_set_quarantine_setting"];
   };
-  "/data_sets/{data_set_id}/runtime_status/{runtime_status}": {
-    /**
-     * Update Data Set Runtime Status
-     * @description Update runtime status for a data set.
-     *
-     * Matches Rails: PUT /data_sets/:id/runtime_status/:status
-     *   - allowed only for infrastructure_or_super_user
-     *   - NOTE: Rails does NOT check org ownership for data_sets (unlike data_sources/sinks)
-     *   - returns 200 with empty body on success
-     */
-    put: operations["update_data_set_runtime_status"];
-  };
   "/data_sets/{data_set_id}/samples": {
     /**
      * Put Data Set Samples
@@ -4948,13 +4646,6 @@ export interface paths {
      * @description Vote on a data set's rating. Rails rating_votes#vote.
      */
     post: operations["vote_data_set"];
-  };
-  "/data_sets/{resource_id}/control/{event}": {
-    /**
-     * Show Control Event
-     * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-     */
-    get: operations["data_sets_show_control_event"];
   };
   "/data_sets/{resource_id}/docs": {
     /** List Data set Docs */
@@ -5650,26 +5341,6 @@ export interface paths {
      *   - render status: result[:status], json: result
      */
     get: operations["data_sinks_get_data_sink_run_status_get"];
-  };
-  "/data_sinks/{data_sink_id}/runtime_status/{runtime_status}": {
-    /**
-     * Update Data Sink Runtime Status
-     * @description Update runtime status for a data sink.
-     *
-     * Matches Rails: PUT /data_sinks/:id/runtime_status/:status
-     *   - allowed only for infrastructure_or_super_user
-     *   - super users can update any org
-     *   - infra users can update only current org resources
-     *   - returns 200 with empty body
-     */
-    put: operations["update_data_sink_runtime_status"];
-  };
-  "/data_sinks/{resource_id}/control/{event}": {
-    /**
-     * Show Control Event
-     * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-     */
-    get: operations["data_sinks_show_control_event"];
   };
   "/data_sinks/{resource_id}/docs": {
     /** List Data sink Docs */
@@ -6543,7 +6214,7 @@ export interface paths {
      * - data_source.run_now!
      * - render "show"
      */
-    put: operations["data_sources_run_data_source_now"];
+    put: operations["data_sources_run_data_source_now_put"];
     /**
      * Run Data Source Now
      * @description Trigger immediate run of data source.
@@ -6554,7 +6225,7 @@ export interface paths {
      * - data_source.run_now!
      * - render "show"
      */
-    post: operations["data_sources_run_data_source_now_post"];
+    post: operations["data_sources_run_data_source_now"];
   };
   "/data_sources/{data_source_id}/runs": {
     /**
@@ -6562,26 +6233,6 @@ export interface paths {
      * @description List a data source's run IDs, matching Rails ``data_sources#runs``.
      */
     get: operations["get_data_source_runs"];
-  };
-  "/data_sources/{data_source_id}/runtime_status/{runtime_status}": {
-    /**
-     * Update Data Source Runtime Status
-     * @description Update runtime status for a data source.
-     *
-     * Matches Rails: PUT /data_sources/:id/runtime_status/:status
-     *   - allowed only for infrastructure_or_super_user
-     *   - super users can update any org
-     *   - infra users can update only current org resources
-     *   - returns 200 with empty body on success
-     */
-    put: operations["update_data_source_runtime_status"];
-  };
-  "/data_sources/{resource_id}/control/{event}": {
-    /**
-     * Show Control Event
-     * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-     */
-    get: operations["data_sources_show_control_event"];
   };
   "/data_sources/{resource_id}/docs": {
     /** List Data source Docs */
@@ -6985,37 +6636,6 @@ export interface paths {
      */
     post: operations["create_flow"];
   };
-  "/flows/all/condensed": {
-    /**
-     * Origin Nodes Condensed
-     * @description Get condensed list of all origin flow nodes.
-     *
-     * Matches Rails FlowNodesController#origin_nodes_condensed.
-     * Admin-only: requires infrastructure_or_super_user.
-     */
-    get: operations["origin_nodes_condensed"];
-  };
-  "/flows/all/minimal": {
-    /**
-     * Flows Minimal
-     * @description Rails routes.rb:772 -> flow_nodes#flows_minimal (flow_nodes_controller.rb:57-107).
-     *
-     * Returns the flow graph's wiring and nothing else -- just the id columns that
-     * connect sources, sets and sinks -- for every origin flow node the caller can
-     * page through. Infrastructure callers use it to rebuild the topology cheaply.
-     *
-     * Three details separate it from ``/flows/all/condensed``:
-     *
-     * * pagination is **always on**, at a default per_page of 100 (``@paginate =
-     *   true`` unconditionally), where condensed only paginates when asked;
-     * * the page is taken over *flow nodes*, then the three resource queries are
-     *   filtered by the resulting origin_node_ids -- so per_page bounds flows, not
-     *   rows returned;
-     * * ``status`` is upcased only when it arrives as a string, and the dataplane
-     *   filter applies only when no explicit ``org_id`` was given.
-     */
-    get: operations["flows_minimal"];
-  };
   "/flows/document/schema": {
     /**
      * Get Flow Document Schema
@@ -7062,13 +6682,6 @@ export interface paths {
      * }
      */
     put: operations["bulk_assign_project"];
-  };
-  "/flows/raw": {
-    /**
-     * Publish Raw Flow Event
-     * @description Forward a raw flow event to the flow-execution dataplane.
-     */
-    post: operations["publish_raw_flow_event"];
   };
   "/flows/search": {
     /**
@@ -7184,14 +6797,14 @@ export interface paths {
      *
      * Body: {"data_set_id": X} or {"data_set": {"name": "..."}}
      */
-    put: operations["flows_insert_flow_node_endpoint"];
+    put: operations["flows_insert_flow_node_endpoint_put"];
     /**
      * Insert Flow Node Endpoint
      * @description Insert a new node into a flow.
      *
      * Body: {"data_set_id": X} or {"data_set": {"name": "..."}}
      */
-    post: operations["flows_insert_flow_node_endpoint_post"];
+    post: operations["flows_insert_flow_node_endpoint"];
   };
   "/flows/{flow_id}/links": {
     /**
@@ -7273,14 +6886,14 @@ export interface paths {
      *
      * Body: {"delete_resource": bool} or query param delete_resource=true
      */
-    put: operations["flows_remove_flow_node_endpoint"];
+    put: operations["flows_remove_flow_node_endpoint_put"];
     /**
      * Remove Flow Node Endpoint
      * @description Remove a node from a flow.
      *
      * Body: {"delete_resource": bool} or query param delete_resource=true
      */
-    post: operations["flows_remove_flow_node_endpoint_post"];
+    post: operations["flows_remove_flow_node_endpoint"];
   };
   "/flows/{flow_id}/resources_access": {
     /**
@@ -7310,7 +6923,7 @@ export interface paths {
      * an upstream code) is deliberately surfaced to the client, so this endpoint
      * must never synthesize a success response.
      */
-    put: operations["flows_run_flow_now"];
+    put: operations["flows_run_flow_now_put"];
     /**
      * Run Flow Now
      * @description Trigger immediate run of a flow's data source.
@@ -7328,7 +6941,7 @@ export interface paths {
      * an upstream code) is deliberately surfaced to the client, so this endpoint
      * must never synthesize a success response.
      */
-    post: operations["flows_run_flow_now_post"];
+    post: operations["flows_run_flow_now"];
   };
   "/flows/{flow_id}/run_status": {
     /**
@@ -7453,13 +7066,6 @@ export interface paths {
      * delegates to FlowsModule.get_metrics_daily — no new query logic.
      */
     get: operations["flow_metrics_daily"];
-  };
-  "/flows/{resource_id}/control/{event}": {
-    /**
-     * Show Control Event
-     * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-     */
-    get: operations["flows_show_control_event"];
   };
   "/flows/{resource_id}/users_access_insights": {
     /**
@@ -7720,37 +7326,12 @@ export interface paths {
      */
     get: operations["metadata_get_idp_metadata_get"];
   };
-  "/metrics/raw": {
-    /**
-     * Publish Raw Metrics
-     * @description Forward a raw metrics event to the metrics-aggregation dataplane.
-     */
-    post: operations["publish_raw_metrics"];
-  };
   "/notification_channel_settings/{id}": {
     /**
      * Update
      * @description PUT /notification_channel_settings/{id} — update a setting.
      */
     patch: operations["notification_channel_settings_update"];
-  };
-  "/notification_setting/list": {
-    /**
-     * Notification Setting List
-     * @description POST/PUT /notification_setting/list — super_user only.
-     *
-     * Resolves notification_type_id from resource_type + event_type if not provided,
-     * then finds valid notification settings using priority waterfall per channel.
-     */
-    put: operations["notification_setting_notification_setting_list"];
-    /**
-     * Notification Setting List
-     * @description POST/PUT /notification_setting/list — super_user only.
-     *
-     * Resolves notification_type_id from resource_type + event_type if not provided,
-     * then finds valid notification settings using priority waterfall per channel.
-     */
-    post: operations["notification_setting_notification_setting_list_post"];
   };
   "/notification_settings/all": {
     /**
@@ -7765,13 +7346,6 @@ export interface paths {
      * @description PUT /notification_settings/{id} — update a setting.
      */
     patch: operations["notification_settings_update"];
-  };
-  "/notification_settings/{resource_id}/control/{event}": {
-    /**
-     * Show Control Event
-     * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-     */
-    get: operations["notification_settings_show_control_event"];
   };
   "/notifications/read-all": {
     /**
@@ -7887,39 +7461,12 @@ export interface paths {
      */
     post: operations["oauth_start"];
   };
-  "/org_tiers": {
-    /**
-     * List Tiers
-     * @description Rails ``index`` — super users only, paginated, no filters.
-     */
-    get: operations["org_tiers_list_tiers"];
-    /**
-     * Create Tier
-     * @description Rails ``create`` — renders "show", so 200 with the tier, not 201.
-     */
-    post: operations["org_tiers_create_tier"];
-  };
   "/org_tiers/{tier_id}": {
     /**
      * Get Tier
      * @description Rails ``show`` — no authorize! call, so any authenticated caller reads.
      */
     get: operations["org_tiers_get_tier"];
-    /**
-     * Update Tier
-     * @description Rails ``update`` — a partial body patches; blanks are skipped.
-     */
-    put: operations["org_tiers_update_tier_put"];
-    /**
-     * Destroy Tier
-     * @description Rails ``destroy`` — head :ok, or an empty-body 403 / 404.
-     */
-    delete: operations["org_tiers_destroy_tier"];
-    /**
-     * Update Tier
-     * @description Rails ``update`` — a partial body patches; blanks are skipped.
-     */
-    patch: operations["org_tiers_update_tier"];
   };
   "/orgs/account_summary": {
     /**
@@ -7937,26 +7484,6 @@ export interface paths {
      * captured by the ``org_id`` converter and fail as a bad integer.
      */
     get: operations["get_current_org_account_summary"];
-  };
-  "/orgs/all": {
-    /**
-     * List All Orgs
-     * @description List all organizations (super admin only).
-     *
-     * Returns full org detail matching Rails index.json.jbuilder.
-     * Supports X-Nexla-Dataplane header for filtering by dataplane cluster.
-     */
-    get: operations["list_all_orgs"];
-  };
-  "/orgs/data_sets_catalog_configs/{data_set_id}": {
-    /**
-     * Show Catalog Config Data Set
-     * @description Show a single data set with its catalog config context.
-     *
-     * Rails equivalent: DataSetsCatalogConfigsController#show
-     * Super-user only.
-     */
-    get: operations["show_data_sets_catalog_config"];
   };
   "/orgs/{org_id}/account_rate_limited": {
     /**
@@ -7987,44 +7514,6 @@ export interface paths {
      * Returns default cluster + additional allowed clusters.
      */
     get: operations["get_allowed_clusters"];
-    /**
-     * Update Allowed Clusters
-     * @description Update allowed clusters for an org (super admin only).
-     *
-     * Matches Rails: Orgs::ClustersController#update_allowed_clusters
-     * Replaces additional allowed clusters. Org default cluster is auto-excluded.
-     */
-    put: operations["update_allowed_clusters"];
-  };
-  "/orgs/{org_id}/cluster": {
-    /**
-     * Update Org Cluster
-     * @description Update organization cluster assignment (super admin only).
-     *
-     * Rails: PUT /orgs/:org_id/cluster → sets new_cluster_id + cluster_status=MIGRATING.
-     * Returns full org show response.
-     */
-    put: operations["update_org_cluster"];
-  };
-  "/orgs/{org_id}/cluster/activate": {
-    /**
-     * Activate Org Cluster
-     * @description Activate pending cluster migration (super admin only).
-     *
-     * Rails: PUT /orgs/:org_id/cluster/activate → moves new_cluster_id to cluster_id.
-     * Returns full org show response.
-     */
-    put: operations["activate_org_cluster"];
-  };
-  "/orgs/{org_id}/cluster/revert": {
-    /**
-     * Revert Org Cluster
-     * @description Revert pending cluster migration (super admin only).
-     *
-     * Rails: PUT /orgs/:org_id/cluster/revert → clears new_cluster_id, resets status.
-     * Returns full org show response.
-     */
-    put: operations["revert_org_cluster"];
   };
   "/orgs/{org_id}/clusters": {
     /**
@@ -8222,24 +7711,6 @@ export interface paths {
      */
     delete: operations["delete_org_quarantine_setting"];
   };
-  "/orgs/{org_id}/rate_limits": {
-    /**
-     * Set Rate Limits
-     * @description Set rate limits for organization.
-     *
-     * Matches Rails PUT /orgs/:org_id/rate_limits (rate_limiting_controller).
-     *
-     * The body is ``{"rate_limit": {"common": .., "light": .., "medium": ..,
-     * "high": ..}}``, which is what Rails requires:
-     * ``params.require(:rate_limit).permit(*RateLimit::LIMITS)``
-     * (rate_limiting_controller.rb:33). This parameter used to be named
-     * ``rate_limit``, but FastAPI does not embed a single non-model body
-     * parameter, so the handler received the WHOLE body; the writer then looked
-     * for flat ``common``/``light``/… keys, found none, and answered
-     * ``{"success": true}`` having saved nothing.
-     */
-    put: operations["set_rate_limits"];
-  };
   "/orgs/{org_id}/source_activate": {
     /**
      * Activate Rate Limited Sources
@@ -8276,28 +7747,12 @@ export interface paths {
      */
     put: operations["orgs_pause_rate_limited_sources_put"];
   };
-  "/orgs/{org_id}/throttle": {
-    /**
-     * Throttle Organization
-     * @description Set throttle until time for organization.
-     *
-     * Matches Rails PUT /orgs/:org_id/throttle (rate_limiting_controller).
-     */
-    put: operations["throttle_org"];
-  };
   "/orgs/{org_id}/{resource_type}/audit_log": {
     /**
      * Get Org Resource Audit Log
      * @description Audit log for every resource of one type inside an org.
      */
     get: operations["get_org_resource_audit_log"];
-  };
-  "/orgs/{resource_id}/control/{event}": {
-    /**
-     * Show Control Event
-     * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-     */
-    get: operations["orgs_show_control_event"];
   };
   "/orgs/{resource_id}/docs": {
     /** List Organization Docs */
@@ -8404,28 +7859,6 @@ export interface paths {
      * @description Rails QuarantineSettingsController#index.
      */
     get: operations["quarantine_settings_index"];
-  };
-  "/quarantine_settings/all": {
-    /**
-     * Index All
-     * @description Rails QuarantineSettingsController#index_all (line 8).
-     *
-     *     head :forbidden and return if !current_user.infrastructure_or_super_user?
-     *     @quarantine_setting = add_request_filters(QuarantineSetting, QuarantineSetting)
-     *     @quarantine_setting = @quarantine_setting.in_dataplane(request_dataplane) if
-     *       request_dataplane.present?
-     *     @quarantine_setting = @quarantine_setting.page(@page).per_page(@per_page)
-     *     set_link_header(@quarantine_setting)
-     *     render "index"
-     *
-     * The controller-level before_action runs first, so a request without an org
-     * context is a 400 even for a Nexla admin (quarantine_settings_controller.rb:4).
-     *
-     * The accepted filters are the ones add_request_filters actually applies to
-     * this model — see QuarantineSettingsModule.list_all. owner_id is deliberately
-     * absent: Rails allows it as a query parameter but never filters on it here.
-     */
-    get: operations["quarantine_settings_index_all"];
   };
   "/quarantine_settings/{quarantine_setting_id}": {
     /**
@@ -8768,7 +8201,7 @@ export interface paths {
      * Returns:
      *     TokenResponseSchema: Access token with user and org info
      */
-    put: operations["token_create_idp_token"];
+    put: operations["token_create_idp_token_put"];
     /**
      * IDP Token
      * @description Generate token from IDP provider.
@@ -8786,7 +8219,7 @@ export interface paths {
      * Returns:
      *     TokenResponseSchema: Access token with user and org info
      */
-    post: operations["token_create_idp_token_post"];
+    post: operations["token_create_idp_token"];
   };
   "/tool_sets": {
     /** Index Tool Sets */
@@ -9194,7 +8627,7 @@ export interface paths {
      * settings with the body untouched. Requiring a body here turned both of
      * those 200s into a 400.
      */
-    put: operations["user_settings_search_user_settings"];
+    put: operations["user_settings_search_user_settings_put"];
     /**
      * Search User Settings
      * @description Search user settings across users.
@@ -9211,7 +8644,7 @@ export interface paths {
      * settings with the body untouched. Requiring a body here turned both of
      * those 200s into a 400.
      */
-    post: operations["user_settings_search_user_settings_post"];
+    post: operations["user_settings_search_user_settings"];
   };
   "/user_settings/{setting_id}": {
     /**
@@ -9253,39 +8686,12 @@ export interface paths {
      */
     patch: operations["user_settings_update_user_setting"];
   };
-  "/user_tiers": {
-    /**
-     * List Tiers
-     * @description Rails ``index`` — super users only, paginated, no filters.
-     */
-    get: operations["user_tiers_list_tiers"];
-    /**
-     * Create Tier
-     * @description Rails ``create`` — renders "show", so 200 with the tier, not 201.
-     */
-    post: operations["user_tiers_create_tier"];
-  };
   "/user_tiers/{tier_id}": {
     /**
      * Get Tier
      * @description Rails ``show`` — no authorize! call, so any authenticated caller reads.
      */
     get: operations["user_tiers_get_tier"];
-    /**
-     * Update Tier
-     * @description Rails ``update`` — a partial body patches; blanks are skipped.
-     */
-    put: operations["user_tiers_update_tier_put"];
-    /**
-     * Destroy Tier
-     * @description Rails ``destroy`` — head :ok, or an empty-body 403 / 404.
-     */
-    delete: operations["user_tiers_destroy_tier"];
-    /**
-     * Update Tier
-     * @description Rails ``update`` — a partial body patches; blanks are skipped.
-     */
-    patch: operations["user_tiers_update_tier"];
   };
   "/users/account_summary": {
     /**
@@ -9685,15 +9091,6 @@ export interface paths {
      */
     get: operations["get_user_organizations"];
   };
-  "/users/{user_id}/rate_limits": {
-    /**
-     * Set Rate Limits
-     * @description Set rate limits for user.
-     *
-     * Matches Rails PUT /users/:user_id/rate_limits (rate_limiting_controller).
-     */
-    put: operations["set_user_rate_limits"];
-  };
   "/users/{user_id}/source_activate": {
     /**
      * Activate Rate Limited Sources
@@ -9734,15 +9131,6 @@ export interface paths {
      * Returns a list of tag names.
      */
     get: operations["get_user_tags"];
-  };
-  "/users/{user_id}/throttle": {
-    /**
-     * Throttle User
-     * @description Set throttle until time for user.
-     *
-     * Matches Rails PUT /users/:user_id/throttle (rate_limiting_controller).
-     */
-    put: operations["throttle_user"];
   };
   "/users/{user_id}/transferable": {
     /**
@@ -18588,11 +17976,6 @@ export interface components {
       /** Code Type */
       code_type: string;
     };
-    /** Body_throttle_user_api_v1_users__user_id__throttle_put */
-    BackendBody_throttle_user_api_v1_users__user_id__throttle_put: {
-      /** Throttle Until */
-      throttle_until?: string | null;
-    };
     /**
      * UserCreditInputSchema
      * @description Body of ``POST /users/:id/credits`` and ``PUT /users/:id/credits/use``.
@@ -18761,45 +18144,6 @@ export interface components {
        * @default 0
        */
       rate_limited?: number;
-    };
-    /**
-     * UserTierUpdateSchema
-     * @description Nothing is required on update; update_mutable! skips blank values.
-     *
-     * ``trial_period_days`` is deliberately absent: it is a real column and
-     * ``create`` accepts it, but ``update_mutable!`` never assigns it, so an
-     * update carrying it is accepted and ignored -- which is what Pydantic does
-     * with an undeclared field.
-     */
-    BackendUserTierUpdateSchema: {
-      /** Name */
-      name?: string | null;
-      /** Display Name */
-      display_name?: string | null;
-      /** Record Count Limit */
-      record_count_limit?: number | null;
-      /** Record Count Limit Time */
-      record_count_limit_time?: string | null;
-      /** Data Source Count Limit */
-      data_source_count_limit?: number | null;
-    };
-    /**
-     * UserTierCreateSchema
-     * @description user_tier.rb — name and display_name are ``create: [:required]``.
-     */
-    BackendUserTierCreateSchema: {
-      /** Name */
-      name: string;
-      /** Display Name */
-      display_name: string;
-      /** Record Count Limit */
-      record_count_limit?: number | null;
-      /** Record Count Limit Time */
-      record_count_limit_time?: string | null;
-      /** Data Source Count Limit */
-      data_source_count_limit?: number | null;
-      /** Trial Period Days */
-      trial_period_days?: number | null;
     };
     /**
      * UserSettingUpdateSchema
@@ -19964,11 +19308,6 @@ export interface components {
       /** Created At */
       created_at?: string | null;
     };
-    /** Body_throttle_org_api_v1_orgs__org_id__throttle_put */
-    BackendBody_throttle_org_api_v1_orgs__org_id__throttle_put: {
-      /** Throttle Until */
-      throttle_until?: string | null;
-    };
     /**
      * OrgResponseSchema
      * @description Schema for organization response.
@@ -20148,22 +19487,6 @@ export interface components {
         }[] | null;
     };
     /**
-     * ClusterUpdateSchema
-     * @description Schema for updating organization cluster.
-     */
-    BackendClusterUpdateSchema: {
-      /** Cluster Id */
-      cluster_id: number;
-    };
-    /**
-     * AllowedClustersUpdateSchema
-     * @description Request body for PUT /orgs/:id/allowed_clusters.
-     */
-    BackendAllowedClustersUpdateSchema: {
-      /** Cluster Ids */
-      cluster_ids: (number | null)[];
-    };
-    /**
      * OrgUpdateSchema
      * @description Schema for updating an organization.
      *
@@ -20262,45 +19585,6 @@ export interface components {
       delegate_owner_id?: number | null;
       /** Pause Data Flows */
       pause_data_flows?: boolean | null;
-    };
-    /**
-     * OrgTierUpdateSchema
-     * @description Nothing is required on update; update_mutable! skips blank values.
-     *
-     * ``trial_period_days`` is deliberately absent: it is a real column and
-     * ``create`` accepts it, but ``update_mutable!`` never assigns it, so an
-     * update carrying it is accepted and ignored -- which is what Pydantic does
-     * with an undeclared field.
-     */
-    BackendOrgTierUpdateSchema: {
-      /** Name */
-      name?: string | null;
-      /** Display Name */
-      display_name?: string | null;
-      /** Record Count Limit */
-      record_count_limit?: number | null;
-      /** Record Count Limit Time */
-      record_count_limit_time?: string | null;
-      /** Data Source Count Limit */
-      data_source_count_limit?: number | null;
-    };
-    /**
-     * OrgTierCreateSchema
-     * @description org_tier.rb — name and display_name are ``create: [:required]``.
-     */
-    BackendOrgTierCreateSchema: {
-      /** Name */
-      name: string;
-      /** Display Name */
-      display_name: string;
-      /** Record Count Limit */
-      record_count_limit?: number | null;
-      /** Record Count Limit Time */
-      record_count_limit_time?: string | null;
-      /** Data Source Count Limit */
-      data_source_count_limit?: number | null;
-      /** Trial Period Days */
-      trial_period_days?: number | null;
     };
     /**
      * OauthStartResponse
@@ -22664,48 +21948,6 @@ export interface components {
       updated_at?: string | null;
       /** Created At */
       created_at?: string | null;
-    };
-    /**
-     * StandaloneEndpointUpdate
-     * @description Lenient schema for standalone PUT /cluster_endpoints/{id}.
-     */
-    BackendStandaloneEndpointUpdate: {
-      /** Cluster Id */
-      cluster_id?: number | null;
-      /** Service */
-      service?: string | null;
-      /** Protocol */
-      protocol?: string | null;
-      /** Host */
-      host?: string | null;
-      /** Port */
-      port?: string | null;
-      /** Context */
-      context?: string | null;
-    };
-    /**
-     * StandaloneEndpointCreate
-     * @description Schema for standalone POST /cluster_endpoints — includes cluster_id.
-     *
-     * Mirrors Rails ``config/api/schemas/v1/cluster_endpoint.rb``: service,
-     * protocol, host and port are ``:create => [:required]``; cluster_id is
-     * optional in the schema (a missing/unknown cluster is rejected later by
-     * ``Cluster.find``, which 404s); ``header_host`` is NOT part of the Rails
-     * schema, and ``additionalProperties: false`` makes sending it a 400.
-     */
-    BackendStandaloneEndpointCreate: {
-      /** Cluster Id */
-      cluster_id?: number | null;
-      /** Service */
-      service: string;
-      /** Protocol */
-      protocol: string;
-      /** Host */
-      host: string;
-      /** Port */
-      port: string;
-      /** Context */
-      context?: string | null;
     };
     /**
      * CopyOptionsSchema
@@ -27476,37 +26718,6 @@ export interface operations {
       /** @description Forbidden */
       403: {
         content: never;
-      };
-    };
-  };
-  /**
-   * Destroy Org
-   * @description Delete an organization (asynchronous).
-   *
-   * Matches Rails OrgsController#destroy:
-   * - Non-super users get 405
-   * - Validates org tier restrictions before creating async task
-   * - Creates DeleteOrg async task and enqueues it
-   * - Returns wrapped async task response
-   */
-  destroy_org: {
-    parameters: {
-      path: {
-        org_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
       };
     };
   };
@@ -33218,70 +32429,6 @@ export interface operations {
     };
   };
   /**
-   * Info
-   * @description Debug endpoint showing base URL, request info and the process environment.
-   *
-   * Rails (api_auth_configs_controller.rb:27-39)::
-   *
-   *     def info
-   *       head :not_found and return if !current_user.super_user?
-   *       re = Hash.new
-   *       request.env.each do |k, v|
-   *         re[k] = v if v.is_a?(String)
-   *       end
-   *       render json: {
-   *         :base_url => ApiAuthConfig.generate_base_url(request),
-   *         :request_ip => request.remote_ip,
-   *         :reqest_env => re,
-   *         :env => ENV
-   *       }
-   *     end
-   *
-   * ``ENV`` extends ``Enumerable``, so ActiveSupport serializes it through
-   * ``Enumerable#as_json`` -> ``to_a.as_json`` -- an **array of ``[key, value]``
-   * pairs**, not an object. That is the bulk of the response, and the port had
-   * been sending ``"env": {}``.
-   *
-   * This deliberately exposes the full process environment, secrets included
-   * (DB password, ACCESS_TOKEN_SECRET_KEY, CREDENTIALS_ENC_KEY,
-   * AUTH_CONFIG_ENC_KEY), because that is what the Rails endpoint does and this
-   * port follows Rails.
-   *
-   * Three things stand between that payload and a caller, because the action
-   * body above is not the whole story — the controller also carries::
-   *
-   *     before_action :validate_api_user,
-   *                   except: [:index_client_config, :index_sign_on_options]
-   *
-   *     def validate_api_user
-   *       raise Api::V1::ApiError.new(:method_not_allowed) if current_org.nil?
-   *       authorize! :manage, current_org
-   *     end
-   *
-   * ``info`` is not in that ``except`` list, so those two run *before* the
-   * ``head :not_found`` — the same pair the five CRUD actions in ``_crud.py``
-   * get. They are therefore checked here first, in that order; putting them
-   * after the super-user check would collapse all three answers back into 404.
-   *
-   * The no-org case reached 404 rather than 405 before those guards existed:
-   * ``populate_super_user_flags`` returns without setting
-   * ``_super_user_override`` when ``org_id`` is None, so ``is_super_user_async``
-   * fell through to its own ``if not org_id: return False``. That failed closed
-   * — the secrets below were never reachable without an org — but 404 is not the
-   * status Rails answers with, and the org-admin case was 404 where Rails says
-   * 403.
-   */
-  info: {
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-    };
-  };
-  /**
    * Update Api Auth Config
    * @description Update an auth config.
    */
@@ -34066,22 +33213,6 @@ export interface operations {
     };
   };
   /**
-   * Create Auth Parameter
-   * @description Create an auth parameter.
-   * Matches Rails AuthParametersController#create.
-   * Requires super_user.
-   */
-  create_auth_parameter: {
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-    };
-  };
-  /**
    * Get Auth Parameter
    * @description Get a single auth parameter.
    * Matches Rails AuthParametersController#show.
@@ -34099,87 +33230,6 @@ export interface operations {
           "application/json": {
             [key: string]: unknown;
           };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Auth Parameter
-   * @description Update an auth parameter.
-   * Matches Rails AuthParametersController#update.
-   * Requires super_user.
-   */
-  auth_parameters_update_auth_parameter_put: {
-    parameters: {
-      path: {
-        auth_parameter_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Delete Auth Parameter
-   * @description Delete an auth parameter.
-   * Matches Rails AuthParametersController#destroy.
-   * Requires super_user.
-   */
-  delete_auth_parameter: {
-    parameters: {
-      path: {
-        auth_parameter_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Auth Parameter
-   * @description Update an auth parameter.
-   * Matches Rails AuthParametersController#update.
-   * Requires super_user.
-   */
-  auth_parameters_update_auth_parameter: {
-    parameters: {
-      path: {
-        auth_parameter_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
       /** @description Validation Error */
@@ -34268,86 +33318,6 @@ export interface operations {
     };
   };
   /**
-   * Update Auth Template By Name
-   * @description Update an auth template by name.
-   * Matches Rails PUT /auth_templates?auth_template_name=X.
-   * Requires super_user.
-   *
-   * Rails routes this to the same #update action as the resourceful PUT, which
-   * falls back to ``AuthTemplate.find(params[:id])`` when ``auth_template_name``
-   * is absent — on the collection route ``params[:id]`` is always nil, so a
-   * missing name 404s (RecordNotFound) rather than being a required query param.
-   */
-  update_auth_template_by_name: {
-    parameters: {
-      query?: {
-        /** @description Auth template name */
-        auth_template_name?: string | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Create Auth Template
-   * @description Create an auth template.
-   * Matches Rails AuthTemplatesController#create.
-   * Requires super_user.
-   */
-  create_auth_template: {
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-    };
-  };
-  /**
-   * Delete Auth Template By Name
-   * @description Delete an auth template by name.
-   * Matches Rails DELETE /auth_templates?auth_template_name=X.
-   * Requires super_user.
-   *
-   * Same fallback as the PUT-by-name route above: a missing name maps to
-   * Rails' ``AuthTemplate.find(nil)`` -> RecordNotFound -> 404.
-   */
-  delete_auth_template_by_name: {
-    parameters: {
-      query?: {
-        /** @description Auth template name */
-        auth_template_name?: string | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Get Auth Template
    * @description Get a single auth template.
    * Matches Rails AuthTemplatesController#show.
@@ -34365,87 +33335,6 @@ export interface operations {
           "application/json": {
             [key: string]: unknown;
           };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Auth Template
-   * @description Update an auth template.
-   * Matches Rails AuthTemplatesController#update.
-   * Requires super_user.
-   */
-  auth_templates_update_auth_template_put: {
-    parameters: {
-      path: {
-        auth_template_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Delete Auth Template Endpoint
-   * @description Delete an auth template.
-   * Matches Rails AuthTemplatesController#destroy.
-   * Requires super_user.
-   */
-  delete_auth_template_endpoint: {
-    parameters: {
-      path: {
-        auth_template_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Auth Template
-   * @description Update an auth template.
-   * Matches Rails AuthTemplatesController#update.
-   * Requires super_user.
-   */
-  auth_templates_update_auth_template: {
-    parameters: {
-      path: {
-        auth_template_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
       /** @description Validation Error */
@@ -35026,66 +33915,6 @@ export interface operations {
     };
   };
   /**
-   * List Cluster Endpoints
-   * @description List all cluster endpoints (super_user only).
-   *
-   * Matches Rails ClusterEndpointsController#index.
-   */
-  list_cluster_endpoints: {
-    parameters: {
-      query?: {
-        page?: string | number | null;
-        per_page?: string | number | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-              [key: string]: unknown;
-            }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Create Cluster Endpoint
-   * @description Create a cluster endpoint (super_user only).
-   *
-   * Matches Rails ClusterEndpointsController#create:
-   *   ClusterEndpoint.build_from_input(input)
-   */
-  create_cluster_endpoint: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendStandaloneEndpointCreate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Get Cluster Endpoint Schema
    * @description Return JSON schema for cluster_endpoints.
    *
@@ -35096,71 +33925,6 @@ export interface operations {
       query?: {
         /** @description HTTP method: get, post, or put */
         method?: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Get Cluster Endpoint
-   * @description Get a single cluster endpoint.
-   *
-   * Matches Rails ClusterEndpointsController#show.
-   */
-  get_cluster_endpoint: {
-    parameters: {
-      path: {
-        endpoint_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Cluster Endpoint
-   * @description Update a cluster endpoint (super_user only).
-   *
-   * Matches Rails ClusterEndpointsController#update. Rails' `resources
-   * :cluster_endpoints` maps both PUT and PATCH onto #update, so both verbs
-   * are registered here.
-   */
-  cluster_endpoints_update_cluster_endpoint_put: {
-    parameters: {
-      path: {
-        endpoint_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendStandaloneEndpointUpdate"];
       };
     };
     responses: {
@@ -35199,42 +33963,6 @@ export interface operations {
       200: {
         content: {
           "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Cluster Endpoint
-   * @description Update a cluster endpoint (super_user only).
-   *
-   * Matches Rails ClusterEndpointsController#update. Rails' `resources
-   * :cluster_endpoints` maps both PUT and PATCH onto #update, so both verbs
-   * are registered here.
-   */
-  cluster_endpoints_update_cluster_endpoint: {
-    parameters: {
-      path: {
-        endpoint_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendStandaloneEndpointUpdate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
         };
       };
       /** @description Validation Error */
@@ -36004,78 +34732,6 @@ export interface operations {
    * - Supports lookup by id or by type string
    */
   show_connector: {
-    parameters: {
-      path: {
-        connector_id: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Connector
-   * @description Update a connector.
-   *
-   * Matches Rails ConnectorsController#update:
-   * - Requires super_user
-   * - Only ingestion_mode can be updated
-   *
-   * The body is read from the raw request rather than declared as a typed
-   * parameter so the checks run in RAILS' order --
-   * ``head :forbidden`` -> ``Connector.find`` -> ``JSON.parse(raw_post)``
-   * (connectors_controller.rb:31-37). A declared body parameter is validated by
-   * FastAPI *before* the handler runs, which turned a forbidden caller or an
-   * unknown connector into a 400 whenever the body was also malformed.
-   */
-  connectors_update_connector_put: {
-    parameters: {
-      path: {
-        connector_id: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Connector
-   * @description Update a connector.
-   *
-   * Matches Rails ConnectorsController#update:
-   * - Requires super_user
-   * - Only ingestion_mode can be updated
-   *
-   * The body is read from the raw request rather than declared as a typed
-   * parameter so the checks run in RAILS' order --
-   * ``head :forbidden`` -> ``Connector.find`` -> ``JSON.parse(raw_post)``
-   * (connectors_controller.rb:31-37). A declared body parameter is validated by
-   * FastAPI *before* the handler runs, which turned a forbidden caller or an
-   * unknown connector into a 400 whenever the body was also malformed.
-   */
-  connectors_update_connector: {
     parameters: {
       path: {
         connector_id: string;
@@ -37252,36 +35908,6 @@ export interface operations {
     };
   };
   /**
-   * Index All Dashboard Transforms
-   * @description List all dashboard transforms (superuser only).
-   *
-   * Matches Rails: index_all action
-   */
-  index_all_dashboard_transforms: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number | null;
-        /** @description Items per page */
-        per_page?: number | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BackendDashboardTransformIndexSchema"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Show Dashboard Transform
    * @description Get a specific dashboard transform by ID.
    *
@@ -37417,51 +36043,6 @@ export interface operations {
           "application/json": {
               [key: string]: unknown;
             }[];
-        };
-      };
-    };
-  };
-  /**
-   * List All Credentials (Admin)
-   * @description List all data credentials in optimized format.
-   *
-   * Rails: DataCredentialsController#index_all
-   * Requires infrastructure or super user access.
-   */
-  list_all_credentials: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number | null;
-        /** @description Items per page */
-        per_page?: number | null;
-        org_id?: number | null;
-        /** @description Date interval filter for updated_at (e.g. 'today') */
-        updated_interval?: string | null;
-        /** @description Filter updated_at from date */
-        updated_from?: string | null;
-        /** @description Filter updated_at to date */
-        updated_to?: string | null;
-        /** @description Date interval filter for verified_at */
-        verified_interval?: string | null;
-        /** @description Filter verified_at from date */
-        verified_from?: string | null;
-        /** @description Filter verified_at to date */
-        verified_to?: string | null;
-        scope?: string | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
         };
       };
     };
@@ -38503,32 +37084,6 @@ export interface operations {
           "application/json": {
             [key: string]: unknown;
           };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Show Control Event
-   * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-   */
-  data_credentials_show_control_event: {
-    parameters: {
-      path: {
-        resource_id: number;
-        event: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
       /** @description Validation Error */
@@ -40630,40 +39185,6 @@ export interface operations {
     };
   };
   /**
-   * List All Schemas
-   * @description List all data schemas (nexla admin only).
-   *
-   * Matches Rails DataSchemasController#index_all:
-   *   def index_all
-   *     head :forbidden and return unless nexla_user?
-   *     @data_schemas = DataSchema.all.page(@page).per_page(@per_page)
-   *   end
-   */
-  list_all_schemas: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number | null;
-        /** @description Items per page */
-        per_page?: number | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BackendDataSchemaResponseSchema"][];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * List Public Schemas
    * @description List public data schemas.
    *
@@ -41296,56 +39817,6 @@ export interface operations {
           "application/json": {
               [key: string]: unknown;
             }[];
-        };
-      };
-    };
-  };
-  /**
-   * List All Data Sets
-   * @description List all data sets for a data source. Matches Rails GET /data_sets/all.
-   *
-   * BREAKING for existing callers: the port-only ``limit`` query param is gone
-   * (Rails has no such param — REQUEST_FILTERS defines no ``:limit`` key, so
-   * Rails ignores it). FastAPI silently drops unknown query params, so a caller
-   * still sending ``?limit=50`` gets no 422 telling them it moved — they get the
-   * whole set. On a data source with thousands of detected nexsets that is a
-   * large, silent change in response size. The endpoint is
-   * infrastructure/super-user only, so the blast radius is internal tooling.
-   *
-   * Pagination is available instead: ``?page=1&per_page=50`` reproduces the old
-   * bounded behaviour, and Rails' own semantics apply — neither param means the
-   * whole set, ``per_page=0`` likewise.
-   *
-   * Known stricter-than-Rails edge, pre-existing and shared with other listings:
-   * ``?page=abc`` and ``?page=-1`` are rejected with 422 by the ``ge=0``
-   * constraint, where Rails ``params[:page].to_i`` turns both into 0 and serves
-   * unpaginated (api_controller.rb:158-160).
-   */
-  list_all_data_sets: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number | null;
-        /** @description Items per page */
-        per_page?: number | null;
-        most_recent_limit?: number | null;
-        org_id?: number | null;
-        data_source_id?: number | null;
-        expand?: boolean | null;
-        include_samples?: boolean | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
         };
       };
     };
@@ -42452,41 +40923,6 @@ export interface operations {
     };
   };
   /**
-   * List Catalog Refs
-   * @description List catalog refs for a data set.
-   *
-   * Matches Rails GET /data_sets/:data_set_id/catalog_refs.
-   */
-  list_catalog_refs: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        per_page?: number;
-      };
-      path: {
-        data_set_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-              [key: string]: unknown;
-            }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Create Catalog Ref
    * @description Create a catalog ref for a data set.
    *
@@ -43285,37 +41721,6 @@ export interface operations {
     };
   };
   /**
-   * Update Data Set Runtime Status
-   * @description Update runtime status for a data set.
-   *
-   * Matches Rails: PUT /data_sets/:id/runtime_status/:status
-   *   - allowed only for infrastructure_or_super_user
-   *   - NOTE: Rails does NOT check org ownership for data_sets (unlike data_sources/sinks)
-   *   - returns 200 with empty body on success
-   */
-  update_data_set_runtime_status: {
-    parameters: {
-      path: {
-        data_set_id: number;
-        runtime_status: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Put Data Set Samples
    * @description Append data samples to a data set (Rails PUT /data_sets/:id/samples).
    *
@@ -43759,32 +42164,6 @@ export interface operations {
           "application/json": {
             [key: string]: unknown;
           };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Show Control Event
-   * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-   */
-  data_sets_show_control_event: {
-    parameters: {
-      path: {
-        resource_id: number;
-        event: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
       /** @description Validation Error */
@@ -46781,64 +45160,6 @@ export interface operations {
       path: {
         data_sink_id: number;
         run_id: string | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Data Sink Runtime Status
-   * @description Update runtime status for a data sink.
-   *
-   * Matches Rails: PUT /data_sinks/:id/runtime_status/:status
-   *   - allowed only for infrastructure_or_super_user
-   *   - super users can update any org
-   *   - infra users can update only current org resources
-   *   - returns 200 with empty body
-   */
-  update_data_sink_runtime_status: {
-    parameters: {
-      path: {
-        data_sink_id: number;
-        runtime_status: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Show Control Event
-   * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-   */
-  data_sinks_show_control_event: {
-    parameters: {
-      path: {
-        resource_id: number;
-        event: string;
       };
     };
     responses: {
@@ -50238,7 +48559,7 @@ export interface operations {
    * - data_source.run_now!
    * - render "show"
    */
-  data_sources_run_data_source_now: {
+  data_sources_run_data_source_now_put: {
     parameters: {
       path: {
         data_source_id: number;
@@ -50269,7 +48590,7 @@ export interface operations {
    * - data_source.run_now!
    * - render "show"
    */
-  data_sources_run_data_source_now_post: {
+  data_sources_run_data_source_now: {
     parameters: {
       path: {
         data_source_id: number;
@@ -50309,64 +48630,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["BackendRunIdSchema"][];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Data Source Runtime Status
-   * @description Update runtime status for a data source.
-   *
-   * Matches Rails: PUT /data_sources/:id/runtime_status/:status
-   *   - allowed only for infrastructure_or_super_user
-   *   - super users can update any org
-   *   - infra users can update only current org resources
-   *   - returns 200 with empty body on success
-   */
-  update_data_source_runtime_status: {
-    parameters: {
-      path: {
-        data_source_id: number;
-        runtime_status: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Show Control Event
-   * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-   */
-  data_sources_show_control_event: {
-    parameters: {
-      path: {
-        resource_id: number;
-        event: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
       /** @description Validation Error */
@@ -52358,91 +50621,6 @@ export interface operations {
     };
   };
   /**
-   * Origin Nodes Condensed
-   * @description Get condensed list of all origin flow nodes.
-   *
-   * Matches Rails FlowNodesController#origin_nodes_condensed.
-   * Admin-only: requires infrastructure_or_super_user.
-   */
-  origin_nodes_condensed: {
-    parameters: {
-      query?: {
-        org_id?: number | null;
-        status?: string | null;
-        ingestion_mode?: string | null;
-        flow_type?: string | null;
-        resource_id?: number | null;
-        sort_by?: string | null;
-        sort_order?: string | null;
-        /** @description Page number */
-        page?: number | null;
-        /** @description Items per page */
-        per_page?: number | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-              [key: string]: unknown;
-            }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Flows Minimal
-   * @description Rails routes.rb:772 -> flow_nodes#flows_minimal (flow_nodes_controller.rb:57-107).
-   *
-   * Returns the flow graph's wiring and nothing else -- just the id columns that
-   * connect sources, sets and sinks -- for every origin flow node the caller can
-   * page through. Infrastructure callers use it to rebuild the topology cheaply.
-   *
-   * Three details separate it from ``/flows/all/condensed``:
-   *
-   * * pagination is **always on**, at a default per_page of 100 (``@paginate =
-   *   true`` unconditionally), where condensed only paginates when asked;
-   * * the page is taken over *flow nodes*, then the three resource queries are
-   *   filtered by the resulting origin_node_ids -- so per_page bounds flows, not
-   *   rows returned;
-   * * ``status`` is upcased only when it arrives as a string, and the dataplane
-   *   filter applies only when no explicit ``org_id`` was given.
-   */
-  flows_minimal: {
-    parameters: {
-      query?: {
-        org_id?: number | null;
-        status?: string | null;
-        /** @description Page number */
-        page?: number | null;
-        /** @description Items per page */
-        per_page?: number | null;
-        scope?: string | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Get Flow Document Schema
    * @description JSON Schema for the documents ``GET /flows/{flow_id}/document`` returns.
    */
@@ -52546,33 +50724,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["BackendFlowsIndexResponseSchema"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Publish Raw Flow Event
-   * @description Forward a raw flow event to the flow-execution dataplane.
-   */
-  publish_raw_flow_event: {
-    requestBody?: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
       /** @description Validation Error */
@@ -52939,7 +51090,7 @@ export interface operations {
    *
    * Body: {"data_set_id": X} or {"data_set": {"name": "..."}}
    */
-  flows_insert_flow_node_endpoint: {
+  flows_insert_flow_node_endpoint_put: {
     parameters: {
       path: {
         flow_id: number;
@@ -52973,7 +51124,7 @@ export interface operations {
    *
    * Body: {"data_set_id": X} or {"data_set": {"name": "..."}}
    */
-  flows_insert_flow_node_endpoint_post: {
+  flows_insert_flow_node_endpoint: {
     parameters: {
       path: {
         flow_id: number;
@@ -53320,7 +51471,7 @@ export interface operations {
    *
    * Body: {"delete_resource": bool} or query param delete_resource=true
    */
-  flows_remove_flow_node_endpoint: {
+  flows_remove_flow_node_endpoint_put: {
     parameters: {
       query?: {
         delete_resource?: boolean;
@@ -53357,7 +51508,7 @@ export interface operations {
    *
    * Body: {"delete_resource": bool} or query param delete_resource=true
    */
-  flows_remove_flow_node_endpoint_post: {
+  flows_remove_flow_node_endpoint: {
     parameters: {
       query?: {
         delete_resource?: boolean;
@@ -53441,7 +51592,7 @@ export interface operations {
    * an upstream code) is deliberately surfaced to the client, so this endpoint
    * must never synthesize a success response.
    */
-  flows_run_flow_now: {
+  flows_run_flow_now_put: {
     parameters: {
       path: {
         flow_id: number;
@@ -53479,7 +51630,7 @@ export interface operations {
    * an upstream code) is deliberately surfaced to the client, so this endpoint
    * must never synthesize a success response.
    */
-  flows_run_flow_now_post: {
+  flows_run_flow_now: {
     parameters: {
       path: {
         flow_id: number;
@@ -53840,32 +51991,6 @@ export interface operations {
       };
       path: {
         origin_node_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Show Control Event
-   * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-   */
-  flows_show_control_event: {
-    parameters: {
-      path: {
-        resource_id: number;
-        event: string;
       };
     };
     responses: {
@@ -54672,33 +52797,6 @@ export interface operations {
     };
   };
   /**
-   * Publish Raw Metrics
-   * @description Forward a raw metrics event to the metrics-aggregation dataplane.
-   */
-  publish_raw_metrics: {
-    requestBody?: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Update
    * @description PUT /notification_channel_settings/{id} — update a setting.
    */
@@ -54715,90 +52813,6 @@ export interface operations {
           "application/json": {
             [key: string]: unknown;
           };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Notification Setting List
-   * @description POST/PUT /notification_setting/list — super_user only.
-   *
-   * Resolves notification_type_id from resource_type + event_type if not provided,
-   * then finds valid notification settings using priority waterfall per channel.
-   */
-  notification_setting_notification_setting_list: {
-    parameters: {
-      query?: {
-        resource_type?: string | null;
-        resource_id?: number | null;
-        owner_id?: string | null;
-        event_type?: string | null;
-        notification_type_id?: number | null;
-        org_id?: number | null;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        } | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-              [key: string]: unknown;
-            }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Notification Setting List
-   * @description POST/PUT /notification_setting/list — super_user only.
-   *
-   * Resolves notification_type_id from resource_type + event_type if not provided,
-   * then finds valid notification settings using priority waterfall per channel.
-   */
-  notification_setting_notification_setting_list_post: {
-    parameters: {
-      query?: {
-        resource_type?: string | null;
-        resource_id?: number | null;
-        owner_id?: string | null;
-        event_type?: string | null;
-        notification_type_id?: number | null;
-        org_id?: number | null;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        } | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-              [key: string]: unknown;
-            }[];
         };
       };
       /** @description Validation Error */
@@ -54859,32 +52873,6 @@ export interface operations {
           "application/json": {
             [key: string]: unknown;
           };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Show Control Event
-   * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-   */
-  notification_settings_show_control_event: {
-    parameters: {
-      path: {
-        resource_id: number;
-        event: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
       /** @description Validation Error */
@@ -55206,57 +53194,6 @@ export interface operations {
     };
   };
   /**
-   * List Tiers
-   * @description Rails ``index`` — super users only, paginated, no filters.
-   */
-  org_tiers_list_tiers: {
-    parameters: {
-      query?: {
-        page?: number | null;
-        per_page?: number | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Create Tier
-   * @description Rails ``create`` — renders "show", so 200 with the tier, not 201.
-   */
-  org_tiers_create_tier: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendOrgTierCreateSchema"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Get Tier
    * @description Rails ``show`` — no authorize! call, so any authenticated caller reads.
    */
@@ -55264,91 +53201,6 @@ export interface operations {
     parameters: {
       path: {
         tier_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Tier
-   * @description Rails ``update`` — a partial body patches; blanks are skipped.
-   */
-  org_tiers_update_tier_put: {
-    parameters: {
-      path: {
-        tier_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendOrgTierUpdateSchema"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Destroy Tier
-   * @description Rails ``destroy`` — head :ok, or an empty-body 403 / 404.
-   */
-  org_tiers_destroy_tier: {
-    parameters: {
-      path: {
-        tier_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Tier
-   * @description Rails ``update`` — a partial body patches; blanks are skipped.
-   */
-  org_tiers_update_tier: {
-    parameters: {
-      path: {
-        tier_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendOrgTierUpdateSchema"];
       };
     };
     responses: {
@@ -55388,69 +53240,6 @@ export interface operations {
           "application/json": {
             [key: string]: unknown;
           };
-        };
-      };
-    };
-  };
-  /**
-   * List All Orgs
-   * @description List all organizations (super admin only).
-   *
-   * Returns full org detail matching Rails index.json.jbuilder.
-   * Supports X-Nexla-Dataplane header for filtering by dataplane cluster.
-   */
-  list_all_orgs: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page. Default returns all (Rails PAGINATE_ALL_COUNT) */
-        per_page?: number;
-        dataplane?: string | null;
-        scope?: string | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-              [key: string]: unknown;
-            }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Show Catalog Config Data Set
-   * @description Show a single data set with its catalog config context.
-   *
-   * Rails equivalent: DataSetsCatalogConfigsController#show
-   * Super-user only.
-   */
-  show_data_sets_catalog_config: {
-    parameters: {
-      path: {
-        data_set_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
         };
       };
     };
@@ -55535,136 +53324,6 @@ export interface operations {
           "application/json": {
               [key: string]: unknown;
             }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Allowed Clusters
-   * @description Update allowed clusters for an org (super admin only).
-   *
-   * Matches Rails: Orgs::ClustersController#update_allowed_clusters
-   * Replaces additional allowed clusters. Org default cluster is auto-excluded.
-   */
-  update_allowed_clusters: {
-    parameters: {
-      path: {
-        org_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendAllowedClustersUpdateSchema"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-              [key: string]: unknown;
-            }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Org Cluster
-   * @description Update organization cluster assignment (super admin only).
-   *
-   * Rails: PUT /orgs/:org_id/cluster → sets new_cluster_id + cluster_status=MIGRATING.
-   * Returns full org show response.
-   */
-  update_org_cluster: {
-    parameters: {
-      path: {
-        org_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendClusterUpdateSchema"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Activate Org Cluster
-   * @description Activate pending cluster migration (super admin only).
-   *
-   * Rails: PUT /orgs/:org_id/cluster/activate → moves new_cluster_id to cluster_id.
-   * Returns full org show response.
-   */
-  activate_org_cluster: {
-    parameters: {
-      path: {
-        org_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Revert Org Cluster
-   * @description Revert pending cluster migration (super admin only).
-   *
-   * Rails: PUT /orgs/:org_id/cluster/revert → clears new_cluster_id, resets status.
-   * Returns full org show response.
-   */
-  revert_org_cluster: {
-    parameters: {
-      path: {
-        org_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
         };
       };
       /** @description Validation Error */
@@ -56417,51 +54076,6 @@ export interface operations {
     };
   };
   /**
-   * Set Rate Limits
-   * @description Set rate limits for organization.
-   *
-   * Matches Rails PUT /orgs/:org_id/rate_limits (rate_limiting_controller).
-   *
-   * The body is ``{"rate_limit": {"common": .., "light": .., "medium": ..,
-   * "high": ..}}``, which is what Rails requires:
-   * ``params.require(:rate_limit).permit(*RateLimit::LIMITS)``
-   * (rate_limiting_controller.rb:33). This parameter used to be named
-   * ``rate_limit``, but FastAPI does not embed a single non-model body
-   * parameter, so the handler received the WHOLE body; the writer then looked
-   * for flat ``common``/``light``/… keys, found none, and answered
-   * ``{"success": true}`` having saved nothing.
-   */
-  set_rate_limits: {
-    parameters: {
-      path: {
-        org_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Activate Rate Limited Sources
    * @description Activate rate-limited sources for organization.
    *
@@ -56578,40 +54192,6 @@ export interface operations {
     };
   };
   /**
-   * Throttle Organization
-   * @description Set throttle until time for organization.
-   *
-   * Matches Rails PUT /orgs/:org_id/throttle (rate_limiting_controller).
-   */
-  throttle_org: {
-    parameters: {
-      path: {
-        org_id: number;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["BackendBody_throttle_org_api_v1_orgs__org_id__throttle_put"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Get Org Resource Audit Log
    * @description Audit log for every resource of one type inside an org.
    */
@@ -56638,32 +54218,6 @@ export interface operations {
           "application/json": {
               [key: string]: unknown;
             }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Show Control Event
-   * @description GET /{resource_id}/control/{event} — Rails ControlEventConcern#show_control_event.
-   */
-  orgs_show_control_event: {
-    parameters: {
-      path: {
-        resource_id: number;
-        event: string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
       /** @description Validation Error */
@@ -57301,57 +54855,6 @@ export interface operations {
         data_credentials_id?: number | null;
         page?: string | number | null;
         per_page?: string | number | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Backendapp__api__v1__quarantine_settings__schema__QuarantineSettingResponseSchema"][];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Index All
-   * @description Rails QuarantineSettingsController#index_all (line 8).
-   *
-   *     head :forbidden and return if !current_user.infrastructure_or_super_user?
-   *     @quarantine_setting = add_request_filters(QuarantineSetting, QuarantineSetting)
-   *     @quarantine_setting = @quarantine_setting.in_dataplane(request_dataplane) if
-   *       request_dataplane.present?
-   *     @quarantine_setting = @quarantine_setting.page(@page).per_page(@per_page)
-   *     set_link_header(@quarantine_setting)
-   *     render "index"
-   *
-   * The controller-level before_action runs first, so a request without an org
-   * context is a 400 even for a Nexla admin (quarantine_settings_controller.rb:4).
-   *
-   * The accepted filters are the ones add_request_filters actually applies to
-   * this model — see QuarantineSettingsModule.list_all. owner_id is deliberately
-   * absent: Rails allows it as a query parameter but never filters on it here.
-   */
-  quarantine_settings_index_all: {
-    parameters: {
-      query?: {
-        id?: number[] | null;
-        org_id?: number[] | null;
-        resource_id?: number[] | null;
-        resource_type?: string | null;
-        condition_type?: string | null;
-        sort_by?: string | null;
-        sort_order?: string | null;
-        /** @description Page number */
-        page?: number | null;
-        /** @description Items per page */
-        per_page?: number | null;
-        scope?: string | null;
       };
     };
     responses: {
@@ -58398,7 +55901,7 @@ export interface operations {
    * Returns:
    *     TokenResponseSchema: Access token with user and org info
    */
-  token_create_idp_token: {
+  token_create_idp_token_put: {
     parameters: {
       path: {
         uid: string;
@@ -58436,7 +55939,7 @@ export interface operations {
    * Returns:
    *     TokenResponseSchema: Access token with user and org info
    */
-  token_create_idp_token_post: {
+  token_create_idp_token: {
     parameters: {
       path: {
         uid: string;
@@ -60813,7 +58316,7 @@ export interface operations {
    * settings with the body untouched. Requiring a body here turned both of
    * those 200s into a 400.
    */
-  user_settings_search_user_settings: {
+  user_settings_search_user_settings_put: {
     parameters: {
       query?: {
         /** @description Page number */
@@ -60859,7 +58362,7 @@ export interface operations {
    * settings with the body untouched. Requiring a body here turned both of
    * those 200s into a 400.
    */
-  user_settings_search_user_settings_post: {
+  user_settings_search_user_settings: {
     parameters: {
       query?: {
         /** @description Page number */
@@ -61018,57 +58521,6 @@ export interface operations {
     };
   };
   /**
-   * List Tiers
-   * @description Rails ``index`` — super users only, paginated, no filters.
-   */
-  user_tiers_list_tiers: {
-    parameters: {
-      query?: {
-        page?: number | null;
-        per_page?: number | null;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Create Tier
-   * @description Rails ``create`` — renders "show", so 200 with the tier, not 201.
-   */
-  user_tiers_create_tier: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendUserTierCreateSchema"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Get Tier
    * @description Rails ``show`` — no authorize! call, so any authenticated caller reads.
    */
@@ -61076,91 +58528,6 @@ export interface operations {
     parameters: {
       path: {
         tier_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Tier
-   * @description Rails ``update`` — a partial body patches; blanks are skipped.
-   */
-  user_tiers_update_tier_put: {
-    parameters: {
-      path: {
-        tier_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendUserTierUpdateSchema"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Destroy Tier
-   * @description Rails ``destroy`` — head :ok, or an empty-body 403 / 404.
-   */
-  user_tiers_destroy_tier: {
-    parameters: {
-      path: {
-        tier_id: number;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Update Tier
-   * @description Rails ``update`` — a partial body patches; blanks are skipped.
-   */
-  user_tiers_update_tier: {
-    parameters: {
-      path: {
-        tier_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BackendUserTierUpdateSchema"];
       };
     };
     responses: {
@@ -62443,42 +59810,6 @@ export interface operations {
     };
   };
   /**
-   * Set Rate Limits
-   * @description Set rate limits for user.
-   *
-   * Matches Rails PUT /users/:user_id/rate_limits (rate_limiting_controller).
-   */
-  set_user_rate_limits: {
-    parameters: {
-      path: {
-        user_id: number;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
    * Activate Rate Limited Sources
    * @description Activate rate limited sources for a user.
    * Matches Rails UsersController#activate_rate_limited_sources with activate=true.
@@ -62623,40 +59954,6 @@ export interface operations {
       200: {
         content: {
           "application/json": string[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["BackendHTTPValidationError"];
-        };
-      };
-    };
-  };
-  /**
-   * Throttle User
-   * @description Set throttle until time for user.
-   *
-   * Matches Rails PUT /users/:user_id/throttle (rate_limiting_controller).
-   */
-  throttle_user: {
-    parameters: {
-      path: {
-        user_id: number;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["BackendBody_throttle_user_api_v1_users__user_id__throttle_put"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
         };
       };
       /** @description Validation Error */

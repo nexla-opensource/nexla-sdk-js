@@ -26,12 +26,12 @@ export class TokensResource {
 
   /** IDP Token */
   async token_create_idp_token(init?: OperationInit<"token_create_idp_token">): Promise<OperationData<"token_create_idp_token">> {
-    return this.client.requestOperation("token_create_idp_token", "put", "/token/{uid}", init);
+    return this.client.requestOperation("token_create_idp_token", "post", "/token/{uid}", init);
   }
 
   /** IDP Token */
-  async token_create_idp_token_post(init?: OperationInit<"token_create_idp_token_post">): Promise<OperationData<"token_create_idp_token_post">> {
-    return this.client.requestOperation("token_create_idp_token_post", "post", "/token/{uid}", init);
+  async token_create_idp_token_put(init?: OperationInit<"token_create_idp_token_put">): Promise<OperationData<"token_create_idp_token_put">> {
+    return this.client.requestOperation("token_create_idp_token_put", "put", "/token/{uid}", init);
   }
 
   /** Generate Token */

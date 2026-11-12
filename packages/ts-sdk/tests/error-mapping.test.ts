@@ -16,7 +16,7 @@ import {
   RateLimitError,
   ResourceConflictError,
   ServerError,
-  ValidationError
+  ValidationError,
 } from "../src/errors.js";
 
 type Scripted = { status: number; body?: unknown; text?: string; headers?: Record<string, string> };
@@ -34,12 +34,12 @@ const toResponse = (scripted: Scripted): Response => {
 };
 
 const errorFor = async (scripted: Scripted): Promise<NexlaError> => {
-  const fetchFn: typeof fetch = async () => toResponse(scripted);
+  const fetchFn: typeof fetch = () => Promise.resolve(toResponse(scripted));
   const client = new NexlaClient({
     accessToken: "tok",
     baseUrl: "https://example.com",
     fetch: fetchFn,
-    retry: { maxRetries: 0 }
+    retry: { maxRetries: 0 },
   });
   try {
     await client.request("get", "/flows");
@@ -60,7 +60,10 @@ describe("error body shapes", () => {
   });
 
   it("uses message and keeps detail in body (shape 2)", async () => {
-    const error = await errorFor({ status: 403, body: { detail: "Not authorized to manage this Org", message: "Forbidden" } });
+    const error = await errorFor({
+      status: 403,
+      body: { detail: "Not authorized to manage this Org", message: "Forbidden" },
+    });
     expect(error).toBeInstanceOf(AuthorizationError);
     expect(error.message).toBe("Forbidden");
     expect(error.body).toEqual({ detail: "Not authorized to manage this Org", message: "Forbidden" });
@@ -69,7 +72,7 @@ describe("error body shapes", () => {
   it("reads nested 429 error object (shape 3)", async () => {
     const error = await errorFor({
       status: 429,
-      body: { error: { detail: "Rate limit exceeded.", retry_after: 120, type: "RateLimitExceeded" } }
+      body: { error: { detail: "Rate limit exceeded.", retry_after: 120, type: "RateLimitExceeded" } },
     });
     expect(error).toBeInstanceOf(RateLimitError);
     expect(error.message).toBe("Rate limit exceeded.");
@@ -111,7 +114,10 @@ describe("error body shapes", () => {
   });
 
   it("maps 422 pagination range to ValidationError", async () => {
-    const error = await errorFor({ status: 422, body: { detail: "per_page", message: "Pagination value is out of range" } });
+    const error = await errorFor({
+      status: 422,
+      body: { detail: "per_page", message: "Pagination value is out of range" },
+    });
     expect(error).toBeInstanceOf(ValidationError);
     expect(error.message).toBe("Pagination value is out of range");
   });
@@ -150,18 +156,25 @@ describe("error classes and fields", () => {
 describe("423 is not refreshed like 401", () => {
   it("does not fetch a new service token on 423", async () => {
     let tokenCalls = 0;
-    const fetchFn: typeof fetch = async (input, init) => {
+    const fetchFn: typeof fetch = (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
       if (request.url.endsWith("/token")) {
         tokenCalls += 1;
-        return new Response(JSON.stringify({ access_token: "tok", expires_in: 86400 }), {
-          status: 200,
-          headers: { "content-type": "application/json" }
-        });
+        return Promise.resolve(
+          new Response(JSON.stringify({ access_token: "tok", expires_in: 86400 }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        );
       }
-      return new Response("", { status: 423 });
+      return Promise.resolve(new Response("", { status: 423 }));
     };
-    const client = new NexlaClient({ serviceKey: "svc", baseUrl: "https://example.com", fetch: fetchFn, retry: { maxRetries: 0 } });
+    const client = new NexlaClient({
+      serviceKey: "svc",
+      baseUrl: "https://example.com",
+      fetch: fetchFn,
+      retry: { maxRetries: 0 },
+    });
 
     await expect(client.request("get", "/flows")).rejects.toBeInstanceOf(AccountLockedError);
     expect(tokenCalls).toBe(1);

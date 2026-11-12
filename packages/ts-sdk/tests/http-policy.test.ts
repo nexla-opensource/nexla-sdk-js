@@ -17,34 +17,35 @@ const rateLimited = (retryAfter: number, headers: Record<string, string> = {}) =
 /** Records each delay the retry loop asks for and does not wait. */
 const recordingSleep = () => {
   const delays: number[] = [];
-  const sleep = async (ms: number) => {
+  const sleep = (ms: number) => {
     delays.push(ms);
+    return Promise.resolve();
   };
   return { delays, sleep };
 };
 
 const connectError = () =>
   Object.assign(new TypeError("fetch failed"), {
-    cause: Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" })
+    cause: Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" }),
   });
 
 const resetAfterSend = () =>
   Object.assign(new TypeError("fetch failed"), {
-    cause: Object.assign(new Error("socket hang up"), { code: "ECONNRESET" })
+    cause: Object.assign(new Error("socket hang up"), { code: "ECONNRESET" }),
   });
 
 /** A fetch that never answers and rejects when the request signal aborts. */
 const hangUntilAborted: typeof fetch = (input) =>
   new Promise((_resolve, reject) => {
     const request = input as Request;
-    request.signal.addEventListener("abort", () => reject(request.signal.reason));
+    request.signal.addEventListener("abort", () => reject(request.signal.reason as Error));
   });
 
 describe("Retry-After handling for 429", () => {
   it("uses body error.retry_after before the Retry-After header", async () => {
     const { delays, sleep } = recordingSleep();
     const responses = [rateLimited(1, { "retry-after": "5" }), json(200, { ok: true })];
-    const baseFetch: typeof fetch = async () => responses.shift() ?? json(200);
+    const baseFetch: typeof fetch = () => Promise.resolve(responses.shift() ?? json(200));
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, sleep });
     const response = await fetchWithRetry(new Request("https://example.com/flows"));
@@ -56,7 +57,7 @@ describe("Retry-After handling for 429", () => {
   it("uses a Retry-After header in seconds when the body has no retry_after", async () => {
     const { delays, sleep } = recordingSleep();
     const responses = [json(429, { message: "slow" }, { "retry-after": "7" }), json(200)];
-    const baseFetch: typeof fetch = async () => responses.shift() ?? json(200);
+    const baseFetch: typeof fetch = () => Promise.resolve(responses.shift() ?? json(200));
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, sleep });
     await fetchWithRetry(new Request("https://example.com/flows"));
@@ -68,7 +69,7 @@ describe("Retry-After handling for 429", () => {
     const { delays, sleep } = recordingSleep();
     const when = new Date(Date.now() + 3000).toUTCString();
     const responses = [json(429, {}, { "retry-after": when }), json(200)];
-    const baseFetch: typeof fetch = async () => responses.shift() ?? json(200);
+    const baseFetch: typeof fetch = () => Promise.resolve(responses.shift() ?? json(200));
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, sleep });
     await fetchWithRetry(new Request("https://example.com/flows"));
@@ -82,9 +83,9 @@ describe("Retry-After handling for 429", () => {
   it("does not retry when the wait is over 60 s and returns the 429", async () => {
     const { delays, sleep } = recordingSleep();
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      return rateLimited(120);
+      return Promise.resolve(rateLimited(120));
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 3, sleep });
@@ -98,7 +99,7 @@ describe("Retry-After handling for 429", () => {
   it("retries when the wait is exactly 60 s", async () => {
     const { delays, sleep } = recordingSleep();
     const responses = [rateLimited(60), json(200)];
-    const baseFetch: typeof fetch = async () => responses.shift() ?? json(200);
+    const baseFetch: typeof fetch = () => Promise.resolve(responses.shift() ?? json(200));
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, sleep });
     const response = await fetchWithRetry(new Request("https://example.com/flows"));
@@ -111,7 +112,7 @@ describe("Retry-After handling for 429", () => {
 describe("retry method rules", () => {
   it("retries a POST after a 429", async () => {
     const responses = [rateLimited(0), json(201)];
-    const baseFetch: typeof fetch = async () => responses.shift() ?? json(201);
+    const baseFetch: typeof fetch = () => Promise.resolve(responses.shift() ?? json(201));
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, sleep: async () => {} });
     const response = await fetchWithRetry(new Request("https://example.com/x", { method: "POST", body: "{}" }));
@@ -121,9 +122,13 @@ describe("retry method rules", () => {
 
   it("retries POST on 503 when retryMethods includes POST", async () => {
     const responses = [json(503), json(200)];
-    const baseFetch: typeof fetch = async () => responses.shift() ?? json(200);
+    const baseFetch: typeof fetch = () => Promise.resolve(responses.shift() ?? json(200));
 
-    const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, retryMethods: ["GET", "POST"], sleep: async () => {} });
+    const fetchWithRetry = createFetchWithRetry(baseFetch, {
+      maxRetries: 2,
+      retryMethods: ["GET", "POST"],
+      sleep: async () => {},
+    });
     const response = await fetchWithRetry(new Request("https://example.com/x", { method: "POST", body: "{}" }));
 
     expect(response.status).toBe(200);
@@ -132,9 +137,9 @@ describe("retry method rules", () => {
   it("uses exponential backoff with a 500 ms base and jitter below 100 ms", async () => {
     const { delays, sleep } = recordingSleep();
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      return calls < 4 ? json(503) : json(200);
+      return Promise.resolve(calls < 4 ? json(503) : json(200));
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 3, sleep });
@@ -153,10 +158,10 @@ describe("retry method rules", () => {
 describe("network failures", () => {
   it("retries a connect error on POST", async () => {
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      if (calls === 1) throw connectError();
-      return json(201, { id: 1 });
+      if (calls === 1) return Promise.reject(connectError());
+      return Promise.resolve(json(201, { id: 1 }));
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, sleep: async () => {} });
@@ -168,9 +173,9 @@ describe("network failures", () => {
 
   it("does not retry a POST whose connection reset after send, and raises NexlaConnectionError", async () => {
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      throw resetAfterSend();
+      return Promise.reject(resetAfterSend());
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 3, sleep: async () => {} });
@@ -182,10 +187,10 @@ describe("network failures", () => {
 
   it("retries a GET whose connection reset after send", async () => {
     let calls = 0;
-    const baseFetch: typeof fetch = async () => {
+    const baseFetch: typeof fetch = () => {
       calls += 1;
-      if (calls === 1) throw resetAfterSend();
-      return json(200);
+      if (calls === 1) return Promise.reject(resetAfterSend());
+      return Promise.resolve(json(200));
     };
 
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 2, sleep: async () => {} });
@@ -233,7 +238,7 @@ describe("timeouts and cancellation", () => {
     const fetchWithRetry = createFetchWithRetry(baseFetch, { maxRetries: 3, timeoutMs: 20, sleep: async () => {} });
 
     await expect(
-      fetchWithRetry(new Request("https://example.com/x", { method: "POST", body: "{}" }))
+      fetchWithRetry(new Request("https://example.com/x", { method: "POST", body: "{}" })),
     ).rejects.toBeInstanceOf(NexlaTimeoutError);
     expect(calls).toBe(1);
   });
@@ -265,7 +270,7 @@ describe("NexlaClient wiring", () => {
       baseUrl: "https://example.com",
       fetch: hangUntilAborted,
       timeoutMs: 20,
-      retry: { maxRetries: 0 }
+      retry: { maxRetries: 0 },
     });
 
     await expect(client.request("get", "/flows")).rejects.toBeInstanceOf(NexlaTimeoutError);
@@ -274,33 +279,43 @@ describe("NexlaClient wiring", () => {
   it("retries the /token call on 429 and does not retry it on 503", async () => {
     let tokenCalls = 0;
     let tokenStatus = 429;
-    const fetchFn: typeof fetch = async (input, init) => {
+    const fetchFn: typeof fetch = (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
       if (request.url.endsWith("/token")) {
         tokenCalls += 1;
         if (tokenStatus === 429) {
           tokenStatus = 200;
-          return rateLimited(0);
+          return Promise.resolve(rateLimited(0));
         }
-        return json(200, { access_token: "tok", expires_in: 86400 });
+        return Promise.resolve(json(200, { access_token: "tok", expires_in: 86400 }));
       }
-      return json(200, []);
+      return Promise.resolve(json(200, []));
     };
-    const client = new NexlaClient({ serviceKey: "svc", baseUrl: "https://example.com", fetch: fetchFn, retry: { sleep: async () => {} } });
+    const client = new NexlaClient({
+      serviceKey: "svc",
+      baseUrl: "https://example.com",
+      fetch: fetchFn,
+      retry: { sleep: async () => {} },
+    });
 
     await expect(client.request("get", "/flows")).resolves.toEqual([]);
     expect(tokenCalls).toBe(2);
 
     tokenCalls = 0;
-    const failingFetch: typeof fetch = async (input, init) => {
+    const failingFetch: typeof fetch = (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
       if (request.url.endsWith("/token")) {
         tokenCalls += 1;
-        return json(503, { message: "down" });
+        return Promise.resolve(json(503, { message: "down" }));
       }
-      return json(200, []);
+      return Promise.resolve(json(200, []));
     };
-    const client503 = new NexlaClient({ serviceKey: "svc", baseUrl: "https://example.com", fetch: failingFetch, retry: { sleep: async () => {} } });
+    const client503 = new NexlaClient({
+      serviceKey: "svc",
+      baseUrl: "https://example.com",
+      fetch: failingFetch,
+      retry: { sleep: async () => {} },
+    });
 
     await expect(client503.request("get", "/flows")).rejects.toBeInstanceOf(ServerError);
     expect(tokenCalls).toBe(1);
@@ -310,8 +325,8 @@ describe("NexlaClient wiring", () => {
     const client = new NexlaClient({
       accessToken: "tok",
       baseUrl: "https://example.com",
-      fetch: async () => rateLimited(120),
-      retry: { sleep: async () => {} }
+      fetch: () => Promise.resolve(rateLimited(120)),
+      retry: { sleep: async () => {} },
     });
 
     const error = await client.request("get", "/flows").catch((caught: unknown) => caught);
@@ -326,12 +341,14 @@ describe("per-call signal", () => {
       accessToken: "tok",
       baseUrl: "https://example.com",
       fetch: hangUntilAborted,
-      retry: { maxRetries: 3, sleep: async () => {} }
+      retry: { maxRetries: 3, sleep: async () => {} },
     });
     const controller = new AbortController();
     setTimeout(() => controller.abort(new Error("stop")), 5);
 
-    const error = await client.request("get", "/flows", { signal: controller.signal }).catch((caught: unknown) => caught);
+    const error = await client
+      .request("get", "/flows", { signal: controller.signal })
+      .catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(Error);
     expect((error as Error).message).toBe("stop");
     expect(error).not.toBeInstanceOf(NexlaTimeoutError);
