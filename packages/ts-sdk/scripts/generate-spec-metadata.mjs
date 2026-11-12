@@ -2,17 +2,17 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { MERGED_SPEC_PATH } from "./build-merged-spec.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const packageRoot = path.resolve(__dirname, "..");
-const repoRoot = path.resolve(packageRoot, "..", "..");
 
-const specPath = path.join(repoRoot, "plugin-redoc-0.yaml");
+const specPath = MERGED_SPEC_PATH;
 const outputPath = path.join(packageRoot, "src", "generated", "spec-metadata.ts");
 
-const SPEC_SOURCE = "../../plugin-redoc-0.yaml";
+const SPEC_SOURCE = "src/generated/merged-spec.json";
 const SPEC_HASH_ALGORITHM = "sha256";
 
 const specBytes = fs.readFileSync(specPath);

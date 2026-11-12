@@ -48,10 +48,11 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "gen:types": "openapi-typescript ../../plugin-redoc-0.yaml -o src/generated/schema.ts",
+    "gen:merged-spec": "node ./scripts/build-merged-spec.mjs",
+    "gen:types": "openapi-typescript src/generated/merged-spec.json -o src/generated/schema.ts",
     "gen:resources": "node ./scripts/generate-resource-map.mjs",
     "gen:spec-metadata": "node ./scripts/generate-spec-metadata.mjs",
-    "gen": "pnpm run gen:types && pnpm run gen:resources && pnpm run gen:spec-metadata",
+    "gen": "pnpm run gen:merged-spec && pnpm run gen:types && pnpm run gen:resources && pnpm run gen:spec-metadata",
     "check:generated": "node ./scripts/check-generated-coverage.mjs",
     "lint": "eslint src tests --ext .ts",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",

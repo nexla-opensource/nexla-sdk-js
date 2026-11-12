@@ -50,9 +50,39 @@ packages/ts-sdk/
 - `accessToken`: direct bearer token, no refresh flow.
 - `webhookApiKey`: optional webhook client (`client.webhooks`) for webhook endpoints.
 
+## Backend OpenAPI Spec (Public)
+
+`openapi/nexla-api.public.json` is generator input. It describes the public Nexla backend API: 1,249 operations and 227 component schemas.
+
+Provenance:
+
+- The backend FastAPI app exports the document with `app.openapi()`.
+- The `/api/v1` prefix is removed from every path.
+- Admin-only routes are removed. The exclusion list is kept with the backend tooling.
+- Each `operationId` is the name of the backend route function. When two routes share a name, the builder adds the resource name or the HTTP method to make it unique.
+
+How to rebuild:
+
+1. Export the OpenAPI document and the route list from the backend.
+2. Run the public spec builder. The builder is maintained with the backend tooling and is not in this repository.
+3. Copy the output to `openapi/nexla-api.public.json`.
+4. Run `pnpm -C packages/ts-sdk gen`.
+
+CI does not rebuild this file. The builder needs the private backend source.
+
 ## OpenAPI Generation Pipeline
 
-The OpenAPI spec (`plugin-redoc-0.yaml`) is the source of truth.
+The inputs are `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json`. The codegen reads one merged document, `packages/ts-sdk/src/generated/merged-spec.json`, which `gen` builds from both inputs.
+
+Merge rules (`scripts/build-merged-spec.mjs`):
+
+- Every plugin-redoc operation is kept unchanged.
+- A backend operation is added only when its method and normalized path are not in plugin-redoc. A path is normalized by replacing `{...}` with `{}` and removing any query string and trailing slash.
+- Backend component schemas are copied under a `Backend` prefix, and their `$ref`s are rewritten. Only schemas that the added operations reach are copied.
+- The backend `HTTPBearer` security requirement becomes `NexlaSessionToken`. An operation without a `security` field keeps the default, which requires a session token.
+- Each added operation gets a tag that equals its resource key. The first path segment selects the key. `data_sources` maps to `sources`, `data_sinks` to `destinations`, `data_sets` to `nexsets`, `data_credentials` to `credentials`, `data_maps` to `lookups`, `orgs` to `organizations`, `api_auth_configs` to `org_auth_configs`, `gen_ai_*` to `genai`, `token` to `tokens`, `transform` to `transforms`, and `notification_setting` to `notification_settings`. Any other segment becomes its own resource key. The root path becomes `root`.
+- When an added `operationId` matches an existing one, the resource key is added as a prefix.
+- Backend operations under `/data_flows/*` are backwards-compatible aliases of `/flows`. They are marked `deprecated`, so their generated methods carry `@deprecated`. The `/data_flows/metrics/*` routes are not aliases and are not marked.
 
 ```bash
 pnpm -C packages/ts-sdk gen
@@ -60,12 +90,13 @@ pnpm -C packages/ts-sdk gen
 
 This generates:
 
+- `packages/ts-sdk/src/generated/merged-spec.json` (merged input, committed)
 - `packages/ts-sdk/src/generated/schema.ts` (all paths/components/operations types)
 - `packages/ts-sdk/src/generated/resource-map.ts` (CRUD alias map)
 - `packages/ts-sdk/src/generated/spec-metadata.ts` (spec hash + endpoint inventory)
 - `packages/ts-sdk/src/resources/generated/*.ts` (per-resource operation clients)
 
-Coverage is enforced by `check-generated-coverage.mjs`, which compares generated operationIds against the spec.
+Coverage is enforced by `check-generated-coverage.mjs`, which compares generated endpoints against the merged spec. It also fails when the committed merged spec differs from a rebuild of its inputs.
 
 ## Coverage Model
 

@@ -20,7 +20,7 @@ describe("ResourceClient errors", () => {
       fetch: fetchFn
     });
 
-    const apiKeys = (client as { api_keys?: unknown }).api_keys;
-    expect(apiKeys).toBeUndefined();
+    const missing = (client as { not_a_resource?: unknown }).not_a_resource;
+    expect(missing).toBeUndefined();
   });
 });

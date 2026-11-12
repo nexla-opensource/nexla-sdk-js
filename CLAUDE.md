@@ -10,7 +10,8 @@ This is a pnpm + Turborepo workspace housing the `@nexla/sdk` TypeScript SDK.
 packages/ts-sdk/      # @nexla/sdk source, tests, build config
 docs/ts-sdk/          # architecture, API coverage, integration-test policy
 .changeset/           # Changesets for npm releases
-plugin-redoc-0.yaml   # OpenAPI spec, source of truth for codegen
+plugin-redoc-0.yaml   # OpenAPI spec (part 1 of the codegen input)
+openapi/              # Public backend OpenAPI spec (part 2 of the codegen input)
 ```
 
 ## Development Commands
@@ -63,7 +64,7 @@ export NEXLA_API_URL="https://dataops.nexla.io/nexla-api"
 - **`NexlaClient`** (`packages/ts-sdk/src/client/`): main entry point; supports `serviceKey`, `accessToken`, retry/backoff, typed request pipeline.
 - **Auth** (`packages/ts-sdk/src/auth/`): service-key session-token flow (auto-refresh on 401, retry once) and direct access-token flow.
 - **Resources** (`packages/ts-sdk/src/resources/generated/`): per-resource operation clients generated from OpenAPI `operationId`s.
-- **Generated types** (`packages/ts-sdk/src/generated/`): `schema.ts`, `resource-map.ts`, `spec-metadata.ts` — all generated from `plugin-redoc-0.yaml`.
+- **Generated types** (`packages/ts-sdk/src/generated/`): `merged-spec.json`, `schema.ts`, `resource-map.ts`, `spec-metadata.ts` — generated from `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json`.
 - **Webhooks** (`packages/ts-sdk/src/webhooks/`): API-key authenticated webhook client.
 - **Errors** (`packages/ts-sdk/src/errors.ts`): `NexlaError`, `AuthenticationError`, `NotFoundError`, `ValidationError`, `RateLimitError`.
 
@@ -72,7 +73,8 @@ Notable backend mappings include `credentials → /data_credentials`, `sources �
 
 ### Build Pipeline
 - **`tsup`** produces ESM (`dist/index.js`), CJS (`dist/index.cjs`), and `.d.ts` outputs declared in `packages/ts-sdk/package.json` `exports`.
-- **`openapi-typescript`** generates `schema.ts` from `plugin-redoc-0.yaml` (relative path `../../plugin-redoc-0.yaml` from the `ts-sdk` package).
+- **`build-merged-spec.mjs`** merges `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json` into `src/generated/merged-spec.json`. Run it with `gen:merged-spec`.
+- **`openapi-typescript`** generates `schema.ts` from `src/generated/merged-spec.json`.
 - **Custom mjs scripts** under `packages/ts-sdk/scripts/` generate the resource map (`generate-resource-map.mjs`) and spec metadata (`generate-spec-metadata.mjs`); `check-generated-coverage.mjs` is the CI gate that validates spec ↔ generated drift.
 
 ## Authentication Patterns

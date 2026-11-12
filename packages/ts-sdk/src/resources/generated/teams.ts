@@ -69,6 +69,46 @@ export class TeamsResource {
     return this.client.requestOperation("replace_team_members", "post", "/teams/{team_id}/members", init);
   }
 
+  /** Accessible Resources */
+  async teams_accessible_resources(init?: OperationInit<"teams_accessible_resources">): Promise<OperationData<"teams_accessible_resources">> {
+    return this.client.requestOperation("teams_accessible_resources", "get", "/teams/accessible", init);
+  }
+
+  /** Add Team Docs */
+  async teams_add_resource_docs(init?: OperationInit<"teams_add_resource_docs">): Promise<OperationData<"teams_add_resource_docs">> {
+    return this.client.requestOperation("teams_add_resource_docs", "put", "/teams/{resource_id}/docs", init);
+  }
+
+  /** Explain Access */
+  async teams_explain_access(init?: OperationInit<"teams_explain_access">): Promise<OperationData<"teams_explain_access">> {
+    return this.client.requestOperation("teams_explain_access", "get", "/teams/{resource_id}/access", init);
+  }
+
+  /** List Team Docs */
+  async teams_list_resource_docs(init?: OperationInit<"teams_list_resource_docs">): Promise<OperationData<"teams_list_resource_docs">> {
+    return this.client.requestOperation("teams_list_resource_docs", "get", "/teams/{resource_id}/docs", init);
+  }
+
+  /** Remove Team Docs */
+  async teams_remove_resource_docs(init?: OperationInit<"teams_remove_resource_docs">): Promise<OperationData<"teams_remove_resource_docs">> {
+    return this.client.requestOperation("teams_remove_resource_docs", "delete", "/teams/{resource_id}/docs", init);
+  }
+
+  /** Reset Team Docs */
+  async teams_reset_resource_docs(init?: OperationInit<"teams_reset_resource_docs">): Promise<OperationData<"teams_reset_resource_docs">> {
+    return this.client.requestOperation("teams_reset_resource_docs", "post", "/teams/{resource_id}/docs", init);
+  }
+
+  /** Update Team */
+  async teams_update_team(init?: OperationInit<"teams_update_team">): Promise<OperationData<"teams_update_team">> {
+    return this.client.requestOperation("teams_update_team", "patch", "/teams/{team_id}", init);
+  }
+
+  /** Users Access Insights */
+  async teams_users_access_insights(init?: OperationInit<"teams_users_access_insights">): Promise<OperationData<"teams_users_access_insights">> {
+    return this.client.requestOperation("teams_users_access_insights", "get", "/teams/{resource_id}/users_access_insights", init);
+  }
+
   /** Modify a Team */
   async update_team(init?: OperationInit<"update_team">): Promise<OperationData<"update_team">> {
     return this.client.requestOperation("update_team", "put", "/teams/{team_id}", init);

@@ -4,7 +4,7 @@
 - `packages/ts-sdk/` — `@nexla/sdk` source (`src/`), tests (`tests/`), codegen scripts (`scripts/`), build config (`tsup.config.ts`, `tsconfig.json`, `eslint.config.js`).
 - `docs/ts-sdk/` — architecture, API coverage process, integration-test policy.
 - `.changeset/` — Changesets entries and config for npm releases.
-- Root: `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `turbo.json`, `plugin-redoc-0.yaml`.
+- Root: `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `turbo.json`, `plugin-redoc-0.yaml`, `openapi/`.
 
 ## Build, Test, and Development Commands
 - Setup: `corepack enable && pnpm install --frozen-lockfile`
@@ -13,7 +13,7 @@
 - Tests (unit + resource): `pnpm -C packages/ts-sdk test` • Coverage: `pnpm -C packages/ts-sdk coverage`
 - Integration (creds required): `NEXLA_SERVICE_KEY=... pnpm -C packages/ts-sdk test:integration`
 - Build: `pnpm -C packages/ts-sdk build` (tsup → dual ESM/CJS + `.d.ts`)
-- Codegen: `pnpm -C packages/ts-sdk gen` (regenerate `src/generated/*` and `src/resources/generated/*` from `plugin-redoc-0.yaml`).
+- Codegen: `pnpm -C packages/ts-sdk gen` (regenerate `src/generated/*` and `src/resources/generated/*` from `plugin-redoc-0.yaml` and `openapi/nexla-api.public.json`).
 
 ## Coding Style & Naming Conventions
 - TypeScript 5.x, strict mode, ES2020 target; 2-space indent, semicolons required.

@@ -2,15 +2,14 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import YAML from "yaml";
+import { MERGED_SPEC_PATH, buildMergedSpecText } from "./build-merged-spec.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const packageRoot = path.resolve(__dirname, "..");
-const repoRoot = path.resolve(packageRoot, "..", "..");
 
-const specPath = path.join(repoRoot, "plugin-redoc-0.yaml");
+const specPath = MERGED_SPEC_PATH;
 const generatedResourcesDir = path.join(packageRoot, "src", "resources", "generated");
 const specMetadataPath = path.join(packageRoot, "src", "generated", "spec-metadata.ts");
 
@@ -21,7 +20,7 @@ const normalizeTag = (value) => String(value).replace(/\s+/g, " ").trim();
 
 const readSpecOperations = () => {
   const rawSpec = fs.readFileSync(specPath, "utf8");
-  const spec = YAML.parse(rawSpec);
+  const spec = JSON.parse(rawSpec);
   const endpointToOperationId = new Map();
 
   for (const [apiPath, pathItem] of Object.entries(spec?.paths ?? {})) {
@@ -94,6 +93,15 @@ const parseSpecMetadata = () => {
   };
 };
 
+// The committed merged spec must equal the output of its inputs (plugin-redoc and the public backend spec).
+const checkMergedSpecInSync = () => {
+  const expected = buildMergedSpecText().text;
+  const actual = fs.readFileSync(specPath, "utf8");
+  return expected === actual
+    ? null
+    : `${path.relative(packageRoot, specPath)} is out of date with its inputs. Run: pnpm -C packages/ts-sdk gen:merged-spec`;
+};
+
 const computeSpecHash = (hashAlgorithm) =>
   crypto.createHash(hashAlgorithm).update(fs.readFileSync(specPath)).digest("hex");
 
@@ -103,6 +111,47 @@ const formatEndpointList = (items, limit = 20) => {
     shown.push(`  - ... (${items.length - limit} more)`);
   }
   return shown.join("\n");
+};
+
+// Each operationId must name one route. Each {placeholder} in a path must have a path parameter of the same name, and no path parameter may lack a placeholder.
+const checkOperationIntegrity = (spec) => {
+  const problems = [];
+  const routesById = new Map();
+
+  for (const [apiPath, pathItem] of Object.entries(spec?.paths ?? {})) {
+    const templateNames = [...apiPath.matchAll(/\{([^}]+)\}/g)].map((match) => match[1]);
+    const pathLevel = Array.isArray(pathItem?.parameters) ? pathItem.parameters : [];
+
+    for (const method of METHODS) {
+      const operation = pathItem?.[method];
+      if (!operation) continue;
+
+      const route = endpointKey(method, apiPath);
+      if (operation.operationId) {
+        routesById.set(operation.operationId, [...(routesById.get(operation.operationId) ?? []), route]);
+      }
+
+      const operationParameters = Array.isArray(operation.parameters) ? operation.parameters : [];
+      const declared = [...pathLevel, ...operationParameters]
+        .filter((parameter) => parameter?.in === "path")
+        .map((parameter) => parameter.name);
+      const undeclared = templateNames.filter((name) => !declared.includes(name));
+      const unused = declared.filter((name) => !templateNames.includes(name));
+      if (undeclared.length > 0 || unused.length > 0) {
+        problems.push(
+          `${route}: path template {${templateNames.join("}, {")}} does not match path parameters [${declared.join(", ")}]`
+        );
+      }
+    }
+  }
+
+  for (const [operationId, routes] of routesById) {
+    if (routes.length > 1) {
+      problems.push(`operationId ${operationId} is used by ${routes.length} routes: ${routes.join(", ")}`);
+    }
+  }
+
+  return problems;
 };
 
 const specOperations = readSpecOperations();
@@ -131,6 +180,19 @@ coveredByOperationId.sort();
 const extraEndpoints = [...generatedEndpoints].filter((key) => !specEndpoints.has(key)).sort();
 
 const errors = [];
+
+const mergedSpecDrift = checkMergedSpecInSync();
+if (mergedSpecDrift) errors.push(mergedSpecDrift);
+
+const operationProblems = checkOperationIntegrity(JSON.parse(fs.readFileSync(specPath, "utf8")));
+if (operationProblems.length > 0) {
+  errors.push(
+    [
+      `Spec operation integrity failed for ${operationProblems.length} item(s):`,
+      formatEndpointList(operationProblems, 50)
+    ].join("\n")
+  );
+}
 
 if (hardMissingEndpoints.length > 0) {
   errors.push(
@@ -173,7 +235,7 @@ if (errors.length > 0) {
 if (coveredByOperationId.length > 0) {
   console.warn(
     [
-      `Coverage note: ${coveredByOperationId.length} spec path/method entries share duplicate operationIds and are treated as covered by generated operation methods:`,
+      `Coverage note: ${coveredByOperationId.length} spec path/method entries are covered by a generated operation method with the same operationId, not by a route match:`,
       formatEndpointList(coveredByOperationId)
     ].join("\n")
   );

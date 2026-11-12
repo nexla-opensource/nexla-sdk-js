@@ -42,6 +42,11 @@ export class MetricsResource {
     return this.client.requestOperation("org_account_metrics_total", "get", "/orgs/{org_id}/flows/account_metrics", init);
   }
 
+  /** Publish Raw Metrics */
+  async publish_raw_metrics(init?: OperationInit<"publish_raw_metrics">): Promise<OperationData<"publish_raw_metrics">> {
+    return this.client.requestOperation("publish_raw_metrics", "post", "/metrics/raw", init);
+  }
+
   /** Get 24 Hour Flow Stats for a User */
   async user_24_hour_flow_stats(init?: OperationInit<"user_24_hour_flow_stats">): Promise<OperationData<"user_24_hour_flow_stats">> {
     return this.client.requestOperation("user_24_hour_flow_stats", "get", "/users/{user_id}/flows/dashboard", init);
