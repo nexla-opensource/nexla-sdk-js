@@ -123,7 +123,7 @@ By default the key is sent in the URL query string (`authMethod: "query"`). Pass
 - `NEXLA_WEBHOOK_API_KEY` — not read by the SDK. An application that uses `WebhooksClient` can read it and pass it as `apiKey`.
 
 ## CI, Docs, and Release
-- **CI** (`.github/workflows/ci.yml`), Node 20: install → changeset check → `check:generated` → `gen` (clean diff) → lint → format check → typecheck → coverage → build → publint → attw → size-limit. A separate `consumer-smoke` job runs `smoke:consumer` on Node 18 and 20.
+- **CI** (`.github/workflows/ci.yml`), Node 22: install → changeset check → `check:generated` → `gen` (clean diff) → lint → format check → typecheck → coverage → build → publint → attw → size-limit. A separate `consumer-smoke` job runs `smoke:consumer` on Node 18, 20, and 22.
 - **Integration CI** (`.github/workflows/ci-integration.yml`): scheduled weekly + manual dispatch + PRs touching ts-sdk; gated by repository secrets.
 - **Release** (`.github/workflows/release.yml`): on push to `main` that changes `packages/ts-sdk/package.json`, publishes any version not yet on npm and pushes the git tag.
 

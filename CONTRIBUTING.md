@@ -4,7 +4,7 @@ Contributing to nexla-sdk-js
 Thanks for your interest in contributing!
 
 Setup
-- Node.js >= 18 and pnpm 9 are required (`corepack enable` will pick up the pinned version from `package.json`). CI runs the checks on Node 20 and the consumer smoke test on Node 18 and 20.
+- Node.js >= 18 and pnpm 9 are required (`corepack enable` will pick up the pinned version from `package.json`). CI runs the checks on Node 22 and the consumer smoke test on Node 18, 20, and 22.
 - Install workspace deps: `pnpm install --frozen-lockfile`
 - Run unit + resource tests: `pnpm -C packages/ts-sdk test`
 

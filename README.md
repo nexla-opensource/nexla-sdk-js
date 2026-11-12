@@ -66,7 +66,7 @@ nexla-sdk-js/
 
 ## Development
 
-Requires Node.js >= 18 and pnpm 9. CI runs the checks on Node 20 and the consumer smoke test on Node 18 and 20.
+Requires Node.js >= 18 and pnpm 9. CI runs the checks on Node 22 and the consumer smoke test on Node 18, 20, and 22.
 
 ```bash
 # Install workspace dependencies

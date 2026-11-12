@@ -142,10 +142,10 @@ Blocking TypeScript checks are in `.github/workflows/ci.yml`:
 - tests/coverage
 - build
 - package checks: publint, attw, and size-limit (budgets in `packages/ts-sdk/package.json`)
-- consumer smoke test on Node 18 and 20 (`scripts/consumer-smoke.mjs`, a separate job)
+- consumer smoke test on Node 18, 20, and 22 (`scripts/consumer-smoke.mjs`, a separate job)
 - backend drift check (skips unless `vars.NEXLA_BACKEND_OPENAPI` is set; see below)
 
-The package floor is Node.js 18, from `engines` in `packages/ts-sdk/package.json`. The main job runs on Node 20.
+The package floor is Node.js 18, from `engines` in `packages/ts-sdk/package.json`. The main job runs on Node 22, because `size-limit` 14 needs Node 22.
 
 Integration tests are intentionally documented as non-blocking relative to publish/release gating:
 

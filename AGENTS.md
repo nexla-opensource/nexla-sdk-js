@@ -33,7 +33,7 @@
 - Commits: imperative, concise; prefer Conventional style: `feat:`, `fix:`, `docs:`, `refactor:`, `test:` (e.g., `feat: add webhook delivery history`).
 - PRs: clear description, linked issues, test plan (commands/output), and docs/examples updates when behavior changes.
 - **Changesets**: for every user-visible change, run `pnpm changeset`, then `pnpm changeset version`, and commit the version bump and `CHANGELOG.md`. Merging the PR publishes to npm.
-- CI must pass: changeset check, `check:generated`, format check, lint, typecheck, coverage, build, and the package checks on Node 20. The consumer smoke test also runs on Node 18.
+- CI must pass: changeset check, `check:generated`, format check, lint, typecheck, coverage, build, and the package checks on Node 22. The consumer smoke test runs on Node 18, 20, and 22.
 
 ## Security & Configuration Tips
 - Do not hardcode tokens or URLs; read from env (`NEXLA_API_URL`, `NEXLA_SERVICE_KEY`, `NEXLA_ACCESS_TOKEN`).
